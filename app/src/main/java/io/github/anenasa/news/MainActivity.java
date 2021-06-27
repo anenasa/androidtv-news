@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceView;
@@ -30,6 +31,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -105,9 +108,25 @@ public class MainActivity extends Activity {
     void readChannelList() {
         try {
             File customFile = new File(getExternalFilesDir(null), "config.txt");
+            File customUrl = new File(getExternalFilesDir(null), "url.txt");
             InputStream inputStream;
             if(customFile.exists()){
                 inputStream = new FileInputStream(customFile);
+            }
+            else if(customUrl.exists()){
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+
+                InputStream urlStream = new FileInputStream(customUrl);
+                BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
+                URL url = new URL(urlReader.readLine());
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(15000);
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
+                inputStream = url.openStream();
             }
             else {
                 inputStream = getResources().openRawResource(R.raw.config);
