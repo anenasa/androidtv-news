@@ -10,8 +10,8 @@ android {
         applicationId "io.github.anenasa.news"
         minSdkVersion 21
         targetSdkVersion 30
-        versionCode 1
-        versionName "1.0"
+        versionCode 10100
+        versionName "1.1.0"
 
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'

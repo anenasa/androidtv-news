@@ -20,11 +20,19 @@ https://github.com/anenasa/androidtv-news/releases
 2. 選擇頻道：輸入數字後按 OK
 3. 顯示頻道表：按 OK
 
-## 自訂頻道表
+## 自訂頻道
 
-以 json 格式自訂頻道，可參考[預設頻道表](https://github.com/anenasa/androidtv-news/blob/main/app/src/main/res/raw/config.txt)。
+以 json 格式自訂頻道，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
 
-自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt。格式是：
+讀取優先順序為 config.txt > url.txt > 預設頻道檔案連結。
+
+### 方法一
+將自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt。
+
+### 方式二
+自訂頻道檔案放在網路上，再將檔案的網址放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/url.txt 內。
+
+### 自訂頻道檔案格式
 
     {
       "channelList": [
