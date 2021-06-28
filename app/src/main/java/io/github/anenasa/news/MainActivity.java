@@ -108,18 +108,23 @@ public class MainActivity extends Activity {
     void readChannelList() {
         try {
             File customFile = new File(getExternalFilesDir(null), "config.txt");
-            File customUrl = new File(getExternalFilesDir(null), "url.txt");
             InputStream inputStream;
             if(customFile.exists()){
                 inputStream = new FileInputStream(customFile);
             }
-            else if(customUrl.exists()){
+            else{
+                File customUrl = new File(getExternalFilesDir(null), "url.txt");
                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                 StrictMode.setThreadPolicy(policy);
-
-                InputStream urlStream = new FileInputStream(customUrl);
-                BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
-                URL url = new URL(urlReader.readLine());
+                URL url;
+                if(customUrl.exists()){
+                    InputStream urlStream = new FileInputStream(customUrl);
+                    BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
+                    url = new URL(urlReader.readLine());
+                }
+                else{
+                    url = new URL("https://anenasa.github.io/channel/config.txt");
+                }
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setReadTimeout(10000);
@@ -127,9 +132,6 @@ public class MainActivity extends Activity {
                 urlConnection.setDoOutput(true);
                 urlConnection.connect();
                 inputStream = url.openStream();
-            }
-            else {
-                inputStream = getResources().openRawResource(R.raw.config);
             }
             BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
             StringBuilder stringBuilder = new StringBuilder();
