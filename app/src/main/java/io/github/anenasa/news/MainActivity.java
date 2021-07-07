@@ -1,6 +1,8 @@
 package io.github.anenasa.news;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -59,12 +61,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         preferences = getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE);
-
-        readChannelList();
         channelNum = preferences.getInt("channelNum", 0);
-        if(channelNum >= channel.length){
-            channelNum = 0;
-        }
 
         try {
             YoutubeDL.getInstance().init(getApplication());
@@ -86,6 +83,14 @@ public class MainActivity extends Activity {
         player.setVideoSurfaceView(playerView);
         textView = findViewById(R.id.textView);
 
+        readChannelList();
+        if(channel == null){
+            return;
+        }
+        if(channelNum >= channel.length){
+            channelNum = 0;
+        }
+
         timer = new Timer();
         timerTask = new TimerTask() {
             @Override
@@ -102,6 +107,9 @@ public class MainActivity extends Activity {
     @Override
     protected void onStart() {
         super.onStart();
+        if(channel == null){
+            return;
+        }
         play(channelNum);
     }
 
@@ -153,6 +161,23 @@ public class MainActivity extends Activity {
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
+            channel = null;
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("頻道清單讀取失敗");
+            builder.setMessage(e.toString());
+            builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int id) {
+                    finish();
+                }
+            });
+            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    finish();
+                }
+            });
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
         }
     }
 
@@ -329,6 +354,9 @@ public class MainActivity extends Activity {
     }
 
     void saveSettings() {
+        if(channel == null){
+            return;
+        }
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("channelNum", channelNum);
         for (Channel value : channel) {
