@@ -20,11 +20,23 @@ https://github.com/anenasa/androidtv-news/releases
 2. 選擇頻道：輸入數字後按 OK
 3. 顯示頻道表：按 OK
 
+## 預設頻道
+
+預設頻道條件：
+1. 必須是台灣的節目
+2. 必須是新聞為主
+3. 來源必須合法
+4. youtube-dl 要支援
+
+另外提供[完整頻道清單檔案](https://anenasa.github.io/channel/full.txt)，不限制是新聞和台灣頻道，可使用自訂頻道方式二觀看。
+
+如果有頻道建議歡迎提出。
+
 ## 自訂頻道
 
 以 json 格式自訂頻道，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
 
-讀取優先順序為 config.txt > url.txt > 預設頻道檔案連結。
+讀取優先順序為 config.txt > url.txt > 預設頻道。
 
 ### 方法一
 將自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt。
