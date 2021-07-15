@@ -308,6 +308,10 @@ public class MainActivity extends Activity {
                     player.stop();
                     play(channelNum);
                     return true;
+                case KeyEvent.KEYCODE_MENU:
+                    Intent intents = new Intent(this, SettingsActivity.class);
+                    startActivity(intents);
+                    return true;
                 case KeyEvent.KEYCODE_0:
                     appendInput(0);
                     return true;
