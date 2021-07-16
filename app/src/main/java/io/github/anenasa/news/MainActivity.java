@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
@@ -67,12 +68,14 @@ public class MainActivity extends Activity {
             YoutubeDL.getInstance().init(getApplication());
         } catch (YoutubeDLException e) {
             Log.e(TAG, Log.getStackTraceString(e));
+            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
         }
         player = new SimpleExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
+                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
                 if(needParse(channelNum) != 0) {
                     parse(channelNum);
                 }
@@ -203,6 +206,9 @@ public class MainActivity extends Activity {
             channel[num].setVideo(streamInfo.getUrl());
         } catch (YoutubeDLException | InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
+            runOnUiThread(() -> {
+                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            });
         }
     }
 
