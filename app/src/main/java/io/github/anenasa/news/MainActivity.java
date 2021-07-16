@@ -320,9 +320,20 @@ public class MainActivity extends Activity {
                     player.stop();
                     play(channelNum);
                     return true;
+                case KeyEvent.KEYCODE_INFO:
+                    Intent intent = new Intent(this, ChannelInfoActivity.class);
+                    intent.putExtra("index",channel[channelNum].index);
+                    intent.putExtra("url",channel[channelNum].url);
+                    intent.putExtra("name",channel[channelNum].name);
+                    intent.putExtra("format",channel[channelNum].format);
+                    intent.putExtra("volume",channel[channelNum].volume);
+                    intent.putExtra("width",player.getVideoSize().width);
+                    intent.putExtra("height",player.getVideoSize().height);
+                    startActivity(intent);
+                    return true;
                 case KeyEvent.KEYCODE_MENU:
-                    Intent intents = new Intent(this, SettingsActivity.class);
-                    startActivity(intents);
+                    Intent intentSettings = new Intent(this, SettingsActivity.class);
+                    startActivity(intentSettings);
                     return true;
                 case KeyEvent.KEYCODE_0:
                     appendInput(0);

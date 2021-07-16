@@ -21,6 +21,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:usesCleartextTraffic="true">
+        <activity android:name=".ChannelInfoActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".ChannelListActivity" />
         <activity android:name=".MainActivity">
