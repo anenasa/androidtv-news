@@ -154,8 +154,20 @@ public class MainActivity extends Activity {
                 JSONObject channelObject = channelList.getJSONObject(i);
                 String url = channelObject.getString("url");
                 String name = channelObject.getString("name");
-                String format = channelObject.getString("ytdl-format");
-                float volume = (float) channelObject.getDouble("volume");
+                String format;
+                if(channelObject.isNull("ytdl-format")) {
+                    format = "best";
+                }
+                else{
+                    format = channelObject.getString("ytdl-format");
+                }
+                float volume;
+                if(channelObject.isNull("volume")) {
+                    volume = 1f;
+                }
+                else{
+                    volume = (float) channelObject.getDouble("volume");
+                }
                 channel[i] = new Channel(i, url, name, format, volume);
                 channel[i].setVideo(preferences.getString(url + format, ""));
             }
