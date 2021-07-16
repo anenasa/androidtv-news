@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.KeyEvent;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -24,20 +26,14 @@ public class ChannelListActivity extends Activity {
         channelListView.setItemsCanFocus(true);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, channelArray);
         channelListView.setAdapter(adapter);
-    }
-
-    @Override
-    public boolean dispatchKeyEvent (KeyEvent event) {
-        if (event.getAction() == KeyEvent.ACTION_DOWN) {
-            if (event.getKeyCode() == KeyEvent.KEYCODE_DPAD_CENTER
-                    || event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+        channelListView.setOnItemClickListener(new ListView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("channelNum",channelListView.getSelectedItemPosition());
-                setResult(Activity.RESULT_OK,returnIntent);
+                returnIntent.putExtra("channelNum", i);
+                setResult(Activity.RESULT_OK, returnIntent);
                 finish();
-                return true;
             }
-        }
-        return super.dispatchKeyEvent(event);
+        });
     }
 }
