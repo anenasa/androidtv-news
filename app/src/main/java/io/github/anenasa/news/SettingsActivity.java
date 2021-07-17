@@ -6,12 +6,17 @@ import androidx.preference.PreferenceFragmentCompat;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -27,9 +32,58 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
+        SettingsActivity activity;
+        final String TAG = "SettingsFragment";
+
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+            activity = (SettingsActivity)getActivity();
             setPreferencesFromResource(R.xml.activity_settings, rootKey);
+
+            Preference update = (Preference)findPreference("update");
+            update.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    update.setSummary("正在檢查更新");
+                    new Thread( new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                URL url = new URL("https://raw.githubusercontent.com/anenasa/androidtv-news/main/VERSION");
+                                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                                urlConnection.setRequestMethod("GET");
+                                urlConnection.setReadTimeout(10000);
+                                urlConnection.setConnectTimeout(15000);
+                                urlConnection.setDoOutput(true);
+                                urlConnection.connect();
+                                InputStream inputStream = url.openStream();
+                                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+                                String version_new = reader.readLine();
+                                if(!version_new.equals(BuildConfig.VERSION_NAME.split("-")[0])){
+                                    activity.runOnUiThread(() -> {
+                                        update.setSummary("有新版本");
+                                    });
+                                    String link = "https://github.com/anenasa/androidtv-news/releases/tag/v" + version_new;
+                                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
+                                    startActivity(intent);
+                                }
+                                else{
+                                    activity.runOnUiThread(() -> {
+                                        update.setSummary("已經是最新版本");
+                                    });
+                                }
+                            } catch (IOException e) {
+                                activity.runOnUiThread(() -> {
+                                    update.setSummary("更新時發生錯誤");
+                                });
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            }
+                        }
+                    }).start();
+                    return true;
+                }
+            });
+
             Preference about = (Preference)findPreference("about");
             about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override

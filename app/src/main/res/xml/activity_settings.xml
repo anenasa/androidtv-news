@@ -3,6 +3,9 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <Preference
+        app:key="update"
+        app:title="更新"/>
+    <Preference
         app:key="about"
         app:title="關於"/>
 
