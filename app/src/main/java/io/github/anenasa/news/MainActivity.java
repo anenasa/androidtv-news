@@ -77,7 +77,8 @@ public class MainActivity extends Activity {
                 Log.e(TAG, Log.getStackTraceString(error));
                 Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
                 if(needParse(channelNum) != 0) {
-                    parse(channelNum);
+                    // Force parse by removing video url
+                    channel[channelNum].video = "";
                 }
                 play(channelNum);
             }
