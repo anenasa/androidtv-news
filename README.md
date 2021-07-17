@@ -19,6 +19,8 @@ https://github.com/anenasa/androidtv-news/releases
 1. 轉台：使用上/下或頻道上/下轉台
 2. 選擇頻道：輸入數字後按 OK
 3. 顯示頻道表：按 OK
+4. 顯示頻道資訊：按顯示
+5. 進入設定：按選單
 
 ## 預設頻道
 

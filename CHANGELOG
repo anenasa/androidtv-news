@@ -1,0 +1,11 @@
+version 1.2.0 2021.07.17
+-發生錯誤時顯示錯誤訊息
+-加入設定畫面和頻道資訊畫面
+-頻道清單中可省略 "ytdl-format" 和 "volume"
+
+version 1.1.0 2021.06.28
+-minSdkVersion 設為 21
+-預設頻道清單不內建，改為開啟應用程式時從 https://anenasa.github.io/channel/config.txt 下載
+
+version 1.0.0 2021.06.27
+-Initial release
