@@ -61,8 +61,8 @@ https://github.com/anenasa/androidtv-news/releases
     {
       "url": "頻道網址",
       "name": "頻道名稱",
-      "ytdl-format": "youtube-dl 格式",
-      "volume": 音量
+      "ytdl-format": "youtube-dl 格式（可省略）",
+      "volume": 音量（可省略）
     }
 
 youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
