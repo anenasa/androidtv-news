@@ -174,6 +174,7 @@ public class MainActivity extends Activity {
                 }
                 channel[i] = new Channel(i, url, name, format, volume);
                 channel[i].setVideo(preferences.getString(url + format, ""));
+                channel[i].isHidden = preferences.getBoolean(name + "isHidden", false);
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -266,10 +267,17 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == 0) {
+            // ChannelListActivity
             if (resultCode == Activity.RESULT_OK) {
                 channelNum = data.getIntExtra("channelNum", 0);
                 player.stop();
                 play(channelNum);
+            }
+        }
+        else if(requestCode == 1){
+            // ChannelInfoActivity
+            if (resultCode == Activity.RESULT_OK) {
+                channel[channelNum].isHidden = data.getBooleanExtra("isHidden", false);
             }
         }
     }
@@ -283,10 +291,13 @@ public class MainActivity extends Activity {
                     if(input.equals("")){
                         Intent intent = new Intent(this, ChannelListActivity.class);
                         String[] nameArray = new String[channel.length];
+                        boolean[] isHiddenArray = new boolean[channel.length];
                         for(int i = 0; i < channel.length; i++){
                             nameArray[i] = channel[i].name;
+                            isHiddenArray[i] = channel[i].isHidden;
                         }
                         intent.putExtra("nameArray",nameArray);
+                        intent.putExtra("isHiddenArray",isHiddenArray);
                         startActivityForResult(intent, 0);
                     }
                     else if(Integer.parseInt(input) < channel.length){
@@ -309,21 +320,25 @@ public class MainActivity extends Activity {
                     }
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_CHANNEL_UP:
-                    if (channelNum == 0) {
-                        channelNum = channel.length - 1;
-                    } else {
-                        channelNum -= 1;
-                    }
+                    do {
+                        if (channelNum == 0) {
+                            channelNum = channel.length - 1;
+                        } else {
+                            channelNum -= 1;
+                        }
+                    } while (channel[channelNum].isHidden);
                     player.stop();
                     play(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_CHANNEL_DOWN:
-                    if (channelNum == channel.length - 1) {
-                        channelNum = 0;
-                    } else {
-                        channelNum += 1;
-                    }
+                    do {
+                        if (channelNum == channel.length - 1) {
+                            channelNum = 0;
+                        } else {
+                            channelNum += 1;
+                        }
+                    } while (channel[channelNum].isHidden);
                     player.stop();
                     play(channelNum);
                     return true;
@@ -334,9 +349,10 @@ public class MainActivity extends Activity {
                     intent.putExtra("name",channel[channelNum].name);
                     intent.putExtra("format",channel[channelNum].format);
                     intent.putExtra("volume",channel[channelNum].volume);
+                    intent.putExtra("isHidden",channel[channelNum].isHidden);
                     intent.putExtra("width",player.getVideoSize().width);
                     intent.putExtra("height",player.getVideoSize().height);
-                    startActivity(intent);
+                    startActivityForResult(intent, 1);
                     return true;
                 case KeyEvent.KEYCODE_MENU:
                     Intent intentSettings = new Intent(this, SettingsActivity.class);
@@ -395,6 +411,7 @@ public class MainActivity extends Activity {
         editor.putInt("channelNum", channelNum);
         for (Channel value : channel) {
             editor.putString(value.url + value.format, value.video);
+            editor.putBoolean(value.name + "isHidden", value.isHidden);
         }
         editor.apply();
     }

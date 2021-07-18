@@ -5,6 +5,9 @@
     <Preference
         app:key="name"
         app:title="頻道名稱"/>
+    <SwitchPreferenceCompat
+        app:key="isHidden"
+        app:title="隱藏頻道"/>
     <Preference
         app:key="number"
         app:title="頻道號碼"/>

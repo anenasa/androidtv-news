@@ -7,6 +7,7 @@ public class Channel {
     public String format;
     public float volume;
     public String video = "";
+    public boolean isHidden;
 
     public Channel(int index, String url, String name, String format, float volume) {
         this.index = index;

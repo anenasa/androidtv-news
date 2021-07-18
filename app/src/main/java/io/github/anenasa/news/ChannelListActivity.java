@@ -9,6 +9,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
+import java.util.ArrayList;
+
 public class ChannelListActivity extends Activity {
 
     final String TAG = "ChannelListActivity";
@@ -19,18 +21,24 @@ public class ChannelListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_channel_list);
         String[] channelArray = getIntent().getExtras().getStringArray("nameArray");
-        for(int i=0;i<channelArray.length;i++){
-            channelArray[i] = i + ". " + channelArray[i];
+        boolean[] isHiddenArray = getIntent().getExtras().getBooleanArray("isHiddenArray");
+        ArrayList<String> displayArray = new ArrayList<String>();
+        ArrayList<Integer> channelNumArray = new ArrayList<Integer>();
+        for(int i=0; i<channelArray.length; i++){
+            if(!isHiddenArray[i]) {
+                displayArray.add(i + ". " + channelArray[i]);
+                channelNumArray.add(i);
+            }
         }
         channelListView = findViewById(R.id.channelListView);
         channelListView.setItemsCanFocus(true);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, channelArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, displayArray);
         channelListView.setAdapter(adapter);
         channelListView.setOnItemClickListener(new ListView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra("channelNum", i);
+                returnIntent.putExtra("channelNum", channelNumArray.get(i));
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }
