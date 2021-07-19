@@ -100,7 +100,9 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 for(int i = 0; i < channel.length; i++){
-                    parse(i);
+                    if(!channel[i].isHidden) {
+                        parse(i);
+                    }
                 }
                 saveSettings();
             }
