@@ -56,6 +56,7 @@ public class MainActivity extends Activity {
     SharedPreferences preferences;
 
     Handler mHandler = new Handler(Looper.getMainLooper());
+    boolean isStarted;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -116,6 +117,7 @@ public class MainActivity extends Activity {
         if(channel == null){
             return;
         }
+        isStarted = true;
         play(channelNum);
     }
 
@@ -257,7 +259,9 @@ public class MainActivity extends Activity {
                         player.setMediaItem(mediaItem);
                         player.prepare();
                         player.setVolume(channel[num].volume);
-                        player.play();
+                        if(isStarted){
+                            player.play();
+                        }
                     }
                 });
             }
@@ -427,6 +431,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop() {
         super.onStop();
+        isStarted = false;
         player.stop();
         saveSettings();
     }
