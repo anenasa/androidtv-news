@@ -2,7 +2,7 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <Preference
+    <EditTextPreference
         app:key="name"
         app:title="頻道名稱"/>
     <SwitchPreferenceCompat
@@ -11,13 +11,13 @@
     <Preference
         app:key="number"
         app:title="頻道號碼"/>
-    <Preference
+    <EditTextPreference
         app:key="url"
         app:title="網址"/>
-    <Preference
+    <EditTextPreference
         app:key="format"
         app:title="youtube-dl 格式"/>
-    <Preference
+    <EditTextPreference
         app:key="volume"
         app:title="音量"/>
     <Preference

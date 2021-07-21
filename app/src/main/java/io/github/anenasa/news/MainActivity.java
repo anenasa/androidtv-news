@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
                 Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
                 if(needParse(channelNum) != 0) {
                     // Force parse by removing video url
-                    channel[channelNum].video = "";
+                    channel[channelNum].setVideo("");
                 }
                 play(channelNum);
             }
@@ -101,7 +101,7 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 for(int i = 0; i < channel.length; i++){
-                    if(!channel[i].isHidden) {
+                    if(!channel[i].isHidden()) {
                         parse(i);
                     }
                 }
@@ -156,6 +156,14 @@ public class MainActivity extends Activity {
             }
             JSONObject json = new JSONObject(stringBuilder.toString());
             JSONArray channelList = json.getJSONArray("channelList");
+
+            JSONObject customJsonObject = null;
+            JSONObject customChannelList = null;
+            if(!preferences.getString("jsonSettings", "").isEmpty()) {
+                customJsonObject = new JSONObject(preferences.getString("jsonSettings", ""));
+                customChannelList = customJsonObject.getJSONObject("customChannelList");
+            }
+
             channel = new Channel[channelList.length()];
             for(int i = 0; i < channelList.length(); i++){
 
@@ -177,8 +185,15 @@ public class MainActivity extends Activity {
                     volume = (float) channelObject.getDouble("volume");
                 }
                 channel[i] = new Channel(i, url, name, format, volume);
-                channel[i].setVideo(preferences.getString(url + format, ""));
-                channel[i].isHidden = preferences.getBoolean(name + "isHidden", false);
+                if(customJsonObject != null && customChannelList.has(name)) {
+                    JSONObject customChannelObject = customChannelList.getJSONObject(name);
+                    channel[i].setUrl(customChannelObject.getString("customUrl"));
+                    channel[i].setName(customChannelObject.getString("customName"));
+                    channel[i].setFormat(customChannelObject.getString("customFormat"));
+                    channel[i].setVolume(customChannelObject.getString("customVolume"));
+                    channel[i].setHidden(customChannelObject.getBoolean("isHidden"));
+                }
+                channel[i].setVideo(preferences.getString(channel[i].getUrl() + channel[i].getFormat(), ""));
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -204,8 +219,8 @@ public class MainActivity extends Activity {
 
     void parse(int num)
     {
-        YoutubeDLRequest request = new YoutubeDLRequest(channel[num].url);
-        request.addOption("-f", channel[num].format);
+        YoutubeDLRequest request = new YoutubeDLRequest(channel[num].getUrl());
+        request.addOption("-f", channel[num].getFormat());
         VideoInfo streamInfo = null;
         try {
             streamInfo = YoutubeDL.getInstance().getInfo(request);
@@ -219,16 +234,16 @@ public class MainActivity extends Activity {
     }
 
     int needParse(int num){
-        if(channel[num].video.isEmpty()) {
+        if(channel[num].getVideo().isEmpty()) {
             return 1;
         }
-        if(channel[num].url.endsWith("m3u8")){
+        if(channel[num].getUrl().endsWith("m3u8")){
             return 0;
         }
-        if(channel[num].url.startsWith("https://www.youtube.com/")){
+        if(channel[num].getUrl().startsWith("https://www.youtube.com/")){
             long current = System.currentTimeMillis() / 1000;
-            int pos = channel[num].video.indexOf("expire") + 7;
-            long expire = Long.parseLong(channel[num].video.substring(pos, pos + 10));
+            int pos = channel[num].getVideo().indexOf("expire") + 7;
+            long expire = Long.parseLong(channel[num].getVideo().substring(pos, pos + 10));
             if(current < expire){
                 return 0;
             }
@@ -247,7 +262,7 @@ public class MainActivity extends Activity {
                 if(needParse(num) == 1) {
                     parse(num);
                 }
-                MediaItem mediaItem = MediaItem.fromUri(channel[num].video);
+                MediaItem mediaItem = MediaItem.fromUri(channel[num].getVideo());
                 // player needs to run on main thread
                 mHandler.post(new Runnable() {
                     @Override
@@ -258,7 +273,7 @@ public class MainActivity extends Activity {
                         }
                         player.setMediaItem(mediaItem);
                         player.prepare();
-                        player.setVolume(channel[num].volume);
+                        player.setVolume(channel[num].getVolume());
                         if(isStarted){
                             player.play();
                         }
@@ -271,7 +286,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
         if (requestCode == 0) {
             // ChannelListActivity
             if (resultCode == Activity.RESULT_OK) {
@@ -283,7 +297,31 @@ public class MainActivity extends Activity {
         else if(requestCode == 1){
             // ChannelInfoActivity
             if (resultCode == Activity.RESULT_OK) {
-                channel[channelNum].isHidden = data.getBooleanExtra("isHidden", false);
+                String url_old = channel[channelNum].getUrl();
+                String url_new;
+                if(data.getStringExtra("customUrl").isEmpty()) {
+                    url_new = channel[channelNum].defaultUrl;
+                }
+                else{
+                    url_new = data.getStringExtra("customUrl");
+                }
+                String format_old = channel[channelNum].getFormat();
+                String format_new;
+                if(data.getStringExtra("customFormat").isEmpty()){
+                    format_new = channel[channelNum].defaultFormat;
+                }
+                else{
+                    format_new = data.getStringExtra("customFormat");
+                }
+                if(!url_old.equals(url_new) || !format_old.equals(format_new)){
+                    channel[channelNum].setVideo("");
+                }
+                channel[channelNum].setName(data.getStringExtra("customName"));
+                channel[channelNum].setHidden(data.getBooleanExtra("isHidden", false));
+                channel[channelNum].setUrl(data.getStringExtra("customUrl"));
+                channel[channelNum].setFormat(data.getStringExtra("customFormat"));
+                channel[channelNum].setVolume(data.getStringExtra("customVolume"));
+                saveSettings();
             }
         }
     }
@@ -299,8 +337,8 @@ public class MainActivity extends Activity {
                         String[] nameArray = new String[channel.length];
                         boolean[] isHiddenArray = new boolean[channel.length];
                         for(int i = 0; i < channel.length; i++){
-                            nameArray[i] = channel[i].name;
-                            isHiddenArray[i] = channel[i].isHidden;
+                            nameArray[i] = channel[i].getName();
+                            isHiddenArray[i] = channel[i].isHidden();
                         }
                         intent.putExtra("nameArray",nameArray);
                         intent.putExtra("isHiddenArray",isHiddenArray);
@@ -332,7 +370,7 @@ public class MainActivity extends Activity {
                         } else {
                             channelNum -= 1;
                         }
-                    } while (channel[channelNum].isHidden);
+                    } while (channel[channelNum].isHidden());
                     player.stop();
                     play(channelNum);
                     return true;
@@ -344,18 +382,22 @@ public class MainActivity extends Activity {
                         } else {
                             channelNum += 1;
                         }
-                    } while (channel[channelNum].isHidden);
+                    } while (channel[channelNum].isHidden());
                     player.stop();
                     play(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_INFO:
                     Intent intent = new Intent(this, ChannelInfoActivity.class);
-                    intent.putExtra("index",channel[channelNum].index);
-                    intent.putExtra("url",channel[channelNum].url);
-                    intent.putExtra("name",channel[channelNum].name);
-                    intent.putExtra("format",channel[channelNum].format);
-                    intent.putExtra("volume",channel[channelNum].volume);
-                    intent.putExtra("isHidden",channel[channelNum].isHidden);
+                    intent.putExtra("index",channel[channelNum].getIndex());
+                    intent.putExtra("defaultUrl",channel[channelNum].defaultUrl);
+                    intent.putExtra("defaultName",channel[channelNum].defaultName);
+                    intent.putExtra("defaultFormat",channel[channelNum].defaultFormat);
+                    intent.putExtra("defaultVolume",channel[channelNum].defaultVolume);
+                    intent.putExtra("customUrl",channel[channelNum].customUrl);
+                    intent.putExtra("customName",channel[channelNum].customName);
+                    intent.putExtra("customFormat",channel[channelNum].customFormat);
+                    intent.putExtra("customVolume",channel[channelNum].customVolume);
+                    intent.putExtra("isHidden",channel[channelNum].isHidden());
                     intent.putExtra("width",player.getVideoSize().width);
                     intent.putExtra("height",player.getVideoSize().height);
                     startActivityForResult(intent, 1);
@@ -416,8 +458,26 @@ public class MainActivity extends Activity {
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("channelNum", channelNum);
         for (Channel value : channel) {
-            editor.putString(value.url + value.format, value.video);
-            editor.putBoolean(value.name + "isHidden", value.isHidden);
+            editor.putString(value.getUrl() + value.getFormat(), value.getVideo());
+        }
+        try {
+            JSONObject jsonObject = new JSONObject();
+            JSONObject channelListObject = new JSONObject();
+            for (Channel value : channel) {
+                JSONObject channelObject = new JSONObject();
+                channelObject.put("customUrl", value.customUrl);
+                channelObject.put("customName", value.customName);
+                channelObject.put("customFormat", value.customFormat);
+                channelObject.put("customVolume", value.customVolume);
+                channelObject.put("isHidden", value.isHidden());
+                channelListObject.put(value.defaultName, channelObject);
+            }
+            jsonObject.put("customChannelList", channelListObject);
+            JSONArray newChannelArray = new JSONArray();
+            jsonObject.put("newChannelArray", newChannelArray);
+            editor.putString("jsonSettings", jsonObject.toString());
+        } catch (JSONException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
         }
         editor.apply();
     }
