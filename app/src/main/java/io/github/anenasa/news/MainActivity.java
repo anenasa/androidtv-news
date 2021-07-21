@@ -69,14 +69,14 @@ public class MainActivity extends Activity {
             YoutubeDL.getInstance().init(getApplication());
         } catch (YoutubeDLException e) {
             Log.e(TAG, Log.getStackTraceString(e));
-            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
         }
         player = new SimpleExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
-                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
                 if(needParse(channelNum) != 0) {
                     // Force parse by removing video url
                     channel[channelNum].setVideo("");
@@ -228,7 +228,7 @@ public class MainActivity extends Activity {
         } catch (YoutubeDLException | InterruptedException e) {
             Log.e(TAG, Log.getStackTraceString(e));
             runOnUiThread(() -> {
-                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
             });
         }
     }
