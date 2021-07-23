@@ -54,7 +54,7 @@ https://github.com/anenasa/androidtv-news/releases
 
 ### 自訂頻道檔案格式
 
-頻道檔案如下（最後一個選項後面不能加逗點，其他選項都要）：
+頻道檔案如下（最後一個頻道後面不能加逗點，其他頻道都要）：
 
     {
       "channelList": [
