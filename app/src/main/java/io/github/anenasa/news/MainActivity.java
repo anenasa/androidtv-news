@@ -19,6 +19,10 @@ import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
+import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
+import com.google.android.exoplayer2.source.MediaSource;
+import com.google.android.exoplayer2.upstream.DataSource;
+import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
@@ -36,6 +40,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -184,13 +191,22 @@ public class MainActivity extends Activity {
                 else{
                     volume = (float) channelObject.getDouble("volume");
                 }
-                channel[i] = new Channel(i, url, name, format, volume);
+
+                String header;
+                if(channelObject.isNull("header")) {
+                    header = "";
+                }
+                else{
+                    header = channelObject.getString("header");
+                }
+                channel[i] = new Channel(i, url, name, format, volume, header);
                 if(customJsonObject != null && customChannelList.has(name)) {
                     JSONObject customChannelObject = customChannelList.getJSONObject(name);
                     channel[i].setUrl(customChannelObject.getString("customUrl"));
                     channel[i].setName(customChannelObject.getString("customName"));
                     channel[i].setFormat(customChannelObject.getString("customFormat"));
                     channel[i].setVolume(customChannelObject.getString("customVolume"));
+                    channel[i].setHeader(customChannelObject.getString("customHeader"));
                     channel[i].setHidden(customChannelObject.getBoolean("isHidden"));
                 }
                 channel[i].setVideo(preferences.getString(channel[i].getUrl() + channel[i].getFormat(), ""));
@@ -221,6 +237,9 @@ public class MainActivity extends Activity {
     {
         YoutubeDLRequest request = new YoutubeDLRequest(channel[num].getUrl());
         request.addOption("-f", channel[num].getFormat());
+        if(!channel[num].getHeader().isEmpty()) {
+            request.addOption("--add-header", channel[num].getHeader());
+        }
         VideoInfo streamInfo = null;
         try {
             streamInfo = YoutubeDL.getInstance().getInfo(request);
@@ -263,6 +282,15 @@ public class MainActivity extends Activity {
                     parse(num);
                 }
                 MediaItem mediaItem = MediaItem.fromUri(channel[num].getVideo());
+                Map<String, String> map = new HashMap<>();
+                if(!channel[num].getHeader().isEmpty()) {
+                    String[] header = channel[num].getHeader().split(":", 2);
+                    map.put(header[0], header[1]);
+                }
+                DataSource.Factory factory = new DefaultHttpDataSource.Factory()
+                        .setDefaultRequestProperties(map);
+                MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
+                        .createMediaSource(mediaItem);
                 // player needs to run on main thread
                 mHandler.post(new Runnable() {
                     @Override
@@ -271,7 +299,7 @@ public class MainActivity extends Activity {
                             // Already switched to another channel, do not play this
                             return;
                         }
-                        player.setMediaItem(mediaItem);
+                        player.setMediaSource(mediaSource);
                         player.prepare();
                         player.setVolume(channel[num].getVolume());
                         if(isStarted){
@@ -321,6 +349,7 @@ public class MainActivity extends Activity {
                 channel[channelNum].setUrl(data.getStringExtra("customUrl"));
                 channel[channelNum].setFormat(data.getStringExtra("customFormat"));
                 channel[channelNum].setVolume(data.getStringExtra("customVolume"));
+                channel[channelNum].setHeader(data.getStringExtra("customHeader"));
                 saveSettings();
             }
         }
@@ -393,10 +422,12 @@ public class MainActivity extends Activity {
                     intent.putExtra("defaultName",channel[channelNum].defaultName);
                     intent.putExtra("defaultFormat",channel[channelNum].defaultFormat);
                     intent.putExtra("defaultVolume",channel[channelNum].defaultVolume);
+                    intent.putExtra("defaultHeader",channel[channelNum].defaultHeader);
                     intent.putExtra("customUrl",channel[channelNum].customUrl);
                     intent.putExtra("customName",channel[channelNum].customName);
                     intent.putExtra("customFormat",channel[channelNum].customFormat);
                     intent.putExtra("customVolume",channel[channelNum].customVolume);
+                    intent.putExtra("customHeader",channel[channelNum].customHeader);
                     intent.putExtra("isHidden",channel[channelNum].isHidden());
                     intent.putExtra("width",player.getVideoSize().width);
                     intent.putExtra("height",player.getVideoSize().height);
@@ -469,6 +500,7 @@ public class MainActivity extends Activity {
                 channelObject.put("customName", value.customName);
                 channelObject.put("customFormat", value.customFormat);
                 channelObject.put("customVolume", value.customVolume);
+                channelObject.put("customHeader", value.customHeader);
                 channelObject.put("isHidden", value.isHidden());
                 channelListObject.put(value.defaultName, channelObject);
             }

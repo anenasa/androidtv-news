@@ -6,19 +6,22 @@ public class Channel {
     final String defaultName;
     final String defaultFormat;
     final float defaultVolume;
+    final String defaultHeader;
     String video = "";
     String customUrl = "";
     String customName = "";
     String customFormat = "";
     String customVolume = "";
+    String customHeader = "";
     boolean hidden = false;
 
-    public Channel(int index, String url, String name, String format, float volume) {
+    public Channel(int index, String url, String name, String format, float volume, String header) {
         this.index = index;
         this.defaultUrl = url;
         this.defaultName = name;
         this.defaultFormat = format;
         this.defaultVolume = volume;
+        this.defaultHeader = header;
     }
 
     public int getIndex(){
@@ -61,6 +64,15 @@ public class Channel {
         }
     }
 
+    public String getHeader(){
+        if(customHeader.isEmpty()) {
+            return defaultHeader;
+        }
+        else{
+            return customHeader;
+        }
+    }
+
     public String getVideo(){
         return video;
     }
@@ -87,6 +99,10 @@ public class Channel {
 
     public void setVolume(String volume){
         customVolume = volume;
+    }
+
+    public void setHeader(String header){
+        customHeader = header;
     }
 
     public void setHidden(boolean hidden){

@@ -18,10 +18,12 @@ public class ChannelInfoActivity extends AppCompatActivity {
     String defaultName;
     String defaultFormat;
     float defaultVolume;
+    String defaultHeader;
     String customUrl;
     String customName;
     String customFormat;
     String customVolume;
+    String customHeader;
     boolean channelIsHidden;
     int channelWidth;
     int channelHeight;
@@ -36,10 +38,12 @@ public class ChannelInfoActivity extends AppCompatActivity {
         defaultName = getIntent().getExtras().getString("defaultName");
         defaultFormat = getIntent().getExtras().getString("defaultFormat");
         defaultVolume = getIntent().getExtras().getFloat("defaultVolume");
+        defaultHeader = getIntent().getExtras().getString("defaultHeader");
         customUrl = getIntent().getExtras().getString("customUrl");
         customName = getIntent().getExtras().getString("customName");
         customFormat = getIntent().getExtras().getString("customFormat");
         customVolume = getIntent().getExtras().getString("customVolume");
+        customHeader = getIntent().getExtras().getString("customHeader");
         channelIsHidden = getIntent().getExtras().getBoolean("isHidden");
         channelWidth = getIntent().getExtras().getInt("width");
         channelHeight = getIntent().getExtras().getInt("height");
@@ -57,6 +61,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
         returnIntent.putExtra("customUrl", fragment.activity.customUrl);
         returnIntent.putExtra("customFormat", fragment.activity.customFormat);
         returnIntent.putExtra("customVolume", fragment.activity.customVolume);
+        returnIntent.putExtra("customHeader", fragment.activity.customHeader);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
     }
@@ -152,6 +157,25 @@ public class ChannelInfoActivity extends AppCompatActivity {
             });
             Preference prefSize = findPreference("size");
             prefSize.setSummary(activity.channelWidth + "×" + activity.channelHeight);
+            EditTextPreference prefHeader = findPreference("header");
+            if(activity.customHeader.isEmpty()){
+                prefHeader.setSummary(activity.defaultHeader);
+                prefHeader.setText(activity.defaultHeader);
+            }
+            else{
+                prefHeader.setSummary(activity.customHeader);
+                prefHeader.setText(activity.customHeader);
+            }
+            prefHeader.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.customHeader = newValue.toString();
+                if(newValue.toString().isEmpty()){
+                    preference.setSummary(activity.defaultHeader);
+                }
+                else {
+                    preference.setSummary(newValue.toString());
+                }
+                return true;
+            });
         }
     }
 }

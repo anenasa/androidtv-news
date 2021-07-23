@@ -23,5 +23,8 @@
     <Preference
         app:key="size"
         app:title="解析度"/>
+    <EditTextPreference
+        app:key="header"
+        app:title="Header"/>
 
 </PreferenceScreen>
