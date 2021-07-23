@@ -16,11 +16,16 @@ https://github.com/anenasa/androidtv-news/releases
 
 ## 用法
 
-1. 轉台：使用上/下或頻道上/下轉台
+### 主畫面
+1. 轉台：使用上/下鍵或頻道上/下鍵轉台
 2. 選擇頻道：輸入數字後按 OK
 3. 顯示頻道表：按 OK
-4. 顯示頻道資訊：按顯示
-5. 進入設定：按選單
+4. 顯示頻道資訊：按顯示鍵
+5. 進入設定：按選單鍵
+
+### 頻道資訊
+
+可顯示頻道的一些資訊，也能修改頻道的名稱、網址、youtube-dl 格式、音量和 header，這裡的設定會覆蓋頻道清單檔案裡的設定。如果要回復到頻道清單檔案的設定，只要把要回復的屬性清空並儲存即可。
 
 ## 預設頻道
 
@@ -29,6 +34,7 @@ https://github.com/anenasa/androidtv-news/releases
 2. 必須是新聞為主
 3. 來源必須合法
 4. youtube-dl 要支援
+5. 無須設定 header
 
 另外提供[完整頻道清單檔案](https://anenasa.github.io/channel/full.txt)，不限制是新聞和台灣頻道，可使用自訂頻道方式二觀看。
 
@@ -48,6 +54,8 @@ https://github.com/anenasa/androidtv-news/releases
 
 ### 自訂頻道檔案格式
 
+頻道檔案如下（最後一個選項後面不能加逗點，其他選項都要）：
+
     {
       "channelList": [
         頻道1,
@@ -56,13 +64,14 @@ https://github.com/anenasa/androidtv-news/releases
       ]
     }
 
-頻道格式：
+頻道格式（最後一個選項後面不能加逗點，其他選項都要）：
 
     {
       "url": "頻道網址",
       "name": "頻道名稱",
       "ytdl-format": "youtube-dl 格式（可省略）",
-      "volume": 音量（可省略）
+      "volume": 音量（可省略）,
+      "header": "name: value（可省略，目前只支援設定一個 header）"
     }
 
 youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
