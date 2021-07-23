@@ -40,7 +40,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -191,7 +190,6 @@ public class MainActivity extends Activity {
                 else{
                     volume = (float) channelObject.getDouble("volume");
                 }
-
                 String header;
                 if(channelObject.isNull("header")) {
                     header = "";
@@ -285,7 +283,14 @@ public class MainActivity extends Activity {
                 Map<String, String> map = new HashMap<>();
                 if(!channel[num].getHeader().isEmpty()) {
                     String[] header = channel[num].getHeader().split(":", 2);
-                    map.put(header[0], header[1]);
+                    if(header.length != 2){
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this, "header 格式錯誤", Toast.LENGTH_LONG).show();
+                        });
+                    }
+                    else {
+                        map.put(header[0], header[1]);
+                    }
                 }
                 DataSource.Factory factory = new DefaultHttpDataSource.Factory()
                         .setDefaultRequestProperties(map);
