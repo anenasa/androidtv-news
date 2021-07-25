@@ -25,8 +25,6 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
-import com.yausername.youtubedl_android.YoutubeDLRequest;
-import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -106,9 +104,16 @@ public class MainActivity extends Activity {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                for(int i = 0; i < channel.length; i++){
-                    if(!channel[i].isHidden()) {
-                        parse(i);
+                for (Channel value : channel) {
+                    if (!value.isHidden()) {
+                        try {
+                            value.parse();
+                        } catch (IOException | YoutubeDLException | JSONException | InterruptedException e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                            runOnUiThread(() -> {
+                                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
+                            });
+                        }
                     }
                 }
                 saveSettings();
@@ -231,25 +236,6 @@ public class MainActivity extends Activity {
         }
     }
 
-    void parse(int num)
-    {
-        YoutubeDLRequest request = new YoutubeDLRequest(channel[num].getUrl());
-        request.addOption("-f", channel[num].getFormat());
-        if(!channel[num].getHeader().isEmpty()) {
-            request.addOption("--add-header", channel[num].getHeader());
-        }
-        VideoInfo streamInfo = null;
-        try {
-            streamInfo = YoutubeDL.getInstance().getInfo(request);
-            channel[num].setVideo(streamInfo.getUrl());
-        } catch (YoutubeDLException | InterruptedException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            runOnUiThread(() -> {
-                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
-            });
-        }
-    }
-
     int needParse(int num){
         if(channel[num].getVideo().isEmpty()) {
             return 1;
@@ -277,7 +263,14 @@ public class MainActivity extends Activity {
             @Override
             public void run() {
                 if(needParse(num) == 1) {
-                    parse(num);
+                    try {
+                        channel[num].parse();
+                    } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
+                        Log.e(TAG, Log.getStackTraceString(e));
+                        runOnUiThread(() -> {
+                            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
+                        });
+                    }
                 }
                 MediaItem mediaItem = MediaItem.fromUri(channel[num].getVideo());
                 Map<String, String> map = new HashMap<>();

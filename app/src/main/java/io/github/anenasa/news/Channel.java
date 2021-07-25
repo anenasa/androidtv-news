@@ -1,5 +1,14 @@
 package io.github.anenasa.news;
 
+import com.yausername.youtubedl_android.YoutubeDL;
+import com.yausername.youtubedl_android.YoutubeDLException;
+import com.yausername.youtubedl_android.YoutubeDLRequest;
+import com.yausername.youtubedl_android.mapper.VideoInfo;
+
+import org.json.JSONException;
+
+import java.io.IOException;
+
 public class Channel {
     final int index;
     final String defaultUrl;
@@ -107,5 +116,15 @@ public class Channel {
 
     public void setHidden(boolean hidden){
         this.hidden = hidden;
+    }
+
+    void parse() throws JSONException, IOException, YoutubeDLException, InterruptedException {
+        YoutubeDLRequest request = new YoutubeDLRequest(getUrl());
+        request.addOption("-f", getFormat());
+        if(!getHeader().isEmpty()) {
+            request.addOption("--add-header", getHeader());
+        }
+        VideoInfo streamInfo = YoutubeDL.getInstance().getInfo(request);
+        setVideo(streamInfo.getUrl());
     }
 }
