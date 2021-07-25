@@ -15,6 +15,10 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class Channel {
+    public static final int NEEDPARSE_NO = 0;
+    public static final int NEEDPARSE_YES = 1;
+    public static final int NEEDPARSE_UNKNOWN = 2;
+
     final int index;
     final String defaultUrl;
     final String defaultName;
@@ -121,6 +125,38 @@ public class Channel {
 
     public void setHidden(boolean hidden){
         this.hidden = hidden;
+    }
+
+    int needParse(){
+        if(getVideo().isEmpty()) {
+            return NEEDPARSE_YES;
+        }
+        if(getUrl().endsWith("m3u8")){
+            return NEEDPARSE_NO;
+        }
+        if(getUrl().startsWith("https://www.youtube.com/")){
+            long current = System.currentTimeMillis() / 1000;
+            int pos = getVideo().indexOf("expire") + 7;
+            long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
+            if(current < expire){
+                return NEEDPARSE_NO;
+            }
+            else{
+                return NEEDPARSE_YES;
+            }
+        }
+        if(getUrl().startsWith("https://hamivideo.hinet.net/channel/")){
+            long current = System.currentTimeMillis() / 1000;
+            int pos = getVideo().indexOf("expires") + 8;
+            long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
+            if(current < expire){
+                return NEEDPARSE_NO;
+            }
+            else{
+                return NEEDPARSE_YES;
+            }
+        }
+        return NEEDPARSE_UNKNOWN;
     }
 
     void parse() throws JSONException, IOException, YoutubeDLException, InterruptedException {

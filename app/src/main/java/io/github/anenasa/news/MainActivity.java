@@ -81,7 +81,7 @@ public class MainActivity extends Activity {
             public void onPlayerError(ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
                 Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
-                if(needParse(channelNum) != 0) {
+                if(channel[channelNum].needParse() != Channel.NEEDPARSE_NO) {
                     // Force parse by removing video url
                     channel[channelNum].setVideo("");
                 }
@@ -236,44 +236,12 @@ public class MainActivity extends Activity {
         }
     }
 
-    int needParse(int num){
-        if(channel[num].getVideo().isEmpty()) {
-            return 1;
-        }
-        if(channel[num].getUrl().endsWith("m3u8")){
-            return 0;
-        }
-        if(channel[num].getUrl().startsWith("https://www.youtube.com/")){
-            long current = System.currentTimeMillis() / 1000;
-            int pos = channel[num].getVideo().indexOf("expire") + 7;
-            long expire = Long.parseLong(channel[num].getVideo().substring(pos, pos + 10));
-            if(current < expire){
-                return 0;
-            }
-            else{
-                return 1;
-            }
-        }
-        if(channel[num].getUrl().startsWith("https://hamivideo.hinet.net/channel/")){
-            long current = System.currentTimeMillis() / 1000;
-            int pos = channel[num].getVideo().indexOf("expires") + 8;
-            long expire = Long.parseLong(channel[num].getVideo().substring(pos, pos + 10));
-            if(current < expire){
-                return 0;
-            }
-            else{
-                return 1;
-            }
-        }
-        return 2;
-    }
-
     void play(int num)
     {
         new Thread( new Runnable() {
             @Override
             public void run() {
-                if(needParse(num) == 1) {
+                if(channel[num].needParse() == Channel.NEEDPARSE_YES) {
                     try {
                         channel[num].parse();
                     } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
