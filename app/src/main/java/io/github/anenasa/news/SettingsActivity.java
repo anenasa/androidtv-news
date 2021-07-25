@@ -99,6 +99,7 @@ public class SettingsActivity extends AppCompatActivity {
                             .append("函式庫：").append('\n')
                             .append("youtubedl-android - GNU General Public License v3.0").append('\n')
                             .append("ExoPlayer - Apache License 2.0").append('\n')
+                            .append("OkHttp - Apache License 2.0").append('\n')
                             .append('\n');
                     try{
                         for (String line; (line = readerGPL3.readLine()) != null; ) {

@@ -254,6 +254,17 @@ public class MainActivity extends Activity {
                 return 1;
             }
         }
+        if(channel[num].getUrl().startsWith("https://hamivideo.hinet.net/channel/")){
+            long current = System.currentTimeMillis() / 1000;
+            int pos = channel[num].getVideo().indexOf("expires") + 8;
+            long expire = Long.parseLong(channel[num].getVideo().substring(pos, pos + 10));
+            if(current < expire){
+                return 0;
+            }
+            else{
+                return 1;
+            }
+        }
         return 2;
     }
 

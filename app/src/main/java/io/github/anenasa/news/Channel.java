@@ -1,13 +1,18 @@
 package io.github.anenasa.news;
 
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
 import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 public class Channel {
     final int index;
@@ -119,7 +124,23 @@ public class Channel {
     }
 
     void parse() throws JSONException, IOException, YoutubeDLException, InterruptedException {
-        YoutubeDLRequest request = new YoutubeDLRequest(getUrl());
+        String url = getUrl();
+        YoutubeDLRequest request;
+        if(url.startsWith("https://hamivideo.hinet.net/channel/")){
+            String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
+            OkHttpClient okHttpClient = new OkHttpClient();
+            okHttpClient.setConnectTimeout(30, TimeUnit.SECONDS);
+            okHttpClient.setReadTimeout(30, TimeUnit.SECONDS);
+            Request okHttpRequest = new Request.Builder()
+                    .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id)
+                    .build();
+            Response response = okHttpClient.newCall(okHttpRequest).execute();
+            JSONObject object = new JSONObject(response.body().string());
+            request = new YoutubeDLRequest(object.getString("url"));
+        }
+        else{
+            request = new YoutubeDLRequest(url);
+        }
         request.addOption("-f", getFormat());
         if(!getHeader().isEmpty()) {
             request.addOption("--add-header", getHeader());
