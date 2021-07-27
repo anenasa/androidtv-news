@@ -162,7 +162,7 @@ public class Channel {
     void parse() throws JSONException, IOException, YoutubeDLException, InterruptedException {
         String url = getUrl();
         YoutubeDLRequest request;
-        if(url.startsWith("https://hamivideo.hinet.net/channel/")){
+        if(url.startsWith("https://hamivideo.hinet.net/channel/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
             OkHttpClient okHttpClient = new OkHttpClient();
             okHttpClient.setConnectTimeout(30, TimeUnit.SECONDS);
