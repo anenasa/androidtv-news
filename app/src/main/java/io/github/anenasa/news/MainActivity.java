@@ -359,11 +359,17 @@ public class MainActivity extends AppCompatActivity {
                 case KeyEvent.KEYCODE_BACK:
                     if(!input.equals("")){
                         clearInput();
-                        return true;
                     }
                     else{
-                        return super.dispatchKeyEvent(event);
+                        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                                .setTitle("退出")
+                                .setMessage("是否要退出新聞直播？")
+                                .setPositiveButton("確定", (dialog, id) -> finish())
+                                .setNegativeButton("取消", (dialogInterface, i) -> {});
+                        AlertDialog alertDialog = builder.create();
+                        alertDialog.show();
                     }
+                    return true;
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_CHANNEL_UP:
                     do {
