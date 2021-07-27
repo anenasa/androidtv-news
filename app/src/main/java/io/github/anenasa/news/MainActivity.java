@@ -12,6 +12,7 @@ import android.os.StrictMode;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.SurfaceView;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +44,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class MainActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
 
     int channelNum;
@@ -336,21 +339,12 @@ public class MainActivity extends Activity {
 
     @Override
     public boolean dispatchKeyEvent (KeyEvent event){
-        if(event.getAction() == KeyEvent.ACTION_DOWN) {
+        if(event.getAction() == KeyEvent.ACTION_DOWN && getSupportFragmentManager().getFragments().isEmpty()) {
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
                     if(input.equals("")){
-                        Intent intent = new Intent(this, ChannelListActivity.class);
-                        String[] nameArray = new String[channel.length];
-                        boolean[] isHiddenArray = new boolean[channel.length];
-                        for(int i = 0; i < channel.length; i++){
-                            nameArray[i] = channel[i].getName();
-                            isHiddenArray[i] = channel[i].isHidden();
-                        }
-                        intent.putExtra("nameArray",nameArray);
-                        intent.putExtra("isHiddenArray",isHiddenArray);
-                        startActivityForResult(intent, 0);
+                        showMenu();
                     }
                     else if(Integer.parseInt(input) < channel.length){
                         channelNum = Integer.parseInt(input);
@@ -395,26 +389,10 @@ public class MainActivity extends Activity {
                     play(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_INFO:
-                    Intent intent = new Intent(this, ChannelInfoActivity.class);
-                    intent.putExtra("index",channel[channelNum].getIndex());
-                    intent.putExtra("defaultUrl",channel[channelNum].defaultUrl);
-                    intent.putExtra("defaultName",channel[channelNum].defaultName);
-                    intent.putExtra("defaultFormat",channel[channelNum].defaultFormat);
-                    intent.putExtra("defaultVolume",channel[channelNum].defaultVolume);
-                    intent.putExtra("defaultHeader",channel[channelNum].defaultHeader);
-                    intent.putExtra("customUrl",channel[channelNum].customUrl);
-                    intent.putExtra("customName",channel[channelNum].customName);
-                    intent.putExtra("customFormat",channel[channelNum].customFormat);
-                    intent.putExtra("customVolume",channel[channelNum].customVolume);
-                    intent.putExtra("customHeader",channel[channelNum].customHeader);
-                    intent.putExtra("isHidden",channel[channelNum].isHidden());
-                    intent.putExtra("width",player.getVideoSize().width);
-                    intent.putExtra("height",player.getVideoSize().height);
-                    startActivityForResult(intent, 1);
+                    showChannelInfo(findViewById(R.id.container));
                     return true;
                 case KeyEvent.KEYCODE_MENU:
-                    Intent intentSettings = new Intent(this, SettingsActivity.class);
-                    startActivity(intentSettings);
+                    showSettings(findViewById(R.id.container));
                     return true;
                 case KeyEvent.KEYCODE_0:
                     appendInput(0);
@@ -459,6 +437,55 @@ public class MainActivity extends Activity {
     void clearInput() {
         input = "";
         textView.setText("");
+    }
+
+    public void showMenu(){
+        MenuFragment fragment = new MenuFragment();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.container, fragment)
+                .addToBackStack(fragment.getClass().getName())
+                .commit();
+    }
+
+    public void showChannelList(View view){
+        Intent intent = new Intent(this, ChannelListActivity.class);
+        String[] nameArray = new String[channel.length];
+        boolean[] isHiddenArray = new boolean[channel.length];
+        for(int i = 0; i < channel.length; i++){
+            nameArray[i] = channel[i].getName();
+            isHiddenArray[i] = channel[i].isHidden();
+        }
+        intent.putExtra("nameArray", nameArray);
+        intent.putExtra("isHiddenArray", isHiddenArray);
+        startActivityForResult(intent, 0);
+        getSupportFragmentManager().popBackStack();
+    }
+
+    public void showChannelInfo(View view){
+        Intent intent = new Intent(this, ChannelInfoActivity.class);
+        intent.putExtra("index", channel[channelNum].getIndex());
+        intent.putExtra("defaultUrl", channel[channelNum].defaultUrl);
+        intent.putExtra("defaultName", channel[channelNum].defaultName);
+        intent.putExtra("defaultFormat", channel[channelNum].defaultFormat);
+        intent.putExtra("defaultVolume", channel[channelNum].defaultVolume);
+        intent.putExtra("defaultHeader", channel[channelNum].defaultHeader);
+        intent.putExtra("customUrl", channel[channelNum].customUrl);
+        intent.putExtra("customName", channel[channelNum].customName);
+        intent.putExtra("customFormat", channel[channelNum].customFormat);
+        intent.putExtra("customVolume", channel[channelNum].customVolume);
+        intent.putExtra("customHeader", channel[channelNum].customHeader);
+        intent.putExtra("isHidden", channel[channelNum].isHidden());
+        intent.putExtra("width", player.getVideoSize().width);
+        intent.putExtra("height", player.getVideoSize().height);
+        startActivityForResult(intent, 1);
+        getSupportFragmentManager().popBackStack();
+    }
+
+    public void showSettings(View view){
+        Intent intentSettings = new Intent(this, SettingsActivity.class);
+        startActivity(intentSettings);
+        getSupportFragmentManager().popBackStack();
     }
 
     void saveSettings() {
