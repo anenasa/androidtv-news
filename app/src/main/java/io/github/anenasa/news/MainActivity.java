@@ -119,7 +119,9 @@ public class MainActivity extends Activity {
                 saveSettings();
             }
         };
-        timer.scheduleAtFixedRate(timerTask, 0, 3600000);
+        // Delay timer for one second because if two requests are sent to
+        // Hami Video at the same time, one of them will fail.
+        timer.scheduleAtFixedRate(timerTask, 1000, 3600000);
     }
 
     @Override
