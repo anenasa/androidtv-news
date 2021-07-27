@@ -1,9 +1,11 @@
 package io.github.anenasa.news;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -20,15 +22,28 @@ import java.net.URL;
 
 public class SettingsActivity extends AppCompatActivity {
 
+    String defaultFormat;
+    String defaultVolume;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        defaultFormat = getIntent().getExtras().getString("defaultFormat");
+        defaultVolume = getIntent().getExtras().getString("defaultVolume");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
                 .commit();
+    }
 
+    @Override
+    public void onBackPressed() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra("defaultFormat", defaultFormat);
+        returnIntent.putExtra("defaultVolume", defaultVolume);
+        setResult(Activity.RESULT_OK, returnIntent);
+        super.onBackPressed();
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
@@ -39,6 +54,36 @@ public class SettingsActivity extends AppCompatActivity {
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             activity = (SettingsActivity)getActivity();
             setPreferencesFromResource(R.xml.activity_settings, rootKey);
+
+            EditTextPreference prefFormat = findPreference("format");
+            prefFormat.setSummary(activity.defaultFormat);
+            prefFormat.setText(activity.defaultFormat);
+            prefFormat.setOnPreferenceChangeListener((preference, newValue) -> {
+                if(newValue.toString().isEmpty()){
+                    activity.defaultFormat = "best";
+                    preference.setSummary("best");
+                }
+                else {
+                    activity.defaultFormat = newValue.toString();
+                    preference.setSummary(newValue.toString());
+                }
+                return true;
+            });
+
+            EditTextPreference prefVolume = findPreference("volume");
+            prefVolume.setSummary(activity.defaultVolume);
+            prefVolume.setText(activity.defaultVolume);
+            prefVolume.setOnPreferenceChangeListener((preference, newValue) -> {
+                if(newValue.toString().isEmpty()){
+                    activity.defaultVolume = "1.0";
+                    preference.setSummary("1.0");
+                }
+                else {
+                    activity.defaultVolume = newValue.toString();
+                    preference.setSummary(newValue.toString());
+                }
+                return true;
+            });
 
             Preference update = (Preference)findPreference("update");
             update.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {

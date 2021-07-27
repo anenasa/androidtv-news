@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
     int channelNum;
     Channel[] channel;
     String input = "";
+    String defaultFormat;
+    String defaultVolume;
 
     SimpleExoPlayer player = null;
     SurfaceView playerView = null;
@@ -71,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         preferences = getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE);
         channelNum = preferences.getInt("channelNum", 0);
+        defaultFormat = preferences.getString("defaultFormat", "best");
+        defaultVolume = preferences.getString("defaultVolume", "1.0");
 
         try {
             YoutubeDL.getInstance().init(getApplication());
@@ -188,14 +192,14 @@ public class MainActivity extends AppCompatActivity {
                 String name = channelObject.getString("name");
                 String format;
                 if(channelObject.isNull("ytdl-format")) {
-                    format = "best";
+                    format = defaultFormat;
                 }
                 else{
                     format = channelObject.getString("ytdl-format");
                 }
                 float volume;
                 if(channelObject.isNull("volume")) {
-                    volume = 1f;
+                    volume = Float.parseFloat(defaultVolume);
                 }
                 else{
                     volume = (float) channelObject.getDouble("volume");
@@ -333,6 +337,19 @@ public class MainActivity extends AppCompatActivity {
                 channel[channelNum].setVolume(data.getStringExtra("customVolume"));
                 channel[channelNum].setHeader(data.getStringExtra("customHeader"));
                 saveSettings();
+            }
+        }
+        else if (requestCode == 2) {
+            // SettingsActivity
+            if (resultCode == Activity.RESULT_OK) {
+                String newFormat = data.getStringExtra("defaultFormat");
+                String newVolume = data.getStringExtra("defaultVolume");
+                if(!defaultFormat.equals(newFormat) || !defaultVolume.equals(newVolume)){
+                    defaultFormat = newFormat;
+                    defaultVolume = newVolume;
+                    readChannelList();
+                    play(channelNum);
+                }
             }
         }
     }
@@ -490,7 +507,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void showSettings(View view){
         Intent intentSettings = new Intent(this, SettingsActivity.class);
-        startActivity(intentSettings);
+        intentSettings.putExtra("defaultFormat", defaultFormat);
+        intentSettings.putExtra("defaultVolume", defaultVolume);
+        startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
     }
 
@@ -500,6 +519,8 @@ public class MainActivity extends AppCompatActivity {
         }
         SharedPreferences.Editor editor = preferences.edit();
         editor.putInt("channelNum", channelNum);
+        editor.putString("defaultFormat", defaultFormat);
+        editor.putString("defaultVolume", defaultVolume);
         for (Channel value : channel) {
             editor.putString(value.getUrl() + value.getFormat(), value.getVideo());
         }

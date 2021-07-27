@@ -2,6 +2,14 @@
 <PreferenceScreen
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
+    <EditTextPreference
+        app:layout="@layout/preference_layout"
+        app:key="format"
+        app:title="預設格式"/>
+    <EditTextPreference
+        app:layout="@layout/preference_layout"
+        app:key="volume"
+        app:title="預設音量"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="update"
