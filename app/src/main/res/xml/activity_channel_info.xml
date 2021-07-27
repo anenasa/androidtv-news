@@ -3,27 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="name"
         app:title="頻道名稱"/>
     <SwitchPreferenceCompat
+        app:layout="@layout/preference_layout"
         app:key="isHidden"
         app:title="隱藏頻道"/>
     <Preference
+        app:layout="@layout/preference_layout"
         app:key="number"
         app:title="頻道號碼"/>
     <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="url"
         app:title="網址"/>
     <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="format"
         app:title="youtube-dl 格式"/>
     <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="volume"
         app:title="音量"/>
     <Preference
+        app:layout="@layout/preference_layout"
         app:key="size"
         app:title="解析度"/>
     <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="header"
         app:title="Header"/>
 
