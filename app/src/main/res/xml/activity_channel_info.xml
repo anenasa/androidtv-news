@@ -34,5 +34,9 @@
         app:layout="@layout/preference_layout"
         app:key="header"
         app:title="Header"/>
+    <Preference
+        app:layout="@layout/preference_layout"
+        app:key="delete"
+        app:title="刪除"/>
 
 </PreferenceScreen>

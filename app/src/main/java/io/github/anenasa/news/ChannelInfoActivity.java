@@ -7,12 +7,14 @@ import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreferenceCompat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 
 public class ChannelInfoActivity extends AppCompatActivity {
 
     ChannelInfoFragment fragment = new ChannelInfoFragment();
+    boolean isNewChannel;
     int channelIndex;
     String defaultUrl;
     String defaultName;
@@ -33,6 +35,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        isNewChannel = getIntent().getExtras().getBoolean("isNewChannel");
         channelIndex = getIntent().getExtras().getInt("index");
         defaultUrl = getIntent().getExtras().getString("defaultUrl");
         defaultName = getIntent().getExtras().getString("defaultName");
@@ -174,6 +177,23 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 else {
                     preference.setSummary(newValue.toString());
                 }
+                return true;
+            });
+            Preference prefDelete = findPreference("delete");
+            prefDelete.setVisible(activity.isNewChannel);
+            prefDelete.setOnPreferenceClickListener(preference -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(activity)
+                        .setTitle("刪除")
+                        .setMessage("確定要刪除嗎？")
+                        .setPositiveButton("確定", (dialog, id) -> {
+                            Intent returnIntent = new Intent();
+                            returnIntent.putExtra("delete", true);
+                            activity.setResult(Activity.RESULT_OK, returnIntent);
+                            activity.finish();
+                        })
+                        .setNegativeButton("取消", (dialogInterface, i) -> {});
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
                 return true;
             });
         }

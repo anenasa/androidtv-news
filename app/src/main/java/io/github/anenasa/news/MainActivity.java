@@ -327,6 +327,19 @@ public class MainActivity extends AppCompatActivity {
         else if(requestCode == 1){
             // ChannelInfoActivity - existing channel
             if (resultCode == Activity.RESULT_OK) {
+                if(data.getBooleanExtra("delete", false)){
+                    Channel[] array = new Channel[channel.length - 1];
+                    for(int i = 0, k = 0; i < array.length; i++){
+                        if(i != channelNum){
+                            array[k] = channel[i];
+                            k++;
+                        }
+                    }
+                    channel = array;
+                    channelNum = 0;
+                    return;
+                }
+
                 String url_old = channel[channelNum].getUrl();
                 String url_new;
                 if(data.getStringExtra("customUrl").isEmpty()) {
@@ -371,6 +384,9 @@ public class MainActivity extends AppCompatActivity {
         else if(requestCode == 3){
             // ChannelInfoActivity - new channel
             if (resultCode == Activity.RESULT_OK) {
+                if(data.getBooleanExtra("delete", false)){
+                    return;
+                }
                 channel = Arrays.copyOf(channel, channel.length + 1);
                 channelNum = channel.length - 1;
                 channel[channelNum] = new Channel(channelNum, "", "", defaultFormat, Float.parseFloat(defaultVolume), "");
@@ -520,6 +536,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void showChannelInfo(View view){
         Intent intent = new Intent(this, ChannelInfoActivity.class);
+        intent.putExtra("isNewChannel", channelNum >= channelLength_config);
         intent.putExtra("index", channel[channelNum].getIndex());
         intent.putExtra("defaultUrl", channel[channelNum].defaultUrl);
         intent.putExtra("defaultName", channel[channelNum].defaultName);
@@ -540,6 +557,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void addNewChannel(View view) {
         Intent intent = new Intent(this, ChannelInfoActivity.class);
+        intent.putExtra("isNewChannel", true);
         intent.putExtra("index", channel.length);
         intent.putExtra("defaultUrl", "");
         intent.putExtra("defaultName", "");
