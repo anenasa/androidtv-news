@@ -406,7 +406,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean dispatchKeyEvent (KeyEvent event){
         if(event.getAction() == KeyEvent.ACTION_DOWN && getSupportFragmentManager().getFragments().isEmpty()) {
             switch (event.getKeyCode()) {
-                case KeyEvent.KEYCODE_VOLUME_DOWN:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
                     if(input.equals("")){
