@@ -6,7 +6,7 @@
     android:layout_marginStart="10sp"
     android:layout_marginTop="10sp"
     tools:context=".MenuFragment"
-    android:orientation="horizontal">
+    android:orientation="vertical">
 
     <Button
         android:id="@+id/channel_list"
@@ -28,6 +28,16 @@
         android:textSize="30sp"
         android:background="@drawable/button"
         android:onClick="showChannelInfo"/>
+    <Button
+        android:id="@+id/new_channel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:padding="10sp"
+        android:text="新增頻道"
+        android:textSize="30sp"
+        android:background="@drawable/button"
+        android:onClick="addNewChannel"/>
     <Button
         android:id="@+id/settings"
         android:layout_width="wrap_content"

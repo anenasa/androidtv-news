@@ -39,6 +39,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
     int channelNum;
     Channel[] channel;
+    int channelLength_config;
     String input = "";
     String defaultFormat;
     String defaultVolume;
@@ -176,15 +178,29 @@ public class MainActivity extends AppCompatActivity {
             }
             JSONObject json = new JSONObject(stringBuilder.toString());
             JSONArray channelList = json.getJSONArray("channelList");
+            channelLength_config = channelList.length();
 
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
             if(!preferences.getString("jsonSettings", "").isEmpty()) {
                 customJsonObject = new JSONObject(preferences.getString("jsonSettings", ""));
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
+                JSONArray newChannelArray = customJsonObject.getJSONArray("newChannelArray");
+                channel = new Channel[channelList.length() + newChannelArray.length()];
+                for(int i = channelList.length(); i < channel.length; i++){
+                    JSONObject newChannelObject = newChannelArray.getJSONObject(i - channelList.length());
+                    channel[i] = new Channel(i, "", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                    channel[i].setUrl(newChannelObject.getString("customUrl"));
+                    channel[i].setName(newChannelObject.getString("customName"));
+                    channel[i].setFormat(newChannelObject.getString("customFormat"));
+                    channel[i].setVolume(newChannelObject.getString("customVolume"));
+                    channel[i].setHeader(newChannelObject.getString("customHeader"));
+                    channel[i].setHidden(newChannelObject.getBoolean("isHidden"));
+                }
             }
-
-            channel = new Channel[channelList.length()];
+            else {
+                channel = new Channel[channelList.length()];
+            }
             for(int i = 0; i < channelList.length(); i++){
 
                 JSONObject channelObject = channelList.getJSONObject(i);
@@ -309,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         else if(requestCode == 1){
-            // ChannelInfoActivity
+            // ChannelInfoActivity - existing channel
             if (resultCode == Activity.RESULT_OK) {
                 String url_old = channel[channelNum].getUrl();
                 String url_new;
@@ -352,12 +368,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+        else if(requestCode == 3){
+            // ChannelInfoActivity - new channel
+            if (resultCode == Activity.RESULT_OK) {
+                channel = Arrays.copyOf(channel, channel.length + 1);
+                channelNum = channel.length - 1;
+                channel[channelNum] = new Channel(channelNum, "", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                channel[channelNum].setName(data.getStringExtra("customName"));
+                channel[channelNum].setHidden(data.getBooleanExtra("isHidden", false));
+                channel[channelNum].setUrl(data.getStringExtra("customUrl"));
+                channel[channelNum].setFormat(data.getStringExtra("customFormat"));
+                channel[channelNum].setVolume(data.getStringExtra("customVolume"));
+                channel[channelNum].setHeader(data.getStringExtra("customHeader"));
+                saveSettings();
+                play(channelNum);
+            }
+        }
     }
 
     @Override
     public boolean dispatchKeyEvent (KeyEvent event){
         if(event.getAction() == KeyEvent.ACTION_DOWN && getSupportFragmentManager().getFragments().isEmpty()) {
             switch (event.getKeyCode()) {
+                case KeyEvent.KEYCODE_VOLUME_DOWN:
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
                     if(input.equals("")){
@@ -505,6 +538,26 @@ public class MainActivity extends AppCompatActivity {
         getSupportFragmentManager().popBackStack();
     }
 
+    public void addNewChannel(View view) {
+        Intent intent = new Intent(this, ChannelInfoActivity.class);
+        intent.putExtra("index", channel.length);
+        intent.putExtra("defaultUrl", "");
+        intent.putExtra("defaultName", "");
+        intent.putExtra("defaultFormat", defaultFormat);
+        intent.putExtra("defaultVolume", Float.parseFloat(defaultVolume));
+        intent.putExtra("defaultHeader", "");
+        intent.putExtra("customUrl", "");
+        intent.putExtra("customName", "");
+        intent.putExtra("customFormat", "");
+        intent.putExtra("customVolume", "");
+        intent.putExtra("customHeader", "");
+        intent.putExtra("isHidden", false);
+        intent.putExtra("width", 0);
+        intent.putExtra("height", 0);
+        startActivityForResult(intent, 3);
+        getSupportFragmentManager().popBackStack();
+    }
+
     public void showSettings(View view){
         Intent intentSettings = new Intent(this, SettingsActivity.class);
         intentSettings.putExtra("defaultFormat", defaultFormat);
@@ -527,18 +580,23 @@ public class MainActivity extends AppCompatActivity {
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
-            for (Channel value : channel) {
+            JSONArray newChannelArray = new JSONArray();
+            for(int i = 0; i < channel.length; i++){
                 JSONObject channelObject = new JSONObject();
-                channelObject.put("customUrl", value.customUrl);
-                channelObject.put("customName", value.customName);
-                channelObject.put("customFormat", value.customFormat);
-                channelObject.put("customVolume", value.customVolume);
-                channelObject.put("customHeader", value.customHeader);
-                channelObject.put("isHidden", value.isHidden());
-                channelListObject.put(value.defaultName, channelObject);
+                channelObject.put("customUrl", channel[i].customUrl);
+                channelObject.put("customName", channel[i].customName);
+                channelObject.put("customFormat", channel[i].customFormat);
+                channelObject.put("customVolume", channel[i].customVolume);
+                channelObject.put("customHeader", channel[i].customHeader);
+                channelObject.put("isHidden", channel[i].isHidden());
+                if(i < channelLength_config) {
+                    channelListObject.put(channel[i].defaultName, channelObject);
+                }
+                else{
+                    newChannelArray.put(channelObject);
+                }
             }
             jsonObject.put("customChannelList", channelListObject);
-            JSONArray newChannelArray = new JSONArray();
             jsonObject.put("newChannelArray", newChannelArray);
             editor.putString("jsonSettings", jsonObject.toString());
         } catch (JSONException e) {
