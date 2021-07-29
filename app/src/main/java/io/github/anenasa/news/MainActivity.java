@@ -39,7 +39,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
@@ -51,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
 
     int channelNum;
-    Channel[] channel;
+    ArrayList<Channel> channel;
     int channelLength_config;
     String input = "";
     String defaultFormat;
@@ -90,9 +90,9 @@ public class MainActivity extends AppCompatActivity {
             public void onPlayerError(ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
                 Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
-                if(channel[channelNum].needParse() != Channel.NEEDPARSE_NO) {
+                if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
                     // Force parse by removing video url
-                    channel[channelNum].setVideo("");
+                    channel.get(channelNum).setVideo("");
                 }
                 play(channelNum);
             }
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         if(channel == null){
             return;
         }
-        if(channelNum >= channel.length){
+        if(channelNum >= channel.size()){
             channelNum = 0;
         }
 
@@ -113,10 +113,10 @@ public class MainActivity extends AppCompatActivity {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                for (Channel value : channel) {
-                    if (!value.isHidden()) {
+                for(int i = 0; i < channel.size(); i++){
+                    if (!channel.get(i).isHidden()) {
                         try {
-                            value.parse();
+                            channel.get(i).parse();
                         } catch (IOException | YoutubeDLException | JSONException | InterruptedException e) {
                             Log.e(TAG, Log.getStackTraceString(e));
                             runOnUiThread(() -> {
@@ -182,24 +182,21 @@ public class MainActivity extends AppCompatActivity {
 
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
+            channel = new ArrayList<>();
             if(!preferences.getString("jsonSettings", "").isEmpty()) {
                 customJsonObject = new JSONObject(preferences.getString("jsonSettings", ""));
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
                 JSONArray newChannelArray = customJsonObject.getJSONArray("newChannelArray");
-                channel = new Channel[channelList.length() + newChannelArray.length()];
-                for(int i = channelList.length(); i < channel.length; i++){
-                    JSONObject newChannelObject = newChannelArray.getJSONObject(i - channelList.length());
-                    channel[i] = new Channel(i, "", "", defaultFormat, Float.parseFloat(defaultVolume), "");
-                    channel[i].setUrl(newChannelObject.getString("customUrl"));
-                    channel[i].setName(newChannelObject.getString("customName"));
-                    channel[i].setFormat(newChannelObject.getString("customFormat"));
-                    channel[i].setVolume(newChannelObject.getString("customVolume"));
-                    channel[i].setHeader(newChannelObject.getString("customHeader"));
-                    channel[i].setHidden(newChannelObject.getBoolean("isHidden"));
+                for(int i = 0; i < newChannelArray.length(); i++){
+                    JSONObject newChannelObject = newChannelArray.getJSONObject(i);
+                    channel.add(new Channel(channelList.length() + i, "", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
+                    channel.get(i).setUrl(newChannelObject.getString("customUrl"));
+                    channel.get(i).setName(newChannelObject.getString("customName"));
+                    channel.get(i).setFormat(newChannelObject.getString("customFormat"));
+                    channel.get(i).setVolume(newChannelObject.getString("customVolume"));
+                    channel.get(i).setHeader(newChannelObject.getString("customHeader"));
+                    channel.get(i).setHidden(newChannelObject.getBoolean("isHidden"));
                 }
-            }
-            else {
-                channel = new Channel[channelList.length()];
             }
             for(int i = 0; i < channelList.length(); i++){
 
@@ -227,17 +224,17 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     header = channelObject.getString("header");
                 }
-                channel[i] = new Channel(i, url, name, format, volume, header);
+                channel.add(i, new Channel(i, url, name, format, volume, header));
                 if(customJsonObject != null && customChannelList.has(name)) {
                     JSONObject customChannelObject = customChannelList.getJSONObject(name);
-                    channel[i].setUrl(customChannelObject.getString("customUrl"));
-                    channel[i].setName(customChannelObject.getString("customName"));
-                    channel[i].setFormat(customChannelObject.getString("customFormat"));
-                    channel[i].setVolume(customChannelObject.getString("customVolume"));
-                    channel[i].setHeader(customChannelObject.getString("customHeader"));
-                    channel[i].setHidden(customChannelObject.getBoolean("isHidden"));
+                    channel.get(i).setUrl(customChannelObject.getString("customUrl"));
+                    channel.get(i).setName(customChannelObject.getString("customName"));
+                    channel.get(i).setFormat(customChannelObject.getString("customFormat"));
+                    channel.get(i).setVolume(customChannelObject.getString("customVolume"));
+                    channel.get(i).setHeader(customChannelObject.getString("customHeader"));
+                    channel.get(i).setHidden(customChannelObject.getBoolean("isHidden"));
                 }
-                channel[i].setVideo(preferences.getString(channel[i].getUrl() + channel[i].getFormat(), ""));
+                channel.get(i).setVideo(preferences.getString(channel.get(i).getUrl() + channel.get(i).getFormat(), ""));
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
@@ -266,9 +263,9 @@ public class MainActivity extends AppCompatActivity {
         new Thread( new Runnable() {
             @Override
             public void run() {
-                if(channel[num].needParse() == Channel.NEEDPARSE_YES) {
+                if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                     try {
-                        channel[num].parse();
+                        channel.get(num).parse();
                     } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
                         Log.e(TAG, Log.getStackTraceString(e));
                         runOnUiThread(() -> {
@@ -276,10 +273,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 }
-                MediaItem mediaItem = MediaItem.fromUri(channel[num].getVideo());
+                MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
                 Map<String, String> map = new HashMap<>();
-                if(!channel[num].getHeader().isEmpty()) {
-                    String[] header = channel[num].getHeader().split(":", 2);
+                if(!channel.get(num).getHeader().isEmpty()) {
+                    String[] header = channel.get(num).getHeader().split(":", 2);
                     if(header.length != 2){
                         runOnUiThread(() -> {
                             Toast.makeText(MainActivity.this, "header 格式錯誤", Toast.LENGTH_LONG).show();
@@ -303,7 +300,7 @@ public class MainActivity extends AppCompatActivity {
                         }
                         player.setMediaSource(mediaSource);
                         player.prepare();
-                        player.setVolume(channel[num].getVolume());
+                        player.setVolume(channel.get(num).getVolume());
                         if(isStarted){
                             player.play();
                         }
@@ -328,43 +325,36 @@ public class MainActivity extends AppCompatActivity {
             // ChannelInfoActivity - existing channel
             if (resultCode == Activity.RESULT_OK) {
                 if(data.getBooleanExtra("delete", false)){
-                    Channel[] array = new Channel[channel.length - 1];
-                    for(int i = 0, k = 0; i < array.length; i++){
-                        if(i != channelNum){
-                            array[k] = channel[i];
-                            k++;
-                        }
-                    }
-                    channel = array;
+                    channel.remove(channelNum);
                     channelNum = 0;
                     return;
                 }
 
-                String url_old = channel[channelNum].getUrl();
+                String url_old = channel.get(channelNum).getUrl();
                 String url_new;
                 if(data.getStringExtra("customUrl").isEmpty()) {
-                    url_new = channel[channelNum].defaultUrl;
+                    url_new = channel.get(channelNum).defaultUrl;
                 }
                 else{
                     url_new = data.getStringExtra("customUrl");
                 }
-                String format_old = channel[channelNum].getFormat();
+                String format_old = channel.get(channelNum).getFormat();
                 String format_new;
                 if(data.getStringExtra("customFormat").isEmpty()){
-                    format_new = channel[channelNum].defaultFormat;
+                    format_new = channel.get(channelNum).defaultFormat;
                 }
                 else{
                     format_new = data.getStringExtra("customFormat");
                 }
                 if(!url_old.equals(url_new) || !format_old.equals(format_new)){
-                    channel[channelNum].setVideo("");
+                    channel.get(channelNum).setVideo("");
                 }
-                channel[channelNum].setName(data.getStringExtra("customName"));
-                channel[channelNum].setHidden(data.getBooleanExtra("isHidden", false));
-                channel[channelNum].setUrl(data.getStringExtra("customUrl"));
-                channel[channelNum].setFormat(data.getStringExtra("customFormat"));
-                channel[channelNum].setVolume(data.getStringExtra("customVolume"));
-                channel[channelNum].setHeader(data.getStringExtra("customHeader"));
+                channel.get(channelNum).setName(data.getStringExtra("customName"));
+                channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
+                channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
+                channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
+                channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
+                channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
                 saveSettings();
             }
         }
@@ -387,15 +377,14 @@ public class MainActivity extends AppCompatActivity {
                 if(data.getBooleanExtra("delete", false)){
                     return;
                 }
-                channel = Arrays.copyOf(channel, channel.length + 1);
-                channelNum = channel.length - 1;
-                channel[channelNum] = new Channel(channelNum, "", "", defaultFormat, Float.parseFloat(defaultVolume), "");
-                channel[channelNum].setName(data.getStringExtra("customName"));
-                channel[channelNum].setHidden(data.getBooleanExtra("isHidden", false));
-                channel[channelNum].setUrl(data.getStringExtra("customUrl"));
-                channel[channelNum].setFormat(data.getStringExtra("customFormat"));
-                channel[channelNum].setVolume(data.getStringExtra("customVolume"));
-                channel[channelNum].setHeader(data.getStringExtra("customHeader"));
+                channelNum = channel.size();
+                channel.add(new Channel(channelNum, "", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
+                channel.get(channelNum).setName(data.getStringExtra("customName"));
+                channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
+                channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
+                channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
+                channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
+                channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
                 saveSettings();
                 play(channelNum);
             }
@@ -411,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
                     if(input.equals("")){
                         showMenu();
                     }
-                    else if(Integer.parseInt(input) < channel.length){
+                    else if(Integer.parseInt(input) < channel.size()){
                         channelNum = Integer.parseInt(input);
                         player.stop();
                         play(channelNum);
@@ -439,23 +428,23 @@ public class MainActivity extends AppCompatActivity {
                 case KeyEvent.KEYCODE_CHANNEL_UP:
                     do {
                         if (channelNum == 0) {
-                            channelNum = channel.length - 1;
+                            channelNum = channel.size() - 1;
                         } else {
                             channelNum -= 1;
                         }
-                    } while (channel[channelNum].isHidden());
+                    } while (channel.get(channelNum).isHidden());
                     player.stop();
                     play(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_CHANNEL_DOWN:
                     do {
-                        if (channelNum == channel.length - 1) {
+                        if (channelNum == channel.size() - 1) {
                             channelNum = 0;
                         } else {
                             channelNum += 1;
                         }
-                    } while (channel[channelNum].isHidden());
+                    } while (channel.get(channelNum).isHidden());
                     player.stop();
                     play(channelNum);
                     return true;
@@ -521,11 +510,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void showChannelList(View view){
         Intent intent = new Intent(this, ChannelListActivity.class);
-        String[] nameArray = new String[channel.length];
-        boolean[] isHiddenArray = new boolean[channel.length];
-        for(int i = 0; i < channel.length; i++){
-            nameArray[i] = channel[i].getName();
-            isHiddenArray[i] = channel[i].isHidden();
+        String[] nameArray = new String[channel.size()];
+        boolean[] isHiddenArray = new boolean[channel.size()];
+        for(int i = 0; i < channel.size(); i++){
+            nameArray[i] = channel.get(i).getName();
+            isHiddenArray[i] = channel.get(i).isHidden();
         }
         intent.putExtra("nameArray", nameArray);
         intent.putExtra("isHiddenArray", isHiddenArray);
@@ -536,18 +525,18 @@ public class MainActivity extends AppCompatActivity {
     public void showChannelInfo(View view){
         Intent intent = new Intent(this, ChannelInfoActivity.class);
         intent.putExtra("isNewChannel", channelNum >= channelLength_config);
-        intent.putExtra("index", channel[channelNum].getIndex());
-        intent.putExtra("defaultUrl", channel[channelNum].defaultUrl);
-        intent.putExtra("defaultName", channel[channelNum].defaultName);
-        intent.putExtra("defaultFormat", channel[channelNum].defaultFormat);
-        intent.putExtra("defaultVolume", channel[channelNum].defaultVolume);
-        intent.putExtra("defaultHeader", channel[channelNum].defaultHeader);
-        intent.putExtra("customUrl", channel[channelNum].customUrl);
-        intent.putExtra("customName", channel[channelNum].customName);
-        intent.putExtra("customFormat", channel[channelNum].customFormat);
-        intent.putExtra("customVolume", channel[channelNum].customVolume);
-        intent.putExtra("customHeader", channel[channelNum].customHeader);
-        intent.putExtra("isHidden", channel[channelNum].isHidden());
+        intent.putExtra("index", channel.get(channelNum).getIndex());
+        intent.putExtra("defaultUrl", channel.get(channelNum).defaultUrl);
+        intent.putExtra("defaultName", channel.get(channelNum).defaultName);
+        intent.putExtra("defaultFormat", channel.get(channelNum).defaultFormat);
+        intent.putExtra("defaultVolume", channel.get(channelNum).defaultVolume);
+        intent.putExtra("defaultHeader", channel.get(channelNum).defaultHeader);
+        intent.putExtra("customUrl", channel.get(channelNum).customUrl);
+        intent.putExtra("customName", channel.get(channelNum).customName);
+        intent.putExtra("customFormat", channel.get(channelNum).customFormat);
+        intent.putExtra("customVolume", channel.get(channelNum).customVolume);
+        intent.putExtra("customHeader", channel.get(channelNum).customHeader);
+        intent.putExtra("isHidden", channel.get(channelNum).isHidden());
         intent.putExtra("width", player.getVideoSize().width);
         intent.putExtra("height", player.getVideoSize().height);
         startActivityForResult(intent, 1);
@@ -557,7 +546,7 @@ public class MainActivity extends AppCompatActivity {
     public void addNewChannel(View view) {
         Intent intent = new Intent(this, ChannelInfoActivity.class);
         intent.putExtra("isNewChannel", true);
-        intent.putExtra("index", channel.length);
+        intent.putExtra("index", channel.size());
         intent.putExtra("defaultUrl", "");
         intent.putExtra("defaultName", "");
         intent.putExtra("defaultFormat", defaultFormat);
@@ -598,16 +587,16 @@ public class MainActivity extends AppCompatActivity {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
             JSONArray newChannelArray = new JSONArray();
-            for(int i = 0; i < channel.length; i++){
+            for(int i = 0; i < channel.size(); i++){
                 JSONObject channelObject = new JSONObject();
-                channelObject.put("customUrl", channel[i].customUrl);
-                channelObject.put("customName", channel[i].customName);
-                channelObject.put("customFormat", channel[i].customFormat);
-                channelObject.put("customVolume", channel[i].customVolume);
-                channelObject.put("customHeader", channel[i].customHeader);
-                channelObject.put("isHidden", channel[i].isHidden());
+                channelObject.put("customUrl", channel.get(i).customUrl);
+                channelObject.put("customName", channel.get(i).customName);
+                channelObject.put("customFormat", channel.get(i).customFormat);
+                channelObject.put("customVolume", channel.get(i).customVolume);
+                channelObject.put("customHeader", channel.get(i).customHeader);
+                channelObject.put("isHidden", channel.get(i).isHidden());
                 if(i < channelLength_config) {
-                    channelListObject.put(channel[i].defaultName, channelObject);
+                    channelListObject.put(channel.get(i).defaultName, channelObject);
                 }
                 else{
                     newChannelArray.put(channelObject);
