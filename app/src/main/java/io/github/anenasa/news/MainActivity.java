@@ -273,6 +273,10 @@ public class MainActivity extends AppCompatActivity {
                         });
                     }
                 }
+                // Fix crash if channel.get(num) is already deleted
+                if(num == channel.size()){
+                    return;
+                }
                 MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
                 Map<String, String> map = new HashMap<>();
                 if(!channel.get(num).getHeader().isEmpty()) {
