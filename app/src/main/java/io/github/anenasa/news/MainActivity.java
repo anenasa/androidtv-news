@@ -9,11 +9,13 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.StrictMode;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -587,6 +589,25 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("defaultFormat", defaultFormat);
         intentSettings.putExtra("defaultVolume", defaultVolume);
         startActivityForResult(intentSettings, 2);
+        getSupportFragmentManager().popBackStack();
+    }
+
+    public void showChannelNumEdit(View view){
+        final EditText editText = new EditText(this);
+        editText.setInputType(InputType.TYPE_CLASS_NUMBER);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setTitle("輸入頻道號碼")
+                .setView(editText)
+                .setPositiveButton("確定", (dialog, id) -> {
+                    if(Integer.parseInt(editText.getText().toString()) < channel.size()){
+                        channelNum = Integer.parseInt(editText.getText().toString());
+                        player.stop();
+                        play(channelNum);
+                    }
+                })
+                .setNegativeButton("取消", null);
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
         getSupportFragmentManager().popBackStack();
     }
 

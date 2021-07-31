@@ -48,5 +48,15 @@
         android:textSize="30sp"
         android:background="@drawable/button"
         android:onClick="showSettings"/>
+    <Button
+        android:id="@+id/channelnum_edit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="10sp"
+        android:padding="10sp"
+        android:text="前往頻道"
+        android:textSize="30sp"
+        android:background="@drawable/button"
+        android:onClick="showChannelNumEdit"/>
 
 </LinearLayout>
