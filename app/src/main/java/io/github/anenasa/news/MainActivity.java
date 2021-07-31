@@ -280,14 +280,17 @@ public class MainActivity extends AppCompatActivity {
                 MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
                 Map<String, String> map = new HashMap<>();
                 if(!channel.get(num).getHeader().isEmpty()) {
-                    String[] header = channel.get(num).getHeader().split(":", 2);
-                    if(header.length != 2){
-                        runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, "header 格式錯誤", Toast.LENGTH_LONG).show();
-                        });
-                    }
-                    else {
-                        map.put(header[0], header[1]);
+                    String[] headers = channel.get(num).getHeader().split("\\\\r\\\\n");
+                    for (String header : headers) {
+                        String[] header_split = header.split(":", 2);
+                        if(header_split.length != 2){
+                            runOnUiThread(() -> {
+                                Toast.makeText(MainActivity.this, "header 格式錯誤", Toast.LENGTH_LONG).show();
+                            });
+                        }
+                        else {
+                            map.put(header_split[0], header_split[1]);
+                        }
                     }
                 }
                 DataSource.Factory factory = new DefaultHttpDataSource.Factory()

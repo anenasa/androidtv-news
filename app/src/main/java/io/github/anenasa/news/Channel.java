@@ -179,7 +179,11 @@ public class Channel {
         }
         request.addOption("-f", getFormat());
         if(!getHeader().isEmpty()) {
-            request.addOption("--add-header", getHeader());
+            String[] headers = getHeader().split("\\\\r\\\\n");
+            for (String header : headers) {
+                request.addOption("--add-header", header);
+            }
+
         }
         VideoInfo streamInfo = YoutubeDL.getInstance().getInfo(request);
         setVideo(streamInfo.getUrl());
