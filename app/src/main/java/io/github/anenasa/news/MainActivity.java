@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
                 JSONArray newChannelArray = customJsonObject.getJSONArray("newChannelArray");
                 for(int i = 0; i < newChannelArray.length(); i++){
                     JSONObject newChannelObject = newChannelArray.getJSONObject(i);
-                    channel.add(new Channel(channelList.length() + i, "", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
+                    channel.add(new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
                     channel.get(i).setUrl(newChannelObject.getString("customUrl"));
                     channel.get(i).setName(newChannelObject.getString("customName"));
                     channel.get(i).setFormat(newChannelObject.getString("customFormat"));
@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     header = channelObject.getString("header");
                 }
-                channel.add(i, new Channel(i, url, name, format, volume, header));
+                channel.add(i, new Channel(url, name, format, volume, header));
                 if(customJsonObject != null && customChannelList.has(name)) {
                     JSONObject customChannelObject = customChannelList.getJSONObject(name);
                     channel.get(i).setUrl(customChannelObject.getString("customUrl"));
@@ -386,7 +386,7 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
                 channelNum = channel.size();
-                channel.add(new Channel(channelNum, "", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
+                channel.add(new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
                 channel.get(channelNum).setName(data.getStringExtra("customName"));
                 channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
                 channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
@@ -543,7 +543,7 @@ public class MainActivity extends AppCompatActivity {
     public void showChannelInfo(View view){
         Intent intent = new Intent(this, ChannelInfoActivity.class);
         intent.putExtra("isNewChannel", channelNum >= channelLength_config);
-        intent.putExtra("index", channel.get(channelNum).getIndex());
+        intent.putExtra("index", channelNum);
         intent.putExtra("defaultUrl", channel.get(channelNum).defaultUrl);
         intent.putExtra("defaultName", channel.get(channelNum).defaultName);
         intent.putExtra("defaultFormat", channel.get(channelNum).defaultFormat);

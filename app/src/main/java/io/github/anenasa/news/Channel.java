@@ -19,7 +19,6 @@ public class Channel {
     public static final int NEEDPARSE_YES = 1;
     public static final int NEEDPARSE_UNKNOWN = 2;
 
-    final int index;
     final String defaultUrl;
     final String defaultName;
     final String defaultFormat;
@@ -33,17 +32,12 @@ public class Channel {
     String customHeader = "";
     boolean hidden = false;
 
-    public Channel(int index, String url, String name, String format, float volume, String header) {
-        this.index = index;
+    public Channel(String url, String name, String format, float volume, String header) {
         this.defaultUrl = url;
         this.defaultName = name;
         this.defaultFormat = format;
         this.defaultVolume = volume;
         this.defaultHeader = header;
-    }
-
-    public int getIndex(){
-        return index;
     }
 
     public String getUrl(){
