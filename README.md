@@ -69,10 +69,11 @@ https://github.com/anenasa/androidtv-news/releases
       "name": "頻道名稱",
       "ytdl-format": "youtube-dl 格式（可省略）",
       "volume": 音量（可省略）,
-      "header": "name: value（可省略，目前只支援設定一個 header）"
+      "header": "name: value（可省略）"
     }
 
 youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
+如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\r\\n 分隔）
 
 ## 許可證
 [GNU General Public License v3.0](https://github.com/anenasa/androidtv-news/blob/main/LICENSE)
