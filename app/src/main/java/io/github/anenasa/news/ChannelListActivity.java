@@ -32,7 +32,7 @@ public class ChannelListActivity extends Activity {
         }
         channelListView = findViewById(R.id.channelListView);
         channelListView.setItemsCanFocus(true);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, displayArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.mylistview, displayArray);
         channelListView.setAdapter(adapter);
         channelListView.setOnItemClickListener(new ListView.OnItemClickListener(){
             @Override
