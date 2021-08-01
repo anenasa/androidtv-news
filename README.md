@@ -73,7 +73,7 @@ https://github.com/anenasa/androidtv-news/releases
     }
 
 youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
-如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\r\\n 分隔）
+如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\\\r\\\\n 分隔）
 
 ## 許可證
 [GNU General Public License v3.0](https://github.com/anenasa/androidtv-news/blob/main/LICENSE)
