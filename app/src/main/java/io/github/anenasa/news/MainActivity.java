@@ -109,7 +109,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         if(channelNum >= channel.size()){
-            channelNum = 0;
+            resetChannelNum();
         }
 
         timer = new Timer();
@@ -336,7 +336,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 if(data.getBooleanExtra("delete", false)){
                     channel.remove(channelNum);
-                    channelNum = 0;
+                    resetChannelNum();
                     return;
                 }
 
@@ -648,6 +648,13 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, Log.getStackTraceString(e));
         }
         editor.apply();
+    }
+
+    void resetChannelNum(){
+        channelNum = 0;
+        while (channel.get(channelNum).isHidden()){
+            channelNum++;
+        }
     }
 
     @Override
