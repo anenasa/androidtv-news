@@ -122,9 +122,6 @@ public class MainActivity extends AppCompatActivity {
                             channel.get(i).parse();
                         } catch (IOException | YoutubeDLException | JSONException | InterruptedException e) {
                             Log.e(TAG, Log.getStackTraceString(e));
-                            runOnUiThread(() -> {
-                                Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
-                            });
                         }
                     }
                 }
