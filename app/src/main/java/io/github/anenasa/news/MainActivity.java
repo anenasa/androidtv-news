@@ -17,8 +17,8 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
+import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
 import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         player = new SimpleExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
-            public void onPlayerError(@NonNull ExoPlaybackException error) {
+            public void onPlayerError(@NonNull PlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
                 errorMessageView.setText(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
