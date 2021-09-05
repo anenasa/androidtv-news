@@ -19,7 +19,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.exoplayer2.ExoPlaybackException;
 import com.google.android.exoplayer2.MediaItem;
@@ -65,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
     SimpleExoPlayer player = null;
     SurfaceView playerView = null;
     TextView textView;
+    TextView errorMessageView;
 
     Timer timer;
     TimerTask timerTask;
@@ -89,24 +89,32 @@ public class MainActivity extends AppCompatActivity {
             YoutubeDL.getInstance().init(getApplication());
         } catch (YoutubeDLException e) {
             Log.e(TAG, Log.getStackTraceString(e));
-            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
+            errorMessageView.setText(e.toString());
         }
         player = new SimpleExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
-                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_LONG).show();
+                errorMessageView.setText(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
                     // Force parse by removing video url
                     channel.get(channelNum).setVideo("");
                 }
                 play(channelNum);
             }
+
+            @Override
+            public void onPlaybackStateChanged(int state) {
+                if(state == Player.STATE_READY){
+                    errorMessageView.setText("");
+                }
+            }
         });
         playerView = findViewById(R.id.playerView);
         player.setVideoSurfaceView(playerView);
         textView = findViewById(R.id.textView);
+        errorMessageView = findViewById(R.id.errorMessage);
 
         readChannelList();
         if(channel == null){
@@ -272,9 +280,7 @@ public class MainActivity extends AppCompatActivity {
                         channel.get(num).parse();
                     } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
                         Log.e(TAG, Log.getStackTraceString(e));
-                        runOnUiThread(() -> {
-                            Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
-                        });
+                        showErrorMessage(e.toString());
                     }
                 }
                 // Fix crash if channel.get(num) is already deleted
@@ -288,9 +294,7 @@ public class MainActivity extends AppCompatActivity {
                     for (String header : headers) {
                         String[] header_split = header.split(":", 2);
                         if(header_split.length != 2){
-                            runOnUiThread(() -> {
-                                Toast.makeText(MainActivity.this, "header 格式錯誤", Toast.LENGTH_LONG).show();
-                            });
+                            showErrorMessage("header 格式錯誤");
                         }
                         else {
                             map.put(header_split[0], header_split[1]);
@@ -662,6 +666,14 @@ public class MainActivity extends AppCompatActivity {
         while (channel.get(channelNum).isHidden()){
             channelNum++;
         }
+    }
+
+    void showErrorMessage(String message){
+        runOnUiThread(() -> {
+            if(!player.isPlaying()) {
+                errorMessageView.setText(message);
+            }
+        });
     }
 
     @Override
