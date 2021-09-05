@@ -3,13 +3,10 @@ package io.github.anenasa.news;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.os.StrictMode;
 import android.text.InputType;
 import android.util.Log;
@@ -71,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
 
-    Handler mHandler = new Handler(Looper.getMainLooper());
     boolean isStarted;
     AudioManager audioManager;
 
@@ -295,19 +291,16 @@ public class MainActivity extends AppCompatActivity {
             MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
                     .createMediaSource(mediaItem);
             // player needs to run on main thread
-            mHandler.post(new Runnable() {
-                @Override
-                public void run () {
-                    if(num != channelNum){
-                        // Already switched to another channel, do not play this
-                        return;
-                    }
-                    player.setMediaSource(mediaSource);
-                    player.prepare();
-                    player.setVolume(channel.get(num).getVolume());
-                    if(isStarted){
-                        player.play();
-                    }
+            runOnUiThread(() -> {
+                if(num != channelNum){
+                    // Already switched to another channel, do not play this
+                    return;
+                }
+                player.setMediaSource(mediaSource);
+                player.prepare();
+                player.setVolume(channel.get(num).getVolume());
+                if(isStarted){
+                    player.play();
                 }
             });
         }).start();
