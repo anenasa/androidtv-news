@@ -22,7 +22,7 @@ public class MenuFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        Button button = getView().findViewById(R.id.channel_list);
+        Button button = requireView().findViewById(R.id.channel_list);
         button.requestFocus();
     }
 }

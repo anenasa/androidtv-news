@@ -79,6 +79,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.activity_channel_info, rootKey);
 
             EditTextPreference prefName = findPreference("name");
+            assert prefName != null;
             if(activity.customName.isEmpty()){
                 prefName.setSummary(activity.defaultName);
                 prefName.setText(activity.defaultName);
@@ -98,10 +99,13 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 return true;
             });
             prefIsHidden = findPreference("isHidden");
+            assert prefIsHidden != null;
             prefIsHidden.setChecked(activity.channelIsHidden);
             Preference prefNumber = findPreference("number");
+            assert prefNumber != null;
             prefNumber.setSummary(String.valueOf(activity.channelIndex));
             EditTextPreference prefUrl = findPreference("url");
+            assert prefUrl != null;
             if(activity.customUrl.isEmpty()){
                 prefUrl.setSummary(activity.defaultUrl);
                 prefUrl.setText(activity.defaultUrl);
@@ -121,6 +125,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 return true;
             });
             EditTextPreference prefFormat = findPreference("format");
+            assert prefFormat != null;
             if(activity.customFormat.isEmpty()){
                 prefFormat.setSummary(activity.defaultFormat);
                 prefFormat.setText(activity.defaultFormat);
@@ -140,6 +145,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 return true;
             });
             EditTextPreference prefVolume = findPreference("volume");
+            assert prefVolume != null;
             if(activity.customVolume.isEmpty()){
                 prefVolume.setSummary(String.valueOf(activity.defaultVolume));
                 prefVolume.setText(String.valueOf(activity.defaultVolume));
@@ -159,8 +165,10 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 return true;
             });
             Preference prefSize = findPreference("size");
+            assert prefSize != null;
             prefSize.setSummary(activity.channelWidth + "×" + activity.channelHeight);
             EditTextPreference prefHeader = findPreference("header");
+            assert prefHeader != null;
             if(activity.customHeader.isEmpty()){
                 prefHeader.setSummary(activity.defaultHeader);
                 prefHeader.setText(activity.defaultHeader);
@@ -180,6 +188,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 return true;
             });
             Preference prefDelete = findPreference("delete");
+            assert prefDelete != null;
             prefDelete.setVisible(activity.isNewChannel);
             prefDelete.setOnPreferenceClickListener(preference -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(activity)

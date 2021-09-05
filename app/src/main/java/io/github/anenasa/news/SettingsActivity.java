@@ -55,6 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
             setPreferencesFromResource(R.xml.activity_settings, rootKey);
 
             EditTextPreference prefFormat = findPreference("format");
+            assert prefFormat != null;
             prefFormat.setSummary(activity.defaultFormat);
             prefFormat.setText(activity.defaultFormat);
             prefFormat.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -70,6 +71,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             EditTextPreference prefVolume = findPreference("volume");
+            assert prefVolume != null;
             prefVolume.setSummary(activity.defaultVolume);
             prefVolume.setText(activity.defaultVolume);
             prefVolume.setOnPreferenceChangeListener((preference, newValue) -> {
@@ -85,6 +87,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             Preference update = findPreference("update");
+            assert update != null;
             update.setOnPreferenceClickListener(preference -> {
                 update.setSummary("正在檢查更新");
                 new Thread(() -> {
@@ -117,6 +120,7 @@ public class SettingsActivity extends AppCompatActivity {
             });
 
             Preference about = findPreference("about");
+            assert about != null;
             about.setOnPreferenceClickListener(preference -> {
                 InputStream streamGPL3 = getResources().openRawResource(R.raw.gpl3);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
