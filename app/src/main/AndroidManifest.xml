@@ -24,7 +24,8 @@
         <activity android:name=".ChannelInfoActivity" />
         <activity android:name=".SettingsActivity" />
         <activity android:name=".ChannelListActivity" />
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
