@@ -8,6 +8,10 @@ android {
 
     defaultConfig {
         applicationId "io.github.anenasa.news"
+        // No need to update minSdkVersion to 23
+        // to use extractNativeLibs and usesCleartextTraffic.
+        // They are ignored in older versions.
+        // https://stackoverflow.com/a/27100238
         minSdkVersion 21
         targetSdkVersion 31
         versionCode 10500
