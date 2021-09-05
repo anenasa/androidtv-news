@@ -254,17 +254,8 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("頻道清單讀取失敗");
             builder.setMessage(e.toString());
-            builder.setPositiveButton("確定", new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    finish();
-                }
-            });
-            builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
-                @Override
-                public void onCancel(DialogInterface dialog) {
-                    finish();
-                }
-            });
+            builder.setPositiveButton("確定", (dialog, id) -> finish());
+            builder.setOnCancelListener(dialog -> finish());
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
         }
@@ -272,56 +263,53 @@ public class MainActivity extends AppCompatActivity {
 
     void play(int num)
     {
-        new Thread( new Runnable() {
-            @Override
-            public void run() {
-                if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
-                    try {
-                        channel.get(num).parse();
-                    } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
-                        Log.e(TAG, Log.getStackTraceString(e));
-                        showErrorMessage(e.toString());
-                    }
+        new Thread(() -> {
+            if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
+                try {
+                    channel.get(num).parse();
+                } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
+                    showErrorMessage(e.toString());
                 }
-                // Fix crash if channel.get(num) is already deleted
-                if(num == channel.size()){
-                    return;
-                }
-                MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
-                Map<String, String> map = new HashMap<>();
-                if(!channel.get(num).getHeader().isEmpty()) {
-                    String[] headers = channel.get(num).getHeader().split("\\\\r\\\\n");
-                    for (String header : headers) {
-                        String[] header_split = header.split(":", 2);
-                        if(header_split.length != 2){
-                            showErrorMessage("header 格式錯誤");
-                        }
-                        else {
-                            map.put(header_split[0], header_split[1]);
-                        }
-                    }
-                }
-                DataSource.Factory factory = new DefaultHttpDataSource.Factory()
-                        .setDefaultRequestProperties(map);
-                MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
-                        .createMediaSource(mediaItem);
-                // player needs to run on main thread
-                mHandler.post(new Runnable() {
-                    @Override
-                    public void run () {
-                        if(num != channelNum){
-                            // Already switched to another channel, do not play this
-                            return;
-                        }
-                        player.setMediaSource(mediaSource);
-                        player.prepare();
-                        player.setVolume(channel.get(num).getVolume());
-                        if(isStarted){
-                            player.play();
-                        }
-                    }
-                });
             }
+            // Fix crash if channel.get(num) is already deleted
+            if(num == channel.size()){
+                return;
+            }
+            MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
+            Map<String, String> map = new HashMap<>();
+            if(!channel.get(num).getHeader().isEmpty()) {
+                String[] headers = channel.get(num).getHeader().split("\\\\r\\\\n");
+                for (String header : headers) {
+                    String[] header_split = header.split(":", 2);
+                    if(header_split.length != 2){
+                        showErrorMessage("header 格式錯誤");
+                    }
+                    else {
+                        map.put(header_split[0], header_split[1]);
+                    }
+                }
+            }
+            DataSource.Factory factory = new DefaultHttpDataSource.Factory()
+                    .setDefaultRequestProperties(map);
+            MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
+                    .createMediaSource(mediaItem);
+            // player needs to run on main thread
+            mHandler.post(new Runnable() {
+                @Override
+                public void run () {
+                    if(num != channelNum){
+                        // Already switched to another channel, do not play this
+                        return;
+                    }
+                    player.setMediaSource(mediaSource);
+                    player.prepare();
+                    player.setVolume(channel.get(num).getVolume());
+                    if(isStarted){
+                        player.play();
+                    }
+                }
+            });
         }).start();
     }
 
