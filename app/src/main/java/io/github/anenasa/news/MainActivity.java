@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -90,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
         player = new SimpleExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
-            public void onPlayerError(ExoPlaybackException error) {
+            public void onPlayerError(@NonNull ExoPlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
                 errorMessageView.setText(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
