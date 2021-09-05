@@ -1,8 +1,5 @@
 package io.github.anenasa.news;
 
-import com.squareup.okhttp.OkHttpClient;
-import com.squareup.okhttp.Request;
-import com.squareup.okhttp.Response;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 import com.yausername.youtubedl_android.YoutubeDLRequest;
@@ -12,7 +9,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class Channel {
     public static final int NEEDPARSE_NO = 0;
@@ -159,8 +159,6 @@ public class Channel {
         if(url.startsWith("https://hamivideo.hinet.net/channel/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
             OkHttpClient okHttpClient = new OkHttpClient();
-            okHttpClient.setConnectTimeout(30, TimeUnit.SECONDS);
-            okHttpClient.setReadTimeout(30, TimeUnit.SECONDS);
             Request okHttpRequest = new Request.Builder()
                     .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id)
                     .build();
