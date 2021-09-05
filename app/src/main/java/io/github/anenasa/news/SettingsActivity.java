@@ -85,7 +85,7 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
-            Preference update = (Preference)findPreference("update");
+            Preference update = findPreference("update");
             update.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {
@@ -129,7 +129,7 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             });
 
-            Preference about = (Preference)findPreference("about");
+            Preference about = findPreference("about");
             about.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
                 @Override
                 public boolean onPreferenceClick(Preference preference) {

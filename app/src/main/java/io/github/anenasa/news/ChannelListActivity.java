@@ -3,7 +3,6 @@ package io.github.anenasa.news;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 
 public class ChannelListActivity extends Activity {
 
-    final String TAG = "ChannelListActivity";
     ListView channelListView;
 
     @Override
@@ -22,8 +20,8 @@ public class ChannelListActivity extends Activity {
         setContentView(R.layout.activity_channel_list);
         String[] channelArray = getIntent().getExtras().getStringArray("nameArray");
         boolean[] isHiddenArray = getIntent().getExtras().getBooleanArray("isHiddenArray");
-        ArrayList<String> displayArray = new ArrayList<String>();
-        ArrayList<Integer> channelNumArray = new ArrayList<Integer>();
+        ArrayList<String> displayArray = new ArrayList<>();
+        ArrayList<Integer> channelNumArray = new ArrayList<>();
         for(int i=0; i<channelArray.length; i++){
             if(!isHiddenArray[i]) {
                 displayArray.add(i + ". " + channelArray[i]);
@@ -32,7 +30,7 @@ public class ChannelListActivity extends Activity {
         }
         channelListView = findViewById(R.id.channelListView);
         channelListView.setItemsCanFocus(true);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.mylistview, displayArray);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.mylistview, displayArray);
         channelListView.setAdapter(adapter);
         channelListView.setOnItemClickListener(new ListView.OnItemClickListener(){
             @Override
