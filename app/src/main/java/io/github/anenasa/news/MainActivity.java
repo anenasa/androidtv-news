@@ -191,24 +191,17 @@ public class MainActivity extends AppCompatActivity {
 
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
-            channel = new ArrayList<>();
+            JSONArray newChannelArray = null;
             if(!preferences.getString("jsonSettings", "").isEmpty()) {
                 customJsonObject = new JSONObject(preferences.getString("jsonSettings", ""));
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
-                JSONArray newChannelArray = customJsonObject.getJSONArray("newChannelArray");
-                for(int i = 0; i < newChannelArray.length(); i++){
-                    JSONObject newChannelObject = newChannelArray.getJSONObject(i);
-                    channel.add(new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
-                    channel.get(i).setUrl(newChannelObject.getString("customUrl"));
-                    channel.get(i).setName(newChannelObject.getString("customName"));
-                    channel.get(i).setFormat(newChannelObject.getString("customFormat"));
-                    channel.get(i).setVolume(newChannelObject.getString("customVolume"));
-                    channel.get(i).setHeader(newChannelObject.getString("customHeader"));
-                    channel.get(i).setHidden(newChannelObject.getBoolean("isHidden"));
-                }
+                newChannelArray = customJsonObject.getJSONArray("newChannelArray");
             }
-            for(int i = 0; i < channelList.length(); i++){
 
+            channel = new ArrayList<>();
+
+            // Read channel from channel list
+            for(int i = 0; i < channelList.length(); i++){
                 JSONObject channelObject = channelList.getJSONObject(i);
                 String url = channelObject.getString("url");
                 String name = channelObject.getString("name");
@@ -226,24 +219,43 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     volume = (float) channelObject.getDouble("volume");
                 }
-                String header;
-                if(channelObject.isNull("header")) {
-                    header = "";
-                }
-                else{
+                String header = "";
+                if (!channelObject.isNull("header")) {
                     header = channelObject.getString("header");
                 }
-                channel.add(i, new Channel(url, name, format, volume, header));
+                Channel ch = new Channel(url, name, format, volume, header);
+
+                // Read custom settings for this channel
                 if(customJsonObject != null && customChannelList.has(name)) {
                     JSONObject customChannelObject = customChannelList.getJSONObject(name);
-                    channel.get(i).setUrl(customChannelObject.getString("customUrl"));
-                    channel.get(i).setName(customChannelObject.getString("customName"));
-                    channel.get(i).setFormat(customChannelObject.getString("customFormat"));
-                    channel.get(i).setVolume(customChannelObject.getString("customVolume"));
-                    channel.get(i).setHeader(customChannelObject.getString("customHeader"));
-                    channel.get(i).setHidden(customChannelObject.getBoolean("isHidden"));
+                    ch.setUrl(customChannelObject.getString("customUrl"));
+                    ch.setName(customChannelObject.getString("customName"));
+                    ch.setFormat(customChannelObject.getString("customFormat"));
+                    ch.setVolume(customChannelObject.getString("customVolume"));
+                    ch.setHeader(customChannelObject.getString("customHeader"));
+                    ch.setHidden(customChannelObject.getBoolean("isHidden"));
                 }
-                channel.get(i).setVideo(preferences.getString(channel.get(i).getUrl() + channel.get(i).getFormat(), ""));
+                channel.add(ch);
+            }
+
+            //Read custom channel set in app
+            if(newChannelArray != null){
+                for(int i = 0; i < newChannelArray.length(); i++){
+                    JSONObject newChannelObject = newChannelArray.getJSONObject(i);
+                    Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                    ch.setUrl(newChannelObject.getString("customUrl"));
+                    ch.setName(newChannelObject.getString("customName"));
+                    ch.setFormat(newChannelObject.getString("customFormat"));
+                    ch.setVolume(newChannelObject.getString("customVolume"));
+                    ch.setHeader(newChannelObject.getString("customHeader"));
+                    ch.setHidden(newChannelObject.getBoolean("isHidden"));
+                    channel.add(ch);
+                }
+            }
+
+            // Load saved video url
+            for(Channel ch: channel){
+                ch.setVideo(preferences.getString(ch.getUrl() + ch.getFormat(), ""));
             }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
