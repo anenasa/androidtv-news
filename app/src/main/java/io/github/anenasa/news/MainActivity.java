@@ -336,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
                 if(data.getBooleanExtra("delete", false)){
                     channel.remove(channelNum);
                     resetChannelNum();
+                    saveSettings();
                     return;
                 }
 
