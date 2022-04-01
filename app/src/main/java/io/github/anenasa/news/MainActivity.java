@@ -387,15 +387,16 @@ public class MainActivity extends AppCompatActivity {
                 if(data.getBooleanExtra("delete", false)){
                     return;
                 }
-                channelNum = channel.size();
-                channel.add(new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), ""));
-                channel.get(channelNum).setName(data.getStringExtra("customName"));
-                channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
-                channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
-                channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
-                channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
-                channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
+                Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                ch.setName(data.getStringExtra("customName"));
+                ch.setHidden(data.getBooleanExtra("isHidden", false));
+                ch.setUrl(data.getStringExtra("customUrl"));
+                ch.setFormat(data.getStringExtra("customFormat"));
+                ch.setVolume(data.getStringExtra("customVolume"));
+                ch.setHeader(data.getStringExtra("customHeader"));
+                channel.add(ch);
                 saveSettings();
+                channelNum = channel.size()-1;
                 play(channelNum);
             }
         }
