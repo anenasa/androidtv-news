@@ -270,6 +270,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void switchChannel(int num)
+    {
+        player.stop();
+        errorMessageView.setText("");
+        channelNum = num;
+        play(num);
+    }
+
     void play(int num)
     {
         new Thread(() -> {
@@ -277,14 +285,12 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     channel.get(num).parse();
                 } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
+                    if(channelNum!=num) return;
                     Log.e(TAG, Log.getStackTraceString(e));
                     showErrorMessage(e.toString());
                 }
             }
-            // Fix crash if channel.get(num) is already deleted
-            if(num == channel.size()){
-                return;
-            }
+            if(channelNum!=num) return;
             MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
             Map<String, String> map = new HashMap<>();
             if(!channel.get(num).getHeader().isEmpty()) {
@@ -325,9 +331,7 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == 0) {
             // ChannelListActivity
             if (resultCode == Activity.RESULT_OK) {
-                channelNum = data.getIntExtra("channelNum", 0);
-                player.stop();
-                play(channelNum);
+                switchChannel(data.getIntExtra("channelNum", 0));
             }
         }
         else if(requestCode == 1){
@@ -396,8 +400,7 @@ public class MainActivity extends AppCompatActivity {
                 ch.setHeader(data.getStringExtra("customHeader"));
                 channel.add(ch);
                 saveSettings();
-                channelNum = channel.size()-1;
-                play(channelNum);
+                switchChannel(channel.size()-1);
             }
         }
     }
@@ -412,9 +415,7 @@ public class MainActivity extends AppCompatActivity {
                         showMenu();
                     }
                     else if(Integer.parseInt(input) < channel.size()){
-                        channelNum = Integer.parseInt(input);
-                        player.stop();
-                        play(channelNum);
+                        switchChannel(Integer.parseInt(input));
                         clearInput();
                     }
                     else{
@@ -444,8 +445,7 @@ public class MainActivity extends AppCompatActivity {
                             channelNum -= 1;
                         }
                     } while (channel.get(channelNum).isHidden());
-                    player.stop();
-                    play(channelNum);
+                    switchChannel(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_CHANNEL_DOWN:
@@ -456,8 +456,7 @@ public class MainActivity extends AppCompatActivity {
                             channelNum += 1;
                         }
                     } while (channel.get(channelNum).isHidden());
-                    player.stop();
-                    play(channelNum);
+                    switchChannel(channelNum);
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
@@ -607,9 +606,7 @@ public class MainActivity extends AppCompatActivity {
                 .setView(editText)
                 .setPositiveButton("確定", (dialog, id) -> {
                     if(Integer.parseInt(editText.getText().toString()) < channel.size()){
-                        channelNum = Integer.parseInt(editText.getText().toString());
-                        player.stop();
-                        play(channelNum);
+                        switchChannel(Integer.parseInt(editText.getText().toString()));
                     }
                 })
                 .setNegativeButton("取消", null);
