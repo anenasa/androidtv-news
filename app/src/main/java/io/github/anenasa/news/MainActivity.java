@@ -544,6 +544,7 @@ public class MainActivity extends AppCompatActivity {
         }
         intent.putExtra("nameArray", nameArray);
         intent.putExtra("isHiddenArray", isHiddenArray);
+        intent.putExtra("currentNum", channelNum);
         startActivityForResult(intent, 0);
         getSupportFragmentManager().popBackStack();
     }

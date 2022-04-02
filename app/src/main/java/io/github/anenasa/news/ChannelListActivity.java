@@ -18,6 +18,7 @@ public class ChannelListActivity extends Activity {
         setContentView(R.layout.activity_channel_list);
         String[] channelArray = getIntent().getExtras().getStringArray("nameArray");
         boolean[] isHiddenArray = getIntent().getExtras().getBooleanArray("isHiddenArray");
+        int currentNum = getIntent().getExtras().getInt("currentNum");
         ArrayList<String> displayArray = new ArrayList<>();
         ArrayList<Integer> channelNumArray = new ArrayList<>();
         for(int i=0; i<channelArray.length; i++){
@@ -30,6 +31,7 @@ public class ChannelListActivity extends Activity {
         channelListView.setItemsCanFocus(true);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this, R.layout.mylistview, displayArray);
         channelListView.setAdapter(adapter);
+        channelListView.setSelection(currentNum);
         channelListView.setOnItemClickListener((adapterView, view, i, l) -> {
             Intent returnIntent = new Intent();
             returnIntent.putExtra("channelNum", channelNumArray.get(i));
