@@ -11,7 +11,6 @@ import android.os.StrictMode;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
@@ -503,16 +502,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.dispatchKeyEvent(event);
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        if(event.getAction() == MotionEvent.ACTION_DOWN && getSupportFragmentManager().getFragments().isEmpty()){
-            showMenu();
-            return true;
-        } else {
-            return super.onTouchEvent(event);
-        }
     }
 
     void appendInput(int num) {
