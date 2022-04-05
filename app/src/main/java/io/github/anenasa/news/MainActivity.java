@@ -642,6 +642,7 @@ public class MainActivity extends AppCompatActivity {
             File file = new File(getExternalFilesDir(null), "custom.txt");
             FileOutputStream stream = new FileOutputStream(file);
             stream.write(json_string.getBytes());
+            // Remove this after some releases, give users some time to migrate
             editor.putString("jsonSettings", json_string);
         } catch (JSONException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
