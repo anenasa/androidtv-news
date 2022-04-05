@@ -34,6 +34,7 @@ import org.json.JSONObject;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -637,8 +638,12 @@ public class MainActivity extends AppCompatActivity {
             }
             jsonObject.put("customChannelList", channelListObject);
             jsonObject.put("newChannelArray", newChannelArray);
-            editor.putString("jsonSettings", jsonObject.toString());
-        } catch (JSONException e) {
+            String json_string = jsonObject.toString();
+            File file = new File(getExternalFilesDir(null), "custom.txt");
+            FileOutputStream stream = new FileOutputStream(file);
+            stream.write(json_string.getBytes());
+            editor.putString("jsonSettings", json_string);
+        } catch (JSONException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
         editor.apply();
