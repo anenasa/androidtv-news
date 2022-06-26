@@ -7,6 +7,9 @@ import com.yausername.youtubedl_android.mapper.VideoInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 
 import java.io.IOException;
 
@@ -165,6 +168,14 @@ public class Channel {
             Response response = okHttpClient.newCall(okHttpRequest).execute();
             JSONObject object = new JSONObject(response.body().string());
             request = new YoutubeDLRequest(object.getString("url"));
+        }
+        else if(url.equals("https://news.ebc.net.tw/live")){
+            Document doc = Jsoup.connect(url).get();
+            Element el = doc.selectFirst("div#live-slider div.live-else-little-box");
+            if(el == null) throw new IOException("找不到 div");
+            String src = el.attr("data-code");
+            request = new YoutubeDLRequest(src);
+
         }
         else{
             request = new YoutubeDLRequest(url);
