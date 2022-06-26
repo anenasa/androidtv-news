@@ -16,6 +16,7 @@ import java.io.IOException;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 public class Channel {
     public static final int NEEDPARSE_NO = 0;
@@ -166,7 +167,9 @@ public class Channel {
                     .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id)
                     .build();
             Response response = okHttpClient.newCall(okHttpRequest).execute();
-            JSONObject object = new JSONObject(response.body().string());
+            ResponseBody body = response.body();
+            if (body == null) throw new IOException("body is null");
+            JSONObject object = new JSONObject(body.string());
             request = new YoutubeDLRequest(object.getString("url"));
         }
         else if(url.equals("https://news.ebc.net.tw/live")){
