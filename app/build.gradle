@@ -14,8 +14,8 @@ android {
         // https://stackoverflow.com/a/27100238
         minSdkVersion 21
         targetSdkVersion 31
-        versionCode 10700
-        versionName "1.7.0"
+        versionCode 10701
+        versionName "1.7.1"
 
         ndk {
             abiFilters 'x86', 'x86_64', 'armeabi-v7a', 'arm64-v8a'
