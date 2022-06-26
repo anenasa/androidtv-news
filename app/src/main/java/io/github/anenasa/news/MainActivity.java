@@ -16,10 +16,10 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.SimpleExoPlayer;
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
     String defaultFormat;
     String defaultVolume;
 
-    SimpleExoPlayer player = null;
+    ExoPlayer player = null;
     SurfaceView playerView = null;
     TextView textView;
     TextView errorMessageView;
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
             Log.e(TAG, Log.getStackTraceString(e));
             errorMessageView.setText(e.toString());
         }
-        player = new SimpleExoPlayer.Builder(this).build();
+        player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
