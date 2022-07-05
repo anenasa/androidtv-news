@@ -180,6 +180,25 @@ public class Channel {
             request = new YoutubeDLRequest(src);
 
         }
+        else if(url.startsWith("https://today.line.me/tw/v2/article/")){
+            Document doc = Jsoup.connect(url).get();
+            Element el =doc.selectFirst("script:containsData(__NUXT__)");
+            if(el == null) throw new IOException("找不到 script");
+            String script = el.data();
+            String id = script.substring(script.indexOf("programId:")+10);
+            id = id.substring(0,id.indexOf("}"));
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request okHttpRequest = new Request.Builder()
+                    .url("https://today.line.me/webapi/linelive/" + id)
+                    .build();
+            Response response = okHttpClient.newCall(okHttpRequest).execute();
+            ResponseBody body = response.body();
+            if (body == null) throw new IOException("body is null");
+            JSONObject object = new JSONObject(body.string());
+            String abr = object.getJSONObject("result").getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
+            request = new YoutubeDLRequest(abr);
+
+        }
         else{
             request = new YoutubeDLRequest(url);
         }
