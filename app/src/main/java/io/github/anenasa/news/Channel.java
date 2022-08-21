@@ -126,13 +126,14 @@ public class Channel {
     }
 
     int needParse(){
+        String url = getUrl();
         if(getVideo().isEmpty()) {
             return NEEDPARSE_YES;
         }
-        if(getUrl().endsWith("m3u8")){
+        if(url.endsWith("m3u8")){
             return NEEDPARSE_NO;
         }
-        if(getUrl().startsWith("https://www.youtube.com/")){
+        if(url.startsWith("https://www.youtube.com/")){
             long current = System.currentTimeMillis() / 1000;
             int pos = getVideo().indexOf("expire") + 7;
             long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
@@ -143,7 +144,7 @@ public class Channel {
                 return NEEDPARSE_YES;
             }
         }
-        if(getUrl().startsWith("https://hamivideo.hinet.net/channel/")){
+        if(url.startsWith("https://hamivideo.hinet.net/channel/") || url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
             long current = System.currentTimeMillis() / 1000;
             int pos = getVideo().indexOf("expires") + 8;
             long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
@@ -198,6 +199,31 @@ public class Channel {
             String abr = object.getJSONObject("result").getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
             request = new YoutubeDLRequest(abr);
 
+        }
+        else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
+            String id;
+            if(url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
+                id = url.substring(url.lastIndexOf("/") + 1);
+            }
+            else{
+                Document doc = Jsoup.connect(url).get();
+                Element el = doc.selectFirst("script:containsData(ChannelId)");
+                if(el == null) throw new IOException("找不到 script");
+                String script = el.data();
+                id = script.substring(script.indexOf("ChannelId") + 12);
+                id = id.substring(0, id.indexOf("\""));
+            }
+            OkHttpClient okHttpClient = new OkHttpClient();
+            Request okHttpRequest = new Request.Builder()
+                    .url("https://app.4gtv.tv/Data/GetChannelURL_Mozai.ashx?callback=channelname&Type=LIVE&ChannelId=" + id)
+                    .build();
+            Response response = okHttpClient.newCall(okHttpRequest).execute();
+            ResponseBody body = response.body();
+            if (body == null) throw new IOException("body is null");
+            String bodyString = body.string();
+            String videoUrl = bodyString.substring(bodyString.indexOf("VideoURL") + 11);
+            videoUrl = videoUrl.substring(0, videoUrl.indexOf("\""));
+            request = new YoutubeDLRequest(videoUrl);
         }
         else{
             request = new YoutubeDLRequest(url);
