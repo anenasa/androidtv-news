@@ -71,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
 
     boolean isStarted;
     AudioManager audioManager;
+    int errorCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,8 +96,12 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, Log.getStackTraceString(error));
                 errorMessageView.setText(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
-                    // Force parse by removing video url
-                    channel.get(channelNum).setVideo("");
+                    if(errorCount > 0) {
+                        // Force parse by removing video url
+                        channel.get(channelNum).setVideo("");
+                        errorCount = 0;
+                    }
+                    else errorCount++;
                 }
                 play(channelNum);
             }
@@ -105,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPlaybackStateChanged(int state) {
                 if(state == Player.STATE_READY){
                     errorMessageView.setText("");
+                    errorCount = 0;
                 }
             }
         });
