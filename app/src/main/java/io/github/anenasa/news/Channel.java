@@ -144,7 +144,7 @@ public class Channel {
                 return NEEDPARSE_YES;
             }
         }
-        if(url.startsWith("https://hamivideo.hinet.net/channel/") || url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
+        if(url.startsWith("https://hamivideo.hinet.net/channel/") || url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             long current = System.currentTimeMillis() / 1000;
             int pos = getVideo().indexOf("expires") + 8;
             long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
@@ -200,9 +200,9 @@ public class Channel {
             request = new YoutubeDLRequest(abr);
 
         }
-        else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
+        else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             String id;
-            if(url.startsWith("https://www.ftvnews.com.tw/live/live-video/")){
+            if(url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
                 id = url.substring(url.lastIndexOf("/") + 1);
             }
             else{
