@@ -160,18 +160,18 @@ public class MainActivity extends AppCompatActivity {
 
     void readChannelList() {
         try {
-            File customFile = new File(getExternalFilesDir(null), "config.txt");
+            File configFile = new File(getExternalFilesDir(null), "config.txt");
             InputStream inputStream;
-            if(customFile.exists()){
-                inputStream = new FileInputStream(customFile);
+            if(configFile.exists()){
+                inputStream = new FileInputStream(configFile);
             }
             else{
-                File customUrl = new File(getExternalFilesDir(null), "url.txt");
+                File configUrl = new File(getExternalFilesDir(null), "url.txt");
                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                 StrictMode.setThreadPolicy(policy);
                 URL url;
-                if(customUrl.exists()){
-                    InputStream urlStream = new FileInputStream(customUrl);
+                if(configUrl.exists()){
+                    InputStream urlStream = new FileInputStream(configUrl);
                     BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
                     url = new URL(urlReader.readLine());
                 }
@@ -198,8 +198,15 @@ public class MainActivity extends AppCompatActivity {
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
             JSONArray newChannelArray = null;
-            if(!preferences.getString("jsonSettings", "").isEmpty()) {
-                customJsonObject = new JSONObject(preferences.getString("jsonSettings", ""));
+            File customFile = new File(getExternalFilesDir(null), "custom.txt");
+            if(customFile.exists()){
+                InputStream customStream = new FileInputStream(customFile);
+                BufferedReader customReader = new BufferedReader(new InputStreamReader(customStream));
+                StringBuilder customStringBuilder = new StringBuilder();
+                for (String line; (line = customReader.readLine()) != null; ) {
+                    customStringBuilder.append(line).append('\n');
+                }
+                customJsonObject = new JSONObject(customStringBuilder.toString());
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
                 newChannelArray = customJsonObject.getJSONArray("newChannelArray");
             }
@@ -648,8 +655,6 @@ public class MainActivity extends AppCompatActivity {
             File file = new File(getExternalFilesDir(null), "custom.txt");
             FileOutputStream stream = new FileOutputStream(file);
             stream.write(json_string.getBytes());
-            // Remove this after some releases, give users some time to migrate
-            editor.putString("jsonSettings", json_string);
         } catch (JSONException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
