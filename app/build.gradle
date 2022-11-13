@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 33
     buildToolsVersion "30.0.3"
 
     defaultConfig {
@@ -13,7 +13,7 @@ android {
         // They are ignored in older versions.
         // https://stackoverflow.com/a/27100238
         minSdkVersion 21
-        targetSdkVersion 31
+        targetSdkVersion 33
         versionCode 10702
         versionName "1.7.2"
 
@@ -47,10 +47,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.exoplayer:exoplayer:2.18.0'
-    implementation 'com.github.yausername.youtubedl-android:library:0.13.2'
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.1'
+    implementation 'com.github.yausername.youtubedl-android:library:0.13.3'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'org.jsoup:jsoup:1.15.1'
+    implementation 'org.jsoup:jsoup:1.15.3'
 }
