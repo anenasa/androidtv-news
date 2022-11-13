@@ -23,6 +23,16 @@
         android:background="#80000000"
         android:textSize="48sp" />
     <TextView
+        android:id="@+id/textInfo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="100sp"
+        android:layout_marginEnd="100sp"
+        android:layout_marginTop="50sp"
+        android:layout_gravity="end"
+        android:background="#80000000"
+        android:textSize="48sp" />
+    <TextView
         android:id="@+id/errorMessage"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -62,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     ExoPlayer player = null;
     SurfaceView playerView = null;
     TextView textView;
+    TextView textInfo;
     TextView errorMessageView;
 
     Timer timer;
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
             public void onPlaybackStateChanged(int state) {
                 if(state == Player.STATE_READY){
                     errorMessageView.setText("");
+                    textInfo.setText("");
                     errorCount = 0;
                 }
             }
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
         playerView = findViewById(R.id.playerView);
         player.setVideoSurfaceView(playerView);
         textView = findViewById(R.id.textView);
+        textInfo = findViewById(R.id.textInfo);
         errorMessageView = findViewById(R.id.errorMessage);
 
         readChannelList();
@@ -293,6 +296,7 @@ public class MainActivity extends AppCompatActivity {
 
     void play(int num)
     {
+        textInfo.setText("正在載入" + channel.get(num).getName());
         new Thread(() -> {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
