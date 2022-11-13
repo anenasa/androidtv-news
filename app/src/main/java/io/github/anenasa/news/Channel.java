@@ -229,6 +229,8 @@ public class Channel {
             request = new YoutubeDLRequest(url);
         }
         request.addOption("-f", getFormat());
+        // Reduce time for playlist, should not affect non-playlist stream
+        request.addOption("--playlist-items", "1");
         if(!getHeader().isEmpty()) {
             String[] headers = getHeader().split("\\\\r\\\\n");
             for (String header : headers) {
