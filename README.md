@@ -28,13 +28,8 @@ https://github.com/anenasa/androidtv-news/releases
 ## 預設頻道
 
 預設頻道條件：
-1. 必須是台灣的節目
-2. 必須是新聞為主
-3. 來源必須合法
-4. youtube-dl 要支援
-5. 無須設定 header
-
-另外提供[完整頻道清單檔案](https://anenasa.github.io/channel/full.txt)，不限制是新聞和台灣頻道，可使用自訂頻道方式二觀看。
+1. 來源必須合法
+2. youtube-dl 要支援
 
 如果有頻道建議歡迎提出。
 
