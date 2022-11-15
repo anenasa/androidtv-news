@@ -176,7 +176,13 @@ public class MainActivity extends AppCompatActivity {
                 if(configUrl.exists()){
                     InputStream urlStream = new FileInputStream(configUrl);
                     BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
-                    url = new URL(urlReader.readLine());
+                    String urlStr = urlReader.readLine();
+                    url = new URL(urlStr);
+                    // full.txt is deprecated
+                    // TODO: Remove following code after full.txt is deleted from server
+                    if (urlStr.equals("https://anenasa.github.io/channel/full.txt")) {
+                        configUrl.delete();
+                    }
                 }
                 else{
                     url = new URL("https://anenasa.github.io/channel/config.txt");
