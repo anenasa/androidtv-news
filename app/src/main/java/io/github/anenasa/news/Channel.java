@@ -190,13 +190,13 @@ public class Channel {
             id = id.substring(0,id.indexOf("}"));
             OkHttpClient okHttpClient = new OkHttpClient();
             Request okHttpRequest = new Request.Builder()
-                    .url("https://today.line.me/webapi/linelive/" + id)
+                    .url("https://today.line.me/webapi/live/programs/" + id)
                     .build();
             Response response = okHttpClient.newCall(okHttpRequest).execute();
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
-            String abr = object.getJSONObject("result").getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
+            String abr = object.getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
             request = new YoutubeDLRequest(abr);
 
         }
