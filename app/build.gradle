@@ -49,7 +49,7 @@ android {
 dependencies {
     implementation 'com.google.android.exoplayer:exoplayer:2.18.1'
     // https://github.com/yausername/youtubedl-android/issues/193
-    implementation 'com.github.yausername.youtubedl-android:library:8bc8e77349'
+    implementation 'com.github.yausername.youtubedl-android:library:-SNAPSHOT'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
