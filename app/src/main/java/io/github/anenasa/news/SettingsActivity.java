@@ -13,9 +13,12 @@ import android.os.Bundle;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -23,6 +26,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     String defaultFormat;
     String defaultVolume;
+    final String TAG = "SettingsActivity";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,12 +51,21 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         SettingsActivity activity;
-        final String TAG = "SettingsFragment";
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             activity = (SettingsActivity)getActivity();
             setPreferencesFromResource(R.xml.activity_settings, rootKey);
+
+            Preference config = findPreference("config");
+            assert config != null;
+            config.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/*");
+                startActivityForResult(intent, 0);
+                return true;
+            });
 
             EditTextPreference prefFormat = findPreference("format");
             assert prefFormat != null;
@@ -113,7 +126,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     } catch (IOException e) {
                         activity.runOnUiThread(() -> update.setSummary("更新時發生錯誤"));
-                        Log.e(TAG, Log.getStackTraceString(e));
+                        Log.e(activity.TAG, Log.getStackTraceString(e));
                     }
                 }).start();
                 return true;
@@ -154,6 +167,28 @@ public class SettingsActivity extends AppCompatActivity {
                 alertDialog.show();
                 return true;
             });
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+        super.onActivityResult(requestCode, resultCode, resultData);
+        if (resultCode == Activity.RESULT_OK && resultData != null) {
+            Uri uri = resultData.getData();
+            try {
+                InputStream inputStream = getContentResolver().openInputStream(uri);
+                File outputFile = new File(getExternalFilesDir(null), "config.txt");
+                OutputStream outputStream = new FileOutputStream(outputFile);
+                byte[] buf = new byte[1024];
+                int len;
+                while ((len = inputStream.read(buf)) > 0) {
+                    outputStream.write(buf, 0, len);
+                }
+                inputStream.close();
+                outputStream.close();
+            } catch (IOException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
         }
     }
 }

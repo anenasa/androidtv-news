@@ -398,14 +398,11 @@ public class MainActivity extends AppCompatActivity {
         else if (requestCode == 2) {
             // SettingsActivity
             if (resultCode == Activity.RESULT_OK) {
-                String newFormat = data.getStringExtra("defaultFormat");
-                String newVolume = data.getStringExtra("defaultVolume");
-                if(!defaultFormat.equals(newFormat) || !defaultVolume.equals(newVolume)){
-                    defaultFormat = newFormat;
-                    defaultVolume = newVolume;
-                    readChannelList();
-                    play(channelNum);
-                }
+                defaultFormat = data.getStringExtra("defaultFormat");
+                defaultVolume = data.getStringExtra("defaultVolume");
+                resetChannelNum();
+                readChannelList();
+                play(channelNum);
             }
         }
         else if(requestCode == 3){
