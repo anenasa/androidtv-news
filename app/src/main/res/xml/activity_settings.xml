@@ -8,6 +8,10 @@
         app:title="匯入頻道清單"/>
     <EditTextPreference
         app:layout="@layout/preference_layout"
+        app:key="configurl"
+        app:title="輸入頻道清單網址"/>
+    <EditTextPreference
+        app:layout="@layout/preference_layout"
         app:key="format"
         app:title="預設格式"/>
     <EditTextPreference
