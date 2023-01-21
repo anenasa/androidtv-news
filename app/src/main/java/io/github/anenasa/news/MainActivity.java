@@ -402,7 +402,6 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 defaultFormat = data.getStringExtra("defaultFormat");
                 defaultVolume = data.getStringExtra("defaultVolume");
-                resetChannelNum();
                 readChannelList();
                 play(channelNum);
             }
