@@ -169,24 +169,9 @@ public class MainActivity extends AppCompatActivity {
                 inputStream = new FileInputStream(configFile);
             }
             else{
-                File configUrl = new File(getExternalFilesDir(null), "url.txt");
                 StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
                 StrictMode.setThreadPolicy(policy);
-                URL url;
-                if(configUrl.exists()){
-                    InputStream urlStream = new FileInputStream(configUrl);
-                    BufferedReader urlReader = new BufferedReader(new InputStreamReader(urlStream));
-                    String urlStr = urlReader.readLine();
-                    url = new URL(urlStr);
-                    // full.txt is deprecated
-                    // TODO: Remove following code after full.txt is deleted from server
-                    if (urlStr.equals("https://anenasa.github.io/channel/full.txt")) {
-                        configUrl.delete();
-                    }
-                }
-                else{
-                    url = new URL("https://anenasa.github.io/channel/config.txt");
-                }
+                URL url = new URL("https://anenasa.github.io/channel/config.txt");
                 HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setReadTimeout(10000);
