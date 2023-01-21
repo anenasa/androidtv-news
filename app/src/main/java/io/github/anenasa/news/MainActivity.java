@@ -182,6 +182,7 @@ public class MainActivity extends AppCompatActivity {
                 inputStream = url.openStream();
             }
             readChannelListFromStream(inputStream);
+            channelLength_config = channel.size();
 
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
@@ -252,10 +253,22 @@ public class MainActivity extends AppCompatActivity {
         }
         JSONObject json = new JSONObject(stringBuilder.toString());
         JSONArray channelList = json.getJSONArray("channelList");
-        channelLength_config = channelList.length();
 
         for(int i = 0; i < channelList.length(); i++){
             JSONObject channelObject = channelList.getJSONObject(i);
+            if(channelObject.has("list")){
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+                URL url = new URL(channelObject.getString("list"));
+                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.setReadTimeout(10000);
+                urlConnection.setConnectTimeout(15000);
+                urlConnection.setDoOutput(true);
+                urlConnection.connect();
+                readChannelListFromStream(url.openStream());
+                continue;
+            }
             String url = channelObject.getString("url");
             String name = channelObject.getString("name");
             String format;
