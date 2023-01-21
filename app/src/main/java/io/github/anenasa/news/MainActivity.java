@@ -162,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void readChannelList() {
+        channel = new ArrayList<>();
         try {
             File configFile = new File(getExternalFilesDir(null), "config.txt");
             InputStream inputStream;
@@ -180,14 +181,7 @@ public class MainActivity extends AppCompatActivity {
                 urlConnection.connect();
                 inputStream = url.openStream();
             }
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-            StringBuilder stringBuilder = new StringBuilder();
-            for (String line; (line = reader.readLine()) != null; ) {
-                stringBuilder.append(line).append('\n');
-            }
-            JSONObject json = new JSONObject(stringBuilder.toString());
-            JSONArray channelList = json.getJSONArray("channelList");
-            channelLength_config = channelList.length();
+            readChannelListFromStream(inputStream);
 
             JSONObject customJsonObject = null;
             JSONObject customChannelList = null;
@@ -205,36 +199,10 @@ public class MainActivity extends AppCompatActivity {
                 newChannelArray = customJsonObject.getJSONArray("newChannelArray");
             }
 
-            channel = new ArrayList<>();
-
-            // Read channel from channel list
-            for(int i = 0; i < channelList.length(); i++){
-                JSONObject channelObject = channelList.getJSONObject(i);
-                String url = channelObject.getString("url");
-                String name = channelObject.getString("name");
-                String format;
-                if(channelObject.isNull("ytdl-format")) {
-                    format = defaultFormat;
-                }
-                else{
-                    format = channelObject.getString("ytdl-format");
-                }
-                float volume;
-                if(channelObject.isNull("volume")) {
-                    volume = Float.parseFloat(defaultVolume);
-                }
-                else{
-                    volume = (float) channelObject.getDouble("volume");
-                }
-                String header = "";
-                if (!channelObject.isNull("header")) {
-                    header = channelObject.getString("header");
-                }
-                Channel ch = new Channel(url, name, format, volume, header);
-
-                // Read custom settings for this channel
-                if(customJsonObject != null && customChannelList.has(name)) {
-                    JSONObject customChannelObject = customChannelList.getJSONObject(name);
+            // Read custom settings for this channel
+            for(Channel ch: channel) {
+                if (customJsonObject != null && customChannelList.has(ch.getName())) {
+                    JSONObject customChannelObject = customChannelList.getJSONObject(ch.getName());
                     ch.setUrl(customChannelObject.getString("customUrl"));
                     ch.setName(customChannelObject.getString("customName"));
                     ch.setFormat(customChannelObject.getString("customFormat"));
@@ -242,7 +210,6 @@ public class MainActivity extends AppCompatActivity {
                     ch.setHeader(customChannelObject.getString("customHeader"));
                     ch.setHidden(customChannelObject.getBoolean("isHidden"));
                 }
-                channel.add(ch);
             }
 
             //Read custom channel set in app
@@ -274,6 +241,43 @@ public class MainActivity extends AppCompatActivity {
             builder.setOnCancelListener(dialog -> finish());
             AlertDialog alertDialog = builder.create();
             alertDialog.show();
+        }
+    }
+
+    void readChannelListFromStream(InputStream inputStream) throws JSONException, IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        StringBuilder stringBuilder = new StringBuilder();
+        for (String line; (line = reader.readLine()) != null; ) {
+            stringBuilder.append(line).append('\n');
+        }
+        JSONObject json = new JSONObject(stringBuilder.toString());
+        JSONArray channelList = json.getJSONArray("channelList");
+        channelLength_config = channelList.length();
+
+        for(int i = 0; i < channelList.length(); i++){
+            JSONObject channelObject = channelList.getJSONObject(i);
+            String url = channelObject.getString("url");
+            String name = channelObject.getString("name");
+            String format;
+            if(channelObject.isNull("ytdl-format")) {
+                format = defaultFormat;
+            }
+            else{
+                format = channelObject.getString("ytdl-format");
+            }
+            float volume;
+            if(channelObject.isNull("volume")) {
+                volume = Float.parseFloat(defaultVolume);
+            }
+            else{
+                volume = (float) channelObject.getDouble("volume");
+            }
+            String header = "";
+            if (!channelObject.isNull("header")) {
+                header = channelObject.getString("header");
+            }
+            Channel ch = new Channel(url, name, format, volume, header);
+            channel.add(ch);
         }
     }
 
