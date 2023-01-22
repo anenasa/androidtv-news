@@ -135,14 +135,14 @@ public class MainActivity extends AppCompatActivity {
         timerTask = new TimerTask() {
             @Override
             public void run() {
-                for(int i = 0; i < channel.size(); i++){
-                    if (!channel.get(i).isHidden()) {
-                        try {
+                try {
+                    for (int i = 0; i < channel.size(); i++) {
+                        if (!channel.get(i).isHidden()) {
                             channel.get(i).parse();
-                        } catch (IOException | YoutubeDLException | JSONException | InterruptedException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
                         }
                     }
+                } catch (IOException | YoutubeDLException | JSONException | InterruptedException | NullPointerException e) {
+                    Log.e(TAG, Log.getStackTraceString(e));
                 }
                 saveSettings();
             }
