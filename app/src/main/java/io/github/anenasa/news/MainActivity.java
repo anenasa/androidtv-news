@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     boolean isStarted;
     AudioManager audioManager;
     int errorCount = 0;
+    boolean DO_NOT_PLAY_ON_START = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,6 +155,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        // Do not call play() more than once
+        // play() will be called in onActivityResult()
+        if(DO_NOT_PLAY_ON_START){
+            DO_NOT_PLAY_ON_START = false;
+            return;
+        }
         if(channel == null){
             return;
         }
@@ -358,6 +365,9 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 switchChannel(data.getIntExtra("channelNum", 0));
             }
+            else{
+                play(channelNum);
+            }
         }
         else if(requestCode == 1){
             // ChannelInfoActivity - existing channel
@@ -365,6 +375,7 @@ public class MainActivity extends AppCompatActivity {
                 if(data.getBooleanExtra("delete", false)){
                     channel.remove(channelNum);
                     resetChannelNum();
+                    play(channelNum);
                     saveSettings();
                     return;
                 }
@@ -394,6 +405,7 @@ public class MainActivity extends AppCompatActivity {
                 channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
                 channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
                 channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
+                play(channelNum);
                 saveSettings();
             }
         }
@@ -558,6 +570,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("currentNum", channelNum);
         startActivityForResult(intent, 0);
         getSupportFragmentManager().popBackStack();
+        DO_NOT_PLAY_ON_START = true;
     }
 
     public void showChannelInfo(View view){
@@ -579,6 +592,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("height", player.getVideoSize().height);
         startActivityForResult(intent, 1);
         getSupportFragmentManager().popBackStack();
+        DO_NOT_PLAY_ON_START = true;
     }
 
     public void addNewChannel(View view) {
@@ -600,6 +614,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("height", 0);
         startActivityForResult(intent, 3);
         getSupportFragmentManager().popBackStack();
+        DO_NOT_PLAY_ON_START = true;
     }
 
     public void showSettings(View view){
@@ -608,6 +623,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("defaultVolume", defaultVolume);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
+        DO_NOT_PLAY_ON_START = true;
     }
 
     public void showChannelNumEdit(View view){
