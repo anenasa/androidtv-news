@@ -155,6 +155,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        isStarted = true;
         // Do not call play() more than once
         // play() will be called in onActivityResult()
         if(DO_NOT_PLAY_ON_START){
@@ -164,7 +165,6 @@ public class MainActivity extends AppCompatActivity {
         if(channel == null){
             return;
         }
-        isStarted = true;
         play(channelNum);
     }
 
