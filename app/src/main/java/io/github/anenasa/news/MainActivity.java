@@ -415,6 +415,12 @@ public class MainActivity extends AppCompatActivity {
                 defaultFormat = data.getStringExtra("defaultFormat");
                 defaultVolume = data.getStringExtra("defaultVolume");
                 readChannelList();
+                if(channel == null){
+                    return;
+                }
+                if(channelNum >= channel.size()){
+                    resetChannelNum();
+                }
                 play(channelNum);
             }
         }
