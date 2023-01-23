@@ -35,15 +35,7 @@ https://github.com/anenasa/androidtv-news/releases
 
 ## 自訂頻道
 
-以 json 格式自訂頻道，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
-
-讀取優先順序為 config.txt > url.txt > 預設頻道。
-
-### 方法一
-將自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt。
-
-### 方式二
-自訂頻道檔案放在網路上，再將檔案的網址放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/url.txt 內。
+以 json 格式自訂頻道，將自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
 
 ### 自訂頻道檔案格式
 
@@ -65,6 +57,12 @@ https://github.com/anenasa/androidtv-news/releases
       "ytdl-format": "youtube-dl 格式（可省略）",
       "volume": 音量（可省略）,
       "header": "name: value（可省略）"
+    }
+
+頻道也可以是網路上的頻道清單檔案：
+
+    {
+      "list": "頻道清單檔案網址"
     }
 
 youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
