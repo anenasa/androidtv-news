@@ -245,7 +245,16 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setTitle("頻道清單讀取失敗，要重試嗎？");
             builder.setMessage(e.toString());
-            builder.setPositiveButton("確定", (dialog, id) -> readChannelList());
+            builder.setPositiveButton("確定", (dialog, id) -> {
+                readChannelList();
+                if(channel == null){
+                    return;
+                }
+                if(channelNum >= channel.size()){
+                    resetChannelNum();
+                }
+                play(channelNum);
+            });
             builder.setNeutralButton("進入設定", (dialogInterface, i) -> {
                 showSettings(findViewById(R.id.container));
             });
