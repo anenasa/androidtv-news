@@ -12,6 +12,9 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.yausername.youtubedl_android.YoutubeDL;
+import com.yausername.youtubedl_android.YoutubeDLException;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -141,9 +144,10 @@ public class SettingsActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                         else{
+                            YoutubeDL.getInstance().updateYoutubeDL(activity);
                             activity.runOnUiThread(() -> update.setSummary("已經是最新版本"));
                         }
-                    } catch (IOException e) {
+                    } catch (IOException | YoutubeDLException e) {
                         activity.runOnUiThread(() -> update.setSummary("更新時發生錯誤"));
                         Log.e(activity.TAG, Log.getStackTraceString(e));
                     }
