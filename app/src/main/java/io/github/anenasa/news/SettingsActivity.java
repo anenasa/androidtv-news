@@ -1,22 +1,30 @@
 package io.github.anenasa.news;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.Manifest;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.codekidlabs.storagechooser.StorageChooser;
 import com.yausername.youtubedl_android.YoutubeDL;
 import com.yausername.youtubedl_android.YoutubeDLException;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -52,8 +60,34 @@ public class SettingsActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
+    private void showConfigChooser() {
+        StorageChooser chooser = new StorageChooser.Builder()
+                .withActivity(this)
+                .withFragmentManager(getFragmentManager())
+                .withMemoryBar(true)
+                .allowCustomPath(true)
+                .setType(StorageChooser.FILE_PICKER)
+                .build();
+        chooser.show();
+        chooser.setOnSelectListener(path -> {
+            try {
+                InputStream inputStream = new FileInputStream(path);
+                copyConfig(inputStream);
+            } catch (IOException e) {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+        });
+    }
+
     public static class SettingsFragment extends PreferenceFragmentCompat {
         SettingsActivity activity;
+
+        private ActivityResultLauncher<String> requestPermissionLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        activity.showConfigChooser();
+                    }
+                });
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -66,7 +100,26 @@ public class SettingsActivity extends AppCompatActivity {
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
                 intent.addCategory(Intent.CATEGORY_OPENABLE);
                 intent.setType("text/*");
-                startActivityForResult(intent, 0);
+                PackageManager packageManager = requireActivity().getPackageManager();
+                ComponentName componentName = intent.resolveActivity(packageManager);
+                // Possible results of componentName:
+                // com.android.documentsui on non-Android TV
+                // null on Android TV <= 10
+                // com.google.android.tv.frameworkpackagestubs on Android TV 11
+                // com.android.tv.frameworkpackagestubs on Android TV 12 and 13
+                if(componentName != null && !componentName.getPackageName().endsWith("frameworkpackagestubs")){
+                    startActivityForResult(intent, 0);
+                }
+                else {
+                    // SAF does not work on Android TV
+                    // https://stackoverflow.com/a/38715569/20756028
+                    if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
+                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        activity.showConfigChooser();
+                    }
+                }
                 return true;
             });
 
@@ -160,8 +213,10 @@ public class SettingsActivity extends AppCompatActivity {
             about.setOnPreferenceClickListener(preference -> {
                 InputStream streamGPL3 = getResources().openRawResource(R.raw.gpl3);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
+                InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
                 BufferedReader readerGPL3 = new BufferedReader(new InputStreamReader(streamGPL3));
                 BufferedReader readerApache2 = new BufferedReader(new InputStreamReader(streamApache2));
+                BufferedReader readerMPL2 = new BufferedReader(new InputStreamReader(streamMPL2));
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(String.format("新聞直播 %s 版", BuildConfig.VERSION_NAME)).append('\n')
                         .append("專案頁面：https://github.com/anenasa/androidtv-news").append('\n')
@@ -170,12 +225,16 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("youtubedl-android - GNU General Public License v3.0").append('\n')
                         .append("ExoPlayer - Apache License 2.0").append('\n')
                         .append("OkHttp - Apache License 2.0").append('\n')
+                        .append("Storage Chooser - Mozilla Public License Version 2.0").append('\n')
                         .append('\n');
                 try{
                     for (String line; (line = readerGPL3.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
                     }
                     for (String line; (line = readerApache2.readLine()) != null; ) {
+                        stringBuilder.append(line).append('\n');
+                    }
+                    for (String line; (line = readerMPL2.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
                     }
                 } catch (IOException e) {
@@ -200,18 +259,25 @@ public class SettingsActivity extends AppCompatActivity {
             Uri uri = resultData.getData();
             try {
                 InputStream inputStream = getContentResolver().openInputStream(uri);
-                File outputFile = new File(getExternalFilesDir(null), "config.txt");
-                OutputStream outputStream = new FileOutputStream(outputFile);
-                byte[] buf = new byte[1024];
-                int len;
-                while ((len = inputStream.read(buf)) > 0) {
-                    outputStream.write(buf, 0, len);
-                }
-                inputStream.close();
-                outputStream.close();
+                copyConfig(inputStream);
             } catch (IOException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         }
+    }
+
+    void copyConfig(InputStream inputStream) throws IOException {
+        File outputFile = new File(getExternalFilesDir(null), "config.txt");
+        // Without deleting first, when config.txt is already created with adb push,
+        // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
+        outputFile.delete();
+        OutputStream outputStream = new FileOutputStream(outputFile);
+        byte[] buf = new byte[1024];
+        int len;
+        while ((len = inputStream.read(buf)) > 0) {
+            outputStream.write(buf, 0, len);
+        }
+        inputStream.close();
+        outputStream.close();
     }
 }

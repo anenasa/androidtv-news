@@ -13,7 +13,8 @@ android {
         // They are ignored in older versions.
         // https://stackoverflow.com/a/27100238
         minSdkVersion 21
-        targetSdkVersion 33
+        // Need to set this to 29 so file access works on Android TV 11 and above
+        targetSdkVersion 29
         versionCode 20001
         versionName "2.0.1"
 
@@ -54,4 +55,5 @@ dependencies {
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.squareup.okhttp3:okhttp:4.10.0'
     implementation 'org.jsoup:jsoup:1.15.4'
+    implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
 }
