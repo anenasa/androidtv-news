@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 import sys
 import json
-import youtube_dl
+import yt_dlp
 
 class MyLogger(object):
     def debug(self, msg):
@@ -19,7 +19,7 @@ chnnelFile = open(sys.argv[1])
 channelList = chnnelFile.read()
 jsonObject = json.loads(channelList)
 ydl_opts = {'logger': MyLogger()}
-with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+with yt_dlp.YoutubeDL(ydl_opts) as ydl:
     for item in jsonObject["channelList"]:
         try:
             info = ydl.extract_info(item["url"], download = False)
