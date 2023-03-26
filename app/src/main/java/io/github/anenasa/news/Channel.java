@@ -223,8 +223,6 @@ public class Channel {
         }
         PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
         option.callAttr("__setitem__", "format", getFormat());
-        // Reduce time for playlist, should not affect non-playlist stream
-        option.callAttr("__setitem__", "playlist_items", "1");
         if(!getHeader().isEmpty()) {
             PyObject header_dict = Python.getInstance().getBuiltins().callAttr("dict");
             String[] headers = getHeader().split("\\\\r\\\\n");
