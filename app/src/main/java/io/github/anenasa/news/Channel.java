@@ -159,7 +159,7 @@ public class Channel {
 
     void parse(YtDlp ytdlp) throws JSONException, IOException, InterruptedException, PyException {
         String url = getUrl();
-        if(url.startsWith("https://hamivideo.hinet.net/channel/") && url.endsWith(".do")){
+        if(url.startsWith("https://hamivideo.hinet.net/hamivideo/channel/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
             OkHttpClient okHttpClient = new OkHttpClient();
             Request okHttpRequest = new Request.Builder()
