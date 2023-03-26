@@ -1,9 +1,8 @@
 package io.github.anenasa.news;
 
-import com.yausername.youtubedl_android.YoutubeDL;
-import com.yausername.youtubedl_android.YoutubeDLException;
-import com.yausername.youtubedl_android.YoutubeDLRequest;
-import com.yausername.youtubedl_android.mapper.VideoInfo;
+import com.chaquo.python.PyException;
+import com.chaquo.python.PyObject;
+import com.chaquo.python.Python;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -158,9 +157,8 @@ public class Channel {
         return NEEDPARSE_UNKNOWN;
     }
 
-    void parse() throws JSONException, IOException, YoutubeDLException, InterruptedException {
+    void parse(YtDlp ytdlp) throws JSONException, IOException, InterruptedException, PyException {
         String url = getUrl();
-        YoutubeDLRequest request;
         if(url.startsWith("https://hamivideo.hinet.net/channel/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
             OkHttpClient okHttpClient = new OkHttpClient();
@@ -171,15 +169,13 @@ public class Channel {
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
-            request = new YoutubeDLRequest(object.getString("url"));
+            url = object.getString("url");
         }
         else if(url.equals("https://news.ebc.net.tw/live")){
             Document doc = Jsoup.connect(url).get();
             Element el = doc.selectFirst("div#live-slider div.live-else-little-box");
             if(el == null) throw new IOException("找不到 div");
-            String src = el.attr("data-code");
-            request = new YoutubeDLRequest(src);
-
+            url = el.attr("data-code");
         }
         else if(url.startsWith("https://today.line.me/tw/v2/article/")){
             Document doc = Jsoup.connect(url).get();
@@ -196,9 +192,7 @@ public class Channel {
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
-            String abr = object.getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
-            request = new YoutubeDLRequest(abr);
-
+            url = object.getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
         }
         else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             String id;
@@ -222,23 +216,21 @@ public class Channel {
             if (body == null) throw new IOException("body is null");
             String bodyString = body.string();
             String videoUrl = bodyString.substring(bodyString.indexOf("VideoURL") + 11);
-            videoUrl = videoUrl.substring(0, videoUrl.indexOf("\""));
-            request = new YoutubeDLRequest(videoUrl);
+            url = videoUrl.substring(0, videoUrl.indexOf("\""));
         }
-        else{
-            request = new YoutubeDLRequest(url);
-        }
-        request.addOption("-f", getFormat());
+        PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
+        option.callAttr("__setitem__", "format", getFormat());
         // Reduce time for playlist, should not affect non-playlist stream
-        request.addOption("--playlist-items", "1");
+        option.callAttr("__setitem__", "playlist_items", "1");
         if(!getHeader().isEmpty()) {
+            PyObject header_dict = Python.getInstance().getBuiltins().callAttr("dict");
             String[] headers = getHeader().split("\\\\r\\\\n");
             for (String header : headers) {
-                request.addOption("--add-header", header);
+                int pos = header.indexOf(":");
+                header_dict.callAttr("__setitem__", header.substring(0, pos), header.substring(pos + 1));
             }
-
+            option.callAttr("__setitem__", "http_headers", header_dict);
         }
-        VideoInfo streamInfo = YoutubeDL.getInstance().getInfo(request);
-        setVideo(streamInfo.getUrl());
+        setVideo(ytdlp.extract(url, option));
     }
 }

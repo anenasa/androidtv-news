@@ -16,6 +16,7 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.chaquo.python.PyException;
 import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.MediaItem;
 import com.google.android.exoplayer2.PlaybackException;
@@ -24,8 +25,6 @@ import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
-import com.yausername.youtubedl_android.YoutubeDL;
-import com.yausername.youtubedl_android.YoutubeDLException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -59,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
     String defaultFormat;
     String defaultVolume;
 
+    YtDlp ytdlp;
     ExoPlayer player = null;
     SurfaceView playerView = null;
     TextView textView;
@@ -78,6 +78,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            ytdlp = new YtDlp(this);
+        } catch (PyException e) {
+            Log.e(TAG, Log.getStackTraceString(e));
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("yt-dlp 載入失敗");
+            builder.setMessage(e.toString());
+            builder.setNegativeButton("確定", (dialog, id) -> finish());
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
         setContentView(R.layout.activity_main);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         preferences = getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE);
@@ -85,12 +96,6 @@ public class MainActivity extends AppCompatActivity {
         defaultFormat = preferences.getString("defaultFormat", "best");
         defaultVolume = preferences.getString("defaultVolume", "1.0");
 
-        try {
-            YoutubeDL.getInstance().init(getApplication());
-        } catch (YoutubeDLException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
-            errorMessageView.setText(e.toString());
-        }
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
@@ -130,26 +135,6 @@ public class MainActivity extends AppCompatActivity {
         if(channelNum >= channel.size()){
             resetChannelNum();
         }
-
-        timer = new Timer();
-        timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    for (int i = 0; i < channel.size(); i++) {
-                        if (!channel.get(i).isHidden()) {
-                            channel.get(i).parse();
-                        }
-                    }
-                } catch (IOException | YoutubeDLException | JSONException | InterruptedException | NullPointerException e) {
-                    Log.e(TAG, Log.getStackTraceString(e));
-                }
-                saveSettings();
-            }
-        };
-        // Delay timer for one second because if two requests are sent to
-        // Hami Video at the same time, one of them will fail.
-        timer.scheduleAtFixedRate(timerTask, 1000, 3600000);
     }
 
     @Override
@@ -328,8 +313,8 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
-                    channel.get(num).parse();
-                } catch (JSONException | IOException | YoutubeDLException | InterruptedException e) {
+                    channel.get(num).parse(ytdlp);
+                } catch (JSONException | IOException | InterruptedException | PyException e) {
                     if(channelNum!=num) return;
                     Log.e(TAG, Log.getStackTraceString(e));
                     showErrorMessage(e.toString());

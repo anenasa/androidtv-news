@@ -19,8 +19,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.codekidlabs.storagechooser.StorageChooser;
-import com.yausername.youtubedl_android.YoutubeDL;
-import com.yausername.youtubedl_android.YoutubeDLException;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -197,10 +195,10 @@ public class SettingsActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                         else{
-                            YoutubeDL.getInstance().updateYoutubeDL(activity);
+                            YtDlp.download(activity);
                             activity.runOnUiThread(() -> update.setSummary("已經是最新版本"));
                         }
-                    } catch (IOException | YoutubeDLException e) {
+                    } catch (IOException e) {
                         activity.runOnUiThread(() -> update.setSummary("更新時發生錯誤"));
                         Log.e(activity.TAG, Log.getStackTraceString(e));
                     }
@@ -211,10 +209,12 @@ public class SettingsActivity extends AppCompatActivity {
             Preference about = findPreference("about");
             assert about != null;
             about.setOnPreferenceClickListener(preference -> {
-                InputStream streamGPL3 = getResources().openRawResource(R.raw.gpl3);
+                InputStream streamUnlicense = getResources().openRawResource(R.raw.unlicense);
+                InputStream streamMIT = getResources().openRawResource(R.raw.mit);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
                 InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
-                BufferedReader readerGPL3 = new BufferedReader(new InputStreamReader(streamGPL3));
+                BufferedReader readerUnlicense = new BufferedReader(new InputStreamReader(streamUnlicense));
+                BufferedReader readerMIT = new BufferedReader(new InputStreamReader(streamMIT));
                 BufferedReader readerApache2 = new BufferedReader(new InputStreamReader(streamApache2));
                 BufferedReader readerMPL2 = new BufferedReader(new InputStreamReader(streamMPL2));
                 StringBuilder stringBuilder = new StringBuilder();
@@ -222,13 +222,19 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("專案頁面：https://github.com/anenasa/androidtv-news").append('\n')
                         .append("授權：GNU General Public License v3.0").append('\n')
                         .append("函式庫：").append('\n')
-                        .append("youtubedl-android - GNU General Public License v3.0").append('\n')
+                        .append("yt-dlp - The Unlicense").append('\n')
+                        .append("Chaquopy - MIT License").append('\n')
                         .append("ExoPlayer - Apache License 2.0").append('\n')
                         .append("OkHttp - Apache License 2.0").append('\n')
                         .append("Storage Chooser - Mozilla Public License Version 2.0").append('\n')
                         .append('\n');
                 try{
-                    for (String line; (line = readerGPL3.readLine()) != null; ) {
+                    stringBuilder.append("The Unlicense").append('\n');
+                    for (String line; (line = readerUnlicense.readLine()) != null; ) {
+                        stringBuilder.append(line).append('\n');
+                    }
+                    stringBuilder.append("MIT License").append('\n');
+                    for (String line; (line = readerMIT.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
                     }
                     for (String line; (line = readerApache2.readLine()) != null; ) {
