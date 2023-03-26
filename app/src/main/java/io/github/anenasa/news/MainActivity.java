@@ -41,6 +41,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -209,7 +210,7 @@ public class MainActivity extends AppCompatActivity {
             if(newChannelArray != null){
                 for(int i = 0; i < newChannelArray.length(); i++){
                     JSONObject newChannelObject = newChannelArray.getJSONObject(i);
-                    Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                    Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "", new HashMap<>());
                     ch.setUrl(newChannelObject.getString("customUrl"));
                     ch.setName(newChannelObject.getString("customName"));
                     ch.setFormat(newChannelObject.getString("customFormat"));
@@ -294,7 +295,16 @@ public class MainActivity extends AppCompatActivity {
             if (!channelObject.isNull("header")) {
                 header = channelObject.getString("header");
             }
-            Channel ch = new Channel(url, name, format, volume, header);
+            Map<String, String> ytdlOptions = new HashMap<>();
+            if (!channelObject.isNull("ytdl-options")) {
+                JSONObject options = channelObject.getJSONObject("ytdl-options");
+                for(Iterator<String> iter = options.keys(); iter.hasNext();) {
+                    String key = iter.next();
+                    String value = options.getString(key);
+                    ytdlOptions.put(key, value);
+                }
+            }
+            Channel ch = new Channel(url, name, format, volume, header, ytdlOptions);
             channel.add(ch);
         }
     }
@@ -428,7 +438,7 @@ public class MainActivity extends AppCompatActivity {
                 if(data.getBooleanExtra("delete", false)){
                     return;
                 }
-                Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "");
+                Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "", new HashMap<>());
                 ch.setName(data.getStringExtra("customName"));
                 ch.setHidden(data.getBooleanExtra("isHidden", false));
                 ch.setUrl(data.getStringExtra("customUrl"));

@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.util.Map;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -27,6 +28,7 @@ public class Channel {
     final String defaultFormat;
     final float defaultVolume;
     final String defaultHeader;
+    final Map<String, String> ytdlOptions;
     String video = "";
     String customUrl = "";
     String customName = "";
@@ -35,12 +37,13 @@ public class Channel {
     String customHeader = "";
     boolean hidden = false;
 
-    public Channel(String url, String name, String format, float volume, String header) {
+    public Channel(String url, String name, String format, float volume, String header, Map<String, String> ytdlOptions) {
         this.defaultUrl = url;
         this.defaultName = name;
         this.defaultFormat = format;
         this.defaultVolume = volume;
         this.defaultHeader = header;
+        this.ytdlOptions = ytdlOptions;
     }
 
     public String getUrl(){
@@ -230,6 +233,9 @@ public class Channel {
                 header_dict.callAttr("__setitem__", header.substring(0, pos), header.substring(pos + 1));
             }
             option.callAttr("__setitem__", "http_headers", header_dict);
+        }
+        for (Map.Entry<String, String> entry : this.ytdlOptions.entrySet()) {
+            option.callAttr("__setitem__", entry.getKey(), entry.getValue());
         }
         setVideo(ytdlp.extract(url, option));
     }
