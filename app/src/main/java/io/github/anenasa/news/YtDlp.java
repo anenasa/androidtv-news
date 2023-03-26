@@ -94,6 +94,15 @@ public class YtDlp {
     public String extract(String url, PyObject option) throws PyException {
         PyObject ydl = yt_dlp.callAttr("YoutubeDL", option);
         PyObject info_dict = ydl.callAttr("extract_info", url, false);
-        return info_dict.callAttr("get", "url").toString();
+        PyObject videoUrl = info_dict.callAttr("get", "url");
+        if(videoUrl != null) {
+            return videoUrl.toString();
+        }
+        // url is in entries for playlist
+        PyObject entries = info_dict.callAttr("get", "entries");
+        if(entries != null){
+            return entries.callAttr("__getitem__", 0).callAttr("__getitem__", "url").toString();
+        }
+        throw new PyException("找不到影片網址");
     }
 }
