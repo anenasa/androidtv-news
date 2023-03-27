@@ -8,7 +8,7 @@ https://github.com/anenasa/androidtv-news/releases
 
 ## 特色
 
-使用 [youtubedl-android](https://github.com/yausername/youtubedl-android) 取得影片網址，無須安裝 Youtube 應用程式
+使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 取得影片網址，無須安裝 Youtube 應用程式
 
 使用遙控器轉台
 
@@ -23,13 +23,13 @@ https://github.com/anenasa/androidtv-news/releases
 
 ### 頻道資訊
 
-可顯示頻道的一些資訊，也能修改頻道的名稱、網址、youtube-dl 格式、音量和 header，這裡的設定會覆蓋頻道清單檔案裡的設定。如果要回復到頻道清單檔案的設定，只要把要回復的屬性清空並儲存即可。
+可顯示頻道的一些資訊，也能修改頻道的名稱、網址、yt-dlp 格式、音量和 header，這裡的設定會覆蓋頻道清單檔案裡的設定。如果要回復到頻道清單檔案的設定，只要把要回復的屬性清空並儲存即可。
 
 ## 預設頻道
 
 預設頻道條件：
 1. 來源必須合法
-2. youtube-dl 要支援
+2. yt-dlp 要支援
 
 如果有頻道建議歡迎提出。
 
@@ -54,7 +54,7 @@ https://github.com/anenasa/androidtv-news/releases
     {
       "url": "頻道網址",
       "name": "頻道名稱",
-      "ytdl-format": "youtube-dl 格式（可省略）",
+      "ytdl-format": "yt-dlp 格式（可省略）",
       "volume": 音量（可省略）,
       "header": "name: value（可省略）"
     }
@@ -65,7 +65,7 @@ https://github.com/anenasa/androidtv-news/releases
       "list": "頻道清單檔案網址"
     }
 
-youtube-dl 格式請參考[這裡](https://github.com/ytdl-org/youtube-dl/blob/master/README.md#format-selection)。
+yt-dlp 格式請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/README.md#format-selection)。
 如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\\\r\\\\n 分隔）
 
 ## 許可證

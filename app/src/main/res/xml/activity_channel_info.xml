@@ -21,7 +21,7 @@
     <EditTextPreference
         app:layout="@layout/preference_layout"
         app:key="format"
-        app:title="youtube-dl 格式"/>
+        app:title="yt-dlp 格式"/>
     <EditTextPreference
         app:layout="@layout/preference_layout"
         app:key="volume"
