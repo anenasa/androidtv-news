@@ -1,3 +1,8 @@
+version 3.0.0 2023.03.27
+-使用Chaquopy執行yt-dlp
+-頻道清單中可設定yt-dlp選項
+-修復 Hami video
+
 version 2.0.1 2023.02.20
 -按「設定」->「更新」也會檢查yt-dlp更新
 

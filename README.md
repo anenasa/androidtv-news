@@ -56,7 +56,8 @@ https://github.com/anenasa/androidtv-news/releases
       "name": "頻道名稱",
       "ytdl-format": "yt-dlp 格式（可省略）",
       "volume": 音量（可省略）,
-      "header": "name: value（可省略）"
+      "header": "name: value（可省略）",
+      "ytdl-options": JSON 物件（可省略）
     }
 
 頻道也可以是網路上的頻道清單檔案：
@@ -67,6 +68,7 @@ https://github.com/anenasa/androidtv-news/releases
 
 yt-dlp 格式請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/README.md#format-selection)。
 如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\\\r\\\\n 分隔）
+ytdl-options 請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184)。
 
 ## 許可證
 [GNU General Public License v3.0](https://github.com/anenasa/androidtv-news/blob/main/LICENSE)
