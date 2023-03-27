@@ -332,21 +332,8 @@ public class MainActivity extends AppCompatActivity {
             }
             if(channelNum!=num) return;
             MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
-            Map<String, String> map = new HashMap<>();
-            if(!channel.get(num).getHeader().isEmpty()) {
-                String[] headers = channel.get(num).getHeader().split("\\\\r\\\\n");
-                for (String header : headers) {
-                    String[] header_split = header.split(":", 2);
-                    if(header_split.length != 2){
-                        showErrorMessage("header 格式錯誤");
-                    }
-                    else {
-                        map.put(header_split[0], header_split[1]);
-                    }
-                }
-            }
             DataSource.Factory factory = new DefaultHttpDataSource.Factory()
-                    .setDefaultRequestProperties(map);
+                    .setDefaultRequestProperties(channel.get(num).getHeaderMap());
             MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
                     .createMediaSource(mediaItem);
             // player needs to run on main thread

@@ -11,6 +11,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import okhttp3.OkHttpClient;
@@ -91,6 +92,18 @@ public class Channel {
         }
     }
 
+    public Map<String, String> getHeaderMap(){
+        String[] headers = getHeader().split("\\\\r\\\\n");
+        Map<String, String> map = new HashMap<>();
+        for (String header : headers) {
+            int pos = header.indexOf(":");
+            if(pos != -1){
+                map.put(header.substring(0, pos), header.substring(pos + 1));
+            }
+        }
+        return map;
+    }
+
     public String getVideo(){
         return video;
     }
@@ -146,7 +159,7 @@ public class Channel {
                 return NEEDPARSE_YES;
             }
         }
-        if(url.startsWith("https://hamivideo.hinet.net/channel/") || url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
+        if(url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             long current = System.currentTimeMillis() / 1000;
             int pos = getVideo().indexOf("expires") + 8;
             long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
@@ -162,12 +175,15 @@ public class Channel {
 
     void parse(YtDlp ytdlp) throws JSONException, IOException, InterruptedException, PyException {
         String url = getUrl();
-        if(url.startsWith("https://hamivideo.hinet.net/hamivideo/channel/") && url.endsWith(".do")){
+        if(url.startsWith("https://hamivideo.hinet.net/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
             OkHttpClient okHttpClient = new OkHttpClient();
-            Request okHttpRequest = new Request.Builder()
-                    .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id)
-                    .build();
+            Request.Builder okHttpRequestBuilder = new Request.Builder()
+                    .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id);
+            for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
+                okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
+            }
+            Request okHttpRequest = okHttpRequestBuilder.build();
             Response response = okHttpClient.newCall(okHttpRequest).execute();
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
@@ -225,10 +241,8 @@ public class Channel {
         option.callAttr("__setitem__", "format", getFormat());
         if(!getHeader().isEmpty()) {
             PyObject header_dict = Python.getInstance().getBuiltins().callAttr("dict");
-            String[] headers = getHeader().split("\\\\r\\\\n");
-            for (String header : headers) {
-                int pos = header.indexOf(":");
-                header_dict.callAttr("__setitem__", header.substring(0, pos), header.substring(pos + 1));
+            for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
+                header_dict.callAttr("__setitem__", entry.getKey(), entry.getValue());
             }
             option.callAttr("__setitem__", "http_headers", header_dict);
         }
