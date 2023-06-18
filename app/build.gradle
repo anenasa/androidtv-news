@@ -62,10 +62,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.google.android.exoplayer:exoplayer:2.18.5'
+    implementation 'com.google.android.exoplayer:exoplayer:2.18.7'
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
-    implementation 'com.squareup.okhttp3:okhttp:4.10.0'
-    implementation 'org.jsoup:jsoup:1.15.4'
+    implementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    implementation 'org.jsoup:jsoup:1.16.1'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
 }
