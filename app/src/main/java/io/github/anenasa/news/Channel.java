@@ -201,17 +201,17 @@ public class Channel {
             Element el =doc.selectFirst("script:containsData(__NUXT__)");
             if(el == null) throw new IOException("找不到 script");
             String script = el.data();
-            String id = script.substring(script.indexOf("programId:")+10);
-            id = id.substring(0,id.indexOf("}"));
+            String id = script.substring(script.indexOf("broadcastId:")+13);
+            id = id.substring(0,id.indexOf("\""));
             OkHttpClient okHttpClient = new OkHttpClient();
             Request okHttpRequest = new Request.Builder()
-                    .url("https://today.line.me/webapi/live/programs/" + id)
+                    .url("https://today.line.me/webapi/glplive/broadcasts/" + id)
                     .build();
             Response response = okHttpClient.newCall(okHttpRequest).execute();
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
-            url = object.getJSONObject("program").getJSONObject("broadcast").getJSONObject("hlsUrls").getString("abr");
+            url = object.getJSONObject("hlsUrls").getString("abr");
         }
         else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             String id;
