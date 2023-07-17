@@ -16,8 +16,8 @@ android {
         minSdkVersion 21
         // Need to set this to 29 so file access works on Android TV 11 and above
         targetSdkVersion 29
-        versionCode 30001
-        versionName "3.0.1"
+        versionCode 30002
+        versionName "3.0.2"
     }
 
     buildTypes {
