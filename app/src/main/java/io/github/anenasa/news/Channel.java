@@ -142,7 +142,7 @@ public class Channel {
 
     int needParse(){
         String url = getUrl();
-        if(getVideo().isEmpty()) {
+        if(getVideo().isEmpty() || url.startsWith("https://today.line.me")) {
             return NEEDPARSE_YES;
         }
         if(url.endsWith("m3u8")){
