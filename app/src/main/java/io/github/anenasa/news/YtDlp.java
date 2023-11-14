@@ -47,8 +47,13 @@ public class YtDlp {
      * @return true if yt-dlp is downloaded, false otherwise
      */
     public static boolean isDownloaded(Context context){
-        File file = new File(context.getExternalFilesDir(null), "yt-dlp");
-        return file.exists();
+        File fileYtDlp = new File(context.getExternalFilesDir(null), "yt-dlp");
+        File fileExtract = new File(context.getExternalFilesDir(null), "extract.py");
+        return fileYtDlp.exists() && fileExtract.exists();
+    }
+
+    public static boolean download(Context context){
+        return downloadYtDlp(context) && downloadExtractPy(context);
     }
 
     /**
@@ -56,7 +61,7 @@ public class YtDlp {
      * @param context Context
      * @return true if download is successful, false otherwise
      */
-    public static boolean download(Context context){
+    public static boolean downloadYtDlp(Context context){
         try {
             File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
@@ -77,6 +82,33 @@ public class YtDlp {
             }
             fileOutput.close();
             file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"));
+        } catch (IOException e) {
+            return false;
+        }
+        return true;
+    }
+
+    public static boolean downloadExtractPy(Context context){
+        try {
+            File file = new File(context.getExternalFilesDir(null), "extract.py.part");
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            URL url = new URL("https://raw.githubusercontent.com/anenasa/extract/master/extract.py");
+            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            urlConnection.setRequestMethod("GET");
+            urlConnection.connect();
+
+            FileOutputStream fileOutput = new FileOutputStream(file);
+            InputStream inputStream = urlConnection.getInputStream();
+
+            byte[] buffer = new byte[1024];
+            int bufferLength = 0;
+
+            while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
+                fileOutput.write(buffer, 0, bufferLength);
+            }
+            fileOutput.close();
+            file.renameTo(new File(context.getExternalFilesDir(null), "extract.py"));
         } catch (IOException e) {
             return false;
         }
