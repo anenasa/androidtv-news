@@ -18,12 +18,6 @@ android {
         targetSdkVersion 29
         versionCode 30002
         versionName "3.0.2"
-        python {
-            pip {
-                install "requests"
-                install "bs4"
-            }
-        }
     }
 
     buildTypes {

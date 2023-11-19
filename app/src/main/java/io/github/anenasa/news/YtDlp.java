@@ -17,7 +17,7 @@ import java.net.URL;
 
 public class YtDlp {
     private final String TAG = "YtDlp";
-    private PyObject extractor;
+    private PyObject yt_dlp;
 
     /**
      * Initialize yt-dlp
@@ -30,10 +30,10 @@ public class YtDlp {
         }
         try {
             Python py = Python.getInstance();
-            String path = context.getExternalFilesDir(null).toString();
-            py.getModule("sys").get("path").callAttr("append", path);
-            PyObject m = py.getModule("extract");
-            extractor = m.callAttr("Extractor");
+            String ytdl_filename = new File(context.getExternalFilesDir(null), "yt-dlp").toString();
+            PyObject zipimport = py.getModule("zipimport");
+            PyObject zip = zipimport.callAttr("zipimporter", ytdl_filename);
+            yt_dlp = zip.callAttr("load_module", "yt_dlp");
         } catch (PyException e){
             Log.e(TAG, "yt-dlp 載入失敗");
             new File(context.getExternalFilesDir(null), "yt-dlp").delete();
@@ -92,6 +92,17 @@ public class YtDlp {
      * @see <a href="https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184">list of options</a>
      */
     public String extract(String url, PyObject option) throws PyException {
-        return extractor.callAttr("extract", url, option).toString();
+        PyObject ydl = yt_dlp.callAttr("YoutubeDL", option);
+        PyObject info_dict = ydl.callAttr("extract_info", url, false);
+        PyObject videoUrl = info_dict.callAttr("get", "url");
+        if(videoUrl != null) {
+            return videoUrl.toString();
+        }
+        // url is in entries for playlist
+        PyObject entries = info_dict.callAttr("get", "entries");
+        if(entries != null){
+            return entries.callAttr("__getitem__", 0).callAttr("__getitem__", "url").toString();
+        }
+        throw new PyException("找不到影片網址");
     }
 }
