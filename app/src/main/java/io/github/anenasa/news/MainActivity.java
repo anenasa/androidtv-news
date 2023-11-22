@@ -40,8 +40,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -68,9 +66,6 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     TextView textInfo;
     TextView errorMessageView;
-
-    Timer timer;
-    TimerTask timerTask;
 
     SharedPreferences preferences;
 
