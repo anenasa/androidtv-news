@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion 34
     buildToolsVersion "30.0.3"
 
     defaultConfig {
@@ -59,10 +59,12 @@ android {
     lintOptions {
         abortOnError false
     }
+    namespace 'io.github.anenasa.news'
 }
 
 dependencies {
-    implementation 'com.google.android.exoplayer:exoplayer:2.19.0'
+    implementation 'androidx.media3:media3-exoplayer:1.2.0'
+    implementation "androidx.media3:media3-exoplayer-hls:1.2.0"
     implementation 'androidx.preference:preference:1.2.0'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.squareup.okhttp3:okhttp:4.11.0'

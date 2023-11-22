@@ -17,14 +17,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 
 import com.chaquo.python.PyException;
-import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
-import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.Player;
-import com.google.android.exoplayer2.source.DefaultMediaSourceFactory;
-import com.google.android.exoplayer2.source.MediaSource;
-import com.google.android.exoplayer2.upstream.DataSource;
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSource;
+
+import androidx.annotation.OptIn;
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.PlaybackException;
+import androidx.media3.common.Player;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -48,6 +45,12 @@ import java.util.TimerTask;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DataSource;
+import androidx.media3.datasource.DefaultHttpDataSource;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
+import androidx.media3.exoplayer.source.MediaSource;
 
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
@@ -317,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
         play(num);
     }
 
+    @OptIn(markerClass = UnstableApi.class)
     void play(int num)
     {
         textInfo.setText("正在載入" + channel.get(num).getName());
