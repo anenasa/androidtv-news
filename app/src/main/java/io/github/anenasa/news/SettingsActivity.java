@@ -146,8 +146,8 @@ public class SettingsActivity extends AppCompatActivity {
             prefFormat.setText(activity.defaultFormat);
             prefFormat.setOnPreferenceChangeListener((preference, newValue) -> {
                 if(newValue.toString().isEmpty()){
-                    activity.defaultFormat = "best";
-                    preference.setSummary("best");
+                    activity.defaultFormat = "bv*+ba/b";
+                    preference.setSummary("bv*+ba/b");
                 }
                 else {
                     activity.defaultFormat = newValue.toString();

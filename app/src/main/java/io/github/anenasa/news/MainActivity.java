@@ -49,6 +49,7 @@ import androidx.media3.datasource.DefaultHttpDataSource;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.source.MediaSource;
+import androidx.media3.exoplayer.source.MergingMediaSource;
 
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
@@ -92,7 +93,7 @@ public class MainActivity extends AppCompatActivity {
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         preferences = getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE);
         channelNum = preferences.getInt("channelNum", 0);
-        defaultFormat = preferences.getString("defaultFormat", "best");
+        defaultFormat = preferences.getString("defaultFormat", "bv*+ba/b");
         defaultVolume = preferences.getString("defaultVolume", "1.0");
 
         player = new ExoPlayer.Builder(this).build();
@@ -330,11 +331,29 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
             if(channelNum!=num) return;
-            MediaItem mediaItem = MediaItem.fromUri(channel.get(num).getVideo());
+
             DataSource.Factory factory = new DefaultHttpDataSource.Factory()
                     .setDefaultRequestProperties(channel.get(num).getHeaderMap());
-            MediaSource mediaSource = new DefaultMediaSourceFactory(factory)
-                    .createMediaSource(mediaItem);
+            MediaSource mediaSource;
+            String url = channel.get(num).getVideo();
+            int split = url.indexOf('\n');
+            if(split == -1){
+                MediaItem mediaItem = MediaItem.fromUri(url);
+                mediaSource = new DefaultMediaSourceFactory(factory)
+                        .createMediaSource(mediaItem);
+            }
+            else{
+                String firstUrl = url.substring(0, split);
+                MediaItem firstMediaItem = MediaItem.fromUri(firstUrl);
+                MediaSource firstMediaSource = new DefaultMediaSourceFactory(factory)
+                        .createMediaSource(firstMediaItem);
+                String secondUrl = url.substring(split + 1);
+                MediaItem secondMediaItem = MediaItem.fromUri(secondUrl);
+                MediaSource secondMediaSource = new DefaultMediaSourceFactory(factory)
+                        .createMediaSource(secondMediaItem);
+                mediaSource = new MergingMediaSource(firstMediaSource, secondMediaSource);
+            }
+
             // player needs to run on main thread
             runOnUiThread(() -> {
                 if(num != channelNum){
