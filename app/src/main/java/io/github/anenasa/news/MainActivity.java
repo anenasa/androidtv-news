@@ -120,6 +120,10 @@ public class MainActivity extends AppCompatActivity {
                     textInfo.setText("");
                     errorCount = 0;
                 }
+                else if(state == Player.STATE_ENDED){
+                    channel.get(channelNum).setVideo("");
+                    play(channelNum);
+                }
             }
         });
         playerView = findViewById(R.id.playerView);
