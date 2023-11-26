@@ -393,6 +393,9 @@ public class MainActivity extends AppCompatActivity {
                     return;
                 }
 
+                if(data.getBooleanExtra("remove_cache", false)){
+                    channel.get(channelNum).setVideo("");
+                }
                 String url_old = channel.get(channelNum).getUrl();
                 String url_new;
                 if(data.getStringExtra("customUrl").isEmpty()) {

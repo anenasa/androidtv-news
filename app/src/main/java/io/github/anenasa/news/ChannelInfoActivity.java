@@ -29,6 +29,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
     boolean channelIsHidden;
     int channelWidth;
     int channelHeight;
+    boolean remove_cache = false;
 
 
     @Override
@@ -65,6 +66,7 @@ public class ChannelInfoActivity extends AppCompatActivity {
         returnIntent.putExtra("customFormat", fragment.activity.customFormat);
         returnIntent.putExtra("customVolume", fragment.activity.customVolume);
         returnIntent.putExtra("customHeader", fragment.activity.customHeader);
+        returnIntent.putExtra("remove_cache", fragment.activity.remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
     }
@@ -185,6 +187,13 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 else {
                     preference.setSummary(newValue.toString());
                 }
+                return true;
+            });
+            Preference prefRemoveCache = findPreference("remove_cache");
+            assert prefRemoveCache != null;
+            prefRemoveCache.setOnPreferenceClickListener(preference -> {
+                activity.remove_cache = true;
+                preference.setSummary("將移除快取");
                 return true;
             });
             Preference prefDelete = findPreference("delete");
