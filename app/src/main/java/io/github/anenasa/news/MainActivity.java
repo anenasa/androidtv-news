@@ -36,10 +36,17 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -328,7 +335,10 @@ public class MainActivity extends AppCompatActivity {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
                     channel.get(num).parse(ytdlp);
-                } catch (JSONException | IOException | InterruptedException | PyException e) {
+                } catch (JSONException | IOException | InterruptedException | PyException |
+                         InvalidAlgorithmParameterException | IllegalBlockSizeException |
+                         NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException |
+                         InvalidKeyException e) {
                     if(channelNum!=num) return;
                     Log.e(TAG, Log.getStackTraceString(e));
                     showErrorMessage(e.toString());
