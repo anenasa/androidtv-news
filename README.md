@@ -29,7 +29,7 @@ https://github.com/anenasa/androidtv-news/releases
 
 預設頻道條件：
 1. 來源必須合法
-2. yt-dlp 要支援
+2. 台灣能看得到
 
 如果有頻道建議歡迎提出。
 
@@ -66,7 +66,7 @@ https://github.com/anenasa/androidtv-news/releases
       "list": "頻道清單檔案網址"
     }
 
-yt-dlp 格式請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/README.md#format-selection)。
+yt-dlp 格式請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/README.md#format-selection)。預設格式為bv*+ba/b
 
 如果要設定多個 header 可使用 \r\n 分隔（因為反斜線在 json 格式中是特殊字元，所以要用 \\\\r\\\\n 分隔）
 
