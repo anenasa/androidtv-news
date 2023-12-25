@@ -28,6 +28,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -297,6 +298,26 @@ public class Channel {
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
             url = fourgDecrypt(object.getString("Data"));
+        }
+        else if(url.startsWith("https://www.litv.tv/channel/watch.do")){
+            String id = url.substring(url.indexOf("content_id") + 11);
+            if(id.contains("&")) id = id.substring(0, id.indexOf("&"));
+
+            OkHttpClient okHttpClient = new OkHttpClient();
+            String data = String.format("{\"type\":\"auth\",\"contentId\":\"%s\",\"contentType\":\"channel\"}", id);
+            RequestBody requestBody = RequestBody.create(data, MediaType.parse("application/json"));
+            Request.Builder okHttpRequestBuilder = new Request.Builder()
+                    .url("https://www.litv.tv/channel/ajax/getUrl")
+                    .post(requestBody);
+            for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
+                okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
+            }
+            Request okHttpRequest = okHttpRequestBuilder.build();
+            Response response = okHttpClient.newCall(okHttpRequest).execute();
+            ResponseBody body = response.body();
+            if (body == null) throw new IOException("body is null");
+            JSONObject object = new JSONObject(body.string());
+            url = object.getString("fullpath");
         }
 
         PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
