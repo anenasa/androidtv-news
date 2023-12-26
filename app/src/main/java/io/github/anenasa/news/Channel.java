@@ -319,6 +319,24 @@ public class Channel {
             JSONObject object = new JSONObject(body.string());
             url = object.getString("fullpath");
         }
+        else if(url.startsWith("https://www.ofiii.com/channel/watch/")){
+            String id = url.substring(url.lastIndexOf("/") + 1);
+            OkHttpClient okHttpClient = new OkHttpClient();
+            String data = String.format("{\"jsonrpc\":\"2.0\",\"id\":123,\"method\":\"LoadService.GetURLs\",\"params\":{\"media_type\":\"channel\",\"device_type\":\"pc\",\"asset_id\":\"%s\"}}", id);
+            RequestBody requestBody = RequestBody.create(data, MediaType.parse("application/json"));
+            Request.Builder okHttpRequestBuilder = new Request.Builder()
+                    .url("https://api.ofiii.com/cdi/v3/rpc")
+                    .post(requestBody);
+            for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
+                okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
+            }
+            Request okHttpRequest = okHttpRequestBuilder.build();
+            Response response = okHttpClient.newCall(okHttpRequest).execute();
+            ResponseBody body = response.body();
+            if (body == null) throw new IOException("body is null");
+            JSONObject object = new JSONObject(body.string());
+            url = object.getJSONObject("result").getJSONArray("asset_urls").getString(0);
+        }
 
         PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
         option.callAttr("__setitem__", "format", getFormat());
