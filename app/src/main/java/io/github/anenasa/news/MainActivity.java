@@ -445,6 +445,9 @@ public class MainActivity extends AppCompatActivity {
                 defaultFormat = data.getStringExtra("defaultFormat");
                 defaultVolume = data.getStringExtra("defaultVolume");
                 readChannelList();
+                if(data.getBooleanExtra("remove_cache", false)){
+                    for(Channel i: channel) i.setVideo("");
+                }
                 if(channel == null){
                     return;
                 }

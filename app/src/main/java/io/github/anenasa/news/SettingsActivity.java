@@ -36,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
     String defaultFormat;
     String defaultVolume;
     final String TAG = "SettingsActivity";
+    boolean remove_cache = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,6 +55,7 @@ public class SettingsActivity extends AppCompatActivity {
         Intent returnIntent = new Intent();
         returnIntent.putExtra("defaultFormat", defaultFormat);
         returnIntent.putExtra("defaultVolume", defaultVolume);
+        returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
     }
@@ -253,6 +255,14 @@ public class SettingsActivity extends AppCompatActivity {
                         .setPositiveButton("確定", (dialog, id) -> dialog.dismiss());
                         AlertDialog alertDialog = builder.create();
                 alertDialog.show();
+                return true;
+            });
+
+            Preference prefRemoveCache = findPreference("remove_cache");
+            assert prefRemoveCache != null;
+            prefRemoveCache.setOnPreferenceClickListener(preference -> {
+                activity.remove_cache = true;
+                preference.setSummary("將移除快取");
                 return true;
             });
         }

@@ -20,6 +20,10 @@
         app:title="預設音量"/>
     <Preference
         app:layout="@layout/preference_layout"
+        app:key="remove_cache"
+        app:title="移除所有影片網址快取"/>
+    <Preference
+        app:layout="@layout/preference_layout"
         app:key="update"
         app:title="更新"/>
     <Preference
