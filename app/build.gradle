@@ -63,11 +63,11 @@ android {
 }
 
 dependencies {
-    implementation 'androidx.media3:media3-exoplayer:1.2.0'
-    implementation "androidx.media3:media3-exoplayer-hls:1.2.0"
+    implementation 'androidx.media3:media3-exoplayer:1.2.1'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.2.1'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'org.jsoup:jsoup:1.17.1'
+    implementation 'org.jsoup:jsoup:1.17.2'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
 }
