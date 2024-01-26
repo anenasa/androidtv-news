@@ -30,6 +30,7 @@ https://github.com/anenasa/androidtv-news/releases
 預設頻道條件：
 1. 來源必須合法
 2. 台灣能看得到
+3. 無須登入
 
 如果有頻道建議歡迎提出。
 
