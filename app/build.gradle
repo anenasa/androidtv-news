@@ -17,7 +17,7 @@ android {
         // Need to set this to 29 so file access works on Android TV 11 and above
         targetSdkVersion 29
         versionCode 30200
-        versionName "3.2.0"
+        versionName "3.2.1"
     }
 
     buildTypes {
