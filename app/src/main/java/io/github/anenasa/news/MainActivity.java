@@ -226,11 +226,6 @@ public class MainActivity extends AppCompatActivity {
                     channel.add(ch);
                 }
             }
-
-            // Load saved video url
-            for(Channel ch: channel){
-                ch.setVideo(preferences.getString(ch.getUrl() + ch.getFormat(), ""));
-            }
         } catch (IOException | JSONException e) {
             Log.e(TAG, Log.getStackTraceString(e));
             channel = null;
@@ -684,9 +679,6 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("channelNum", channelNum);
         editor.putString("defaultFormat", defaultFormat);
         editor.putString("defaultVolume", defaultVolume);
-        for (Channel value : channel) {
-            editor.putString(value.getUrl() + value.getFormat(), value.getVideo());
-        }
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
