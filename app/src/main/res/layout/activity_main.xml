@@ -32,14 +32,5 @@
         android:layout_gravity="end"
         android:background="#80000000"
         android:textSize="48sp" />
-    <TextView
-        android:id="@+id/errorMessage"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center"
-        android:layout_marginBottom="50sp"
-        android:layout_marginHorizontal="20sp"
-        android:background="#80000000"
-        android:textSize="24sp" />
 
 </FrameLayout>
