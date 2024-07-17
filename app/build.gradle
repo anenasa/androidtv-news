@@ -4,8 +4,7 @@ plugins {
 }
 
 android {
-    compileSdkVersion 34
-    buildToolsVersion "30.0.3"
+    compileSdk 34
 
     defaultConfig {
         applicationId "io.github.anenasa.news"
@@ -15,6 +14,7 @@ android {
         // https://stackoverflow.com/a/27100238
         minSdkVersion 21
         // Need to set this to 29 so file access works on Android TV 11 and above
+        //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
         versionCode 30200
         versionName "3.2.1"
@@ -30,7 +30,8 @@ android {
             versionNameSuffix '-DEBUG'
         }
     }
-    flavorDimensions "abi"
+
+    flavorDimensions = ["abi"]
     productFlavors {
         universal {
             dimension "abi"
