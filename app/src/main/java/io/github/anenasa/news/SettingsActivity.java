@@ -192,7 +192,7 @@ public class SettingsActivity extends AppCompatActivity {
                         String version_new = reader.readLine();
                         if(!version_new.equals(BuildConfig.VERSION_NAME.split("-")[0])){
                             activity.runOnUiThread(() -> update.setSummary("有新版本"));
-                            String link = "https://github.com/anenasa/androidtv-news/releases/tag/v" + version_new;
+                            String link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-" + version_new + ".apk";
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                             startActivity(intent);
                         }
