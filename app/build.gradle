@@ -45,6 +45,9 @@ android {
         abortOnError false
     }
     namespace 'io.github.anenasa.news'
+    buildFeatures {
+        buildConfig true
+    }
 }
 
 dependencies {
