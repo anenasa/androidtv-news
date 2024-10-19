@@ -497,8 +497,8 @@ public class MainActivity extends AppCompatActivity {
                         alertDialog.show();
                     }
                     return true;
-                case KeyEvent.KEYCODE_DPAD_UP:
-                case KeyEvent.KEYCODE_CHANNEL_UP:
+                case KeyEvent.KEYCODE_DPAD_DOWN:
+                case KeyEvent.KEYCODE_CHANNEL_DOWN:
                     do {
                         if (channelNum == 0) {
                             channelNum = channel.size() - 1;
@@ -508,8 +508,8 @@ public class MainActivity extends AppCompatActivity {
                     } while (channel.get(channelNum).isHidden());
                     switchChannel(channelNum);
                     return true;
-                case KeyEvent.KEYCODE_DPAD_DOWN:
-                case KeyEvent.KEYCODE_CHANNEL_DOWN:
+                case KeyEvent.KEYCODE_DPAD_UP:
+                case KeyEvent.KEYCODE_CHANNEL_UP:
                     do {
                         if (channelNum == channel.size() - 1) {
                             channelNum = 0;
