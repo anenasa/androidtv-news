@@ -320,13 +320,17 @@ public class Channel {
             url = object.getString("fullpath");
         }
         else if(url.startsWith("https://www.ofiii.com/channel/watch/")){
-            String id = url.substring(url.lastIndexOf("/") + 1);
             OkHttpClient okHttpClient = new OkHttpClient();
-            String data = String.format("{\"jsonrpc\":\"2.0\",\"id\":123,\"method\":\"LoadService.GetURLs\",\"params\":{\"media_type\":\"channel\",\"device_type\":\"pc\",\"asset_id\":\"%s\"}}", id);
-            RequestBody requestBody = RequestBody.create(data, MediaType.parse("application/json"));
+            // Get device id
+            Request deviceidRequest = new Request.Builder().url("https://www.ofiii.com/api/deviceId").build();
+            Response deviceidResponse = okHttpClient.newCall(deviceidRequest).execute();
+            ResponseBody deviceidBody = deviceidResponse.body();
+            if (deviceidBody == null) throw new IOException("body is null");
+            String deviceid = deviceidBody.string().replace("\"","");
+
+            String id = url.substring(url.lastIndexOf("/") + 1);
             Request.Builder okHttpRequestBuilder = new Request.Builder()
-                    .url("https://api.ofiii.com/cdi/v3/rpc")
-                    .post(requestBody);
+                    .url(String.format("https://cdi.ofiii.com/ofiii_cdi/video/urls?device_type=pc&device_id=%s&media_type=channel&asset_id=%s&project_num=OFWEB00", deviceid, id));
             for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
                 okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
             }
@@ -335,7 +339,7 @@ public class Channel {
             ResponseBody body = response.body();
             if (body == null) throw new IOException("body is null");
             JSONObject object = new JSONObject(body.string());
-            url = object.getJSONObject("result").getJSONArray("asset_urls").getString(0);
+            url = object.getJSONArray("asset_urls").getString(0);
         }
 
         PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
