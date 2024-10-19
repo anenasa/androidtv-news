@@ -320,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
     @OptIn(markerClass = UnstableApi.class)
     void play(int num)
     {
-        textInfo.setText("正在載入" + channel.get(num).getName());
+        textInfo.setText(String.format("正在載入 %d %s", num, channel.get(num).getName()));
         new Thread(() -> {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
