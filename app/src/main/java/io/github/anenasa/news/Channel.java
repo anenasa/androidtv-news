@@ -176,8 +176,7 @@ public class Channel {
             }
         }
         if(url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") ||
-                url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/") ||
-                url.startsWith("https://www.4gtv.tv/channel/") || url.startsWith("https://m.4gtv.tv/channel/")){
+                url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             long current = System.currentTimeMillis() / 1000;
             int pos = getVideo().indexOf("expires") + 8;
             long expire = Long.parseLong(getVideo().substring(pos, pos + 10));
@@ -189,31 +188,6 @@ public class Channel {
             }
         }
         return NEEDPARSE_UNKNOWN;
-    }
-
-    String fourgDecrypt(String data) throws IOException, InvalidAlgorithmParameterException, InvalidKeyException, NoSuchPaddingException, NoSuchAlgorithmException, IllegalBlockSizeException, BadPaddingException {
-        byte [] cipherBytes = Base64.decode(data, Base64.DEFAULT);
-        byte [] iv = "JUMxvVMmszqUTeKn".getBytes();
-        byte [] keyBytes = "ilyB29ZdruuQjC45JhBBR7o2Z8WJ26Vg".getBytes();
-        SecretKey aesKey = new SecretKeySpec(keyBytes, "AES");
-        Cipher cipher = Cipher.getInstance("AES/CBC/NOPADDING");
-        cipher.init(Cipher.DECRYPT_MODE, aesKey, new IvParameterSpec(iv));
-        byte[] result = cipher.doFinal(cipherBytes);
-        String ret = new String(result);
-        String url = ret.substring(ret.indexOf("flstURLs") + 12);
-        url = url.substring(0, url.indexOf("\""));
-        return url;
-    }
-
-    String fourgEncrypt(String assetID, String channelID) throws InvalidAlgorithmParameterException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException {
-        String data = String.format("{\"fnCHANNEL_ID\":\"%s\",\"fsASSET_ID\":\"%s\",\"fsDEVICE_TYPE\":\"pc\",\"clsIDENTITY_VALIDATE_ARUS\":{\"fsVALUE\":\"\"}}", channelID, assetID);
-        byte [] iv = "JUMxvVMmszqUTeKn".getBytes();
-        byte [] keyBytes = "ilyB29ZdruuQjC45JhBBR7o2Z8WJ26Vg".getBytes();
-        SecretKey aesKey = new SecretKeySpec(keyBytes, "AES");
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, aesKey, new IvParameterSpec(iv));
-        byte[] result = cipher.doFinal(data.getBytes());
-        return Base64.encodeToString(result, Base64.DEFAULT);
     }
 
     void parse(YtDlp ytdlp) throws JSONException, IOException, InterruptedException, PyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
@@ -279,25 +253,6 @@ public class Channel {
             String bodyString = body.string();
             String videoUrl = bodyString.substring(bodyString.indexOf("VideoURL") + 11);
             url = videoUrl.substring(0, videoUrl.indexOf("\""));
-        }
-        else if(url.startsWith("https://www.4gtv.tv/channel/") || url.startsWith("https://m.4gtv.tv/channel/")){
-            String assetID = url.substring(url.lastIndexOf("/") + 1, url.indexOf("?"));
-            String channelID = url.substring(url.indexOf("ch=") + 3);
-            String data = fourgEncrypt(assetID, channelID);
-
-            OkHttpClient okHttpClient = new OkHttpClient();
-            RequestBody formBody = new FormBody.Builder()
-                    .add("value", data)
-                    .build();
-            Request okHttpRequest = new Request.Builder()
-                    .url("https://api2.4gtv.tv//Channel/GetChannelUrl3")
-                    .post(formBody)
-                    .build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            JSONObject object = new JSONObject(body.string());
-            url = fourgDecrypt(object.getString("Data"));
         }
         else if(url.startsWith("https://www.litv.tv/channel/watch.do")){
             String id = url.substring(url.indexOf("content_id") + 11);
