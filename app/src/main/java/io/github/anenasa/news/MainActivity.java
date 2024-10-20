@@ -702,8 +702,9 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.put("newChannelArray", newChannelArray);
             String json_string = jsonObject.toString();
             File file = new File(getExternalFilesDir(null), "custom.txt");
-            FileOutputStream stream = new FileOutputStream(file);
-            stream.write(json_string.getBytes());
+            try (FileOutputStream stream = new FileOutputStream(file)) {
+                stream.write(json_string.getBytes());
+            }
         } catch (JSONException | IOException e) {
             Log.e(TAG, Log.getStackTraceString(e));
         }
