@@ -1,3 +1,11 @@
+version 3.3.0 2024.10.22
+-不再提供個別abi的apk，不再支援x86
+-不顯示錯誤訊息
+-退出時不儲存影片網址
+-修復 ofiii
+-轉台顯示顯示頻道號碼
+-反轉上下鍵、選台上下鍵
+
 version 3.2.1 2024.07.05
 -修復 LINE TODAY NoSuchMethodError
 
