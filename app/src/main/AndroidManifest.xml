@@ -17,7 +17,7 @@
         android:fullBackupContent="@xml/my_backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name="com.chaquo.python.android.PyApplication"
+        android:name="MyApplication"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar"
         android:requestLegacyExternalStorage="true"

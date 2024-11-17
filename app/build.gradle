@@ -59,4 +59,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
     implementation 'org.jsoup:jsoup:1.18.1'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
+    implementation "ch.acra:acra-core:5.12.0"
+    compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
+    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
 }
