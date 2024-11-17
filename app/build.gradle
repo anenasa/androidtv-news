@@ -50,6 +50,12 @@ android {
     }
 }
 
+chaquopy {
+    defaultConfig {
+        version = "3.11"
+    }
+}
+
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.2'
     implementation 'androidx.media3:media3-exoplayer:1.4.1'
