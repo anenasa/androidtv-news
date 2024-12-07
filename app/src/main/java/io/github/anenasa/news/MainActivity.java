@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     SurfaceView playerView = null;
     TextView textView;
     TextView textInfo;
+    TextView errorMessageView;
 
     SharedPreferences preferences;
 
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
+                errorMessageView.setText(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
                     if(errorCount > 0) {
                         // Force parse by removing video url
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPlaybackStateChanged(int state) {
                 if(state == Player.STATE_READY){
+                    errorMessageView.setText("");
                     textInfo.setText("");
                     errorCount = 0;
                 }
@@ -134,6 +137,7 @@ public class MainActivity extends AppCompatActivity {
         player.setVideoSurfaceView(playerView);
         textView = findViewById(R.id.textView);
         textInfo = findViewById(R.id.textInfo);
+        errorMessageView = findViewById(R.id.errorMessage);
 
         readChannelList();
         if(channel == null){
@@ -313,6 +317,7 @@ public class MainActivity extends AppCompatActivity {
     void switchChannel(int num)
     {
         player.stop();
+        errorMessageView.setText("");
         channelNum = num;
         play(num);
     }
@@ -331,6 +336,7 @@ public class MainActivity extends AppCompatActivity {
                          InvalidKeyException e) {
                     if(channelNum!=num) return;
                     Log.e(TAG, Log.getStackTraceString(e));
+                    showErrorMessage(e.toString());
                 }
             }
             if(channelNum!=num) return;
@@ -716,6 +722,14 @@ public class MainActivity extends AppCompatActivity {
         while (channel.get(channelNum).isHidden()){
             channelNum++;
         }
+    }
+
+    void showErrorMessage(String message){
+        runOnUiThread(() -> {
+            if(!player.isPlaying()) {
+                errorMessageView.setText(message);
+            }
+        });
     }
 
     @Override
