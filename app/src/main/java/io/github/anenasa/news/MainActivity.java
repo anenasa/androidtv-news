@@ -67,6 +67,7 @@ public class MainActivity extends AppCompatActivity {
     String input = "";
     String defaultFormat;
     String defaultVolume;
+    boolean isShowErrorMessage;
 
     YtDlp ytdlp;
     ExoPlayer player = null;
@@ -102,13 +103,14 @@ public class MainActivity extends AppCompatActivity {
         channelNum = preferences.getInt("channelNum", 0);
         defaultFormat = preferences.getString("defaultFormat", "bv*+ba/b");
         defaultVolume = preferences.getString("defaultVolume", "1.0");
+        isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false);
 
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
                 Log.e(TAG, Log.getStackTraceString(error));
-                errorMessageView.setText(error.toString());
+                showErrorMessage(error.toString());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
                     if(errorCount > 0) {
                         // Force parse by removing video url
@@ -439,6 +441,7 @@ public class MainActivity extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 defaultFormat = data.getStringExtra("defaultFormat");
                 defaultVolume = data.getStringExtra("defaultVolume");
+                isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
                 readChannelList();
                 if(data.getBooleanExtra("remove_cache", false)){
                     for(Channel i: channel) i.setVideo("");
@@ -655,6 +658,7 @@ public class MainActivity extends AppCompatActivity {
         Intent intentSettings = new Intent(this, SettingsActivity.class);
         intentSettings.putExtra("defaultFormat", defaultFormat);
         intentSettings.putExtra("defaultVolume", defaultVolume);
+        intentSettings.putExtra("isShowErrorMessage", isShowErrorMessage);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -685,6 +689,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putInt("channelNum", channelNum);
         editor.putString("defaultFormat", defaultFormat);
         editor.putString("defaultVolume", defaultVolume);
+        editor.putBoolean("isShowErrorMessage", isShowErrorMessage);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
@@ -725,6 +730,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void showErrorMessage(String message){
+        if(!isShowErrorMessage) return;
         runOnUiThread(() -> {
             if(!player.isPlaying()) {
                 errorMessageView.setText(message);

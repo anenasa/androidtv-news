@@ -18,6 +18,10 @@
         app:layout="@layout/preference_layout"
         app:key="volume"
         app:title="預設音量"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="isShowErrorMessage"
+        app:title="顯示錯誤訊息"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="remove_cache"

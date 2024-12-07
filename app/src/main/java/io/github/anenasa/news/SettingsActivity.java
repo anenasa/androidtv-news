@@ -7,6 +7,7 @@ import androidx.core.content.ContextCompat;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreference;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -35,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     String defaultFormat;
     String defaultVolume;
+    boolean isShowErrorMessage;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -44,6 +46,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         defaultFormat = getIntent().getExtras().getString("defaultFormat");
         defaultVolume = getIntent().getExtras().getString("defaultVolume");
+        isShowErrorMessage = getIntent().getExtras().getBoolean("isShowErrorMessage");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -55,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
         Intent returnIntent = new Intent();
         returnIntent.putExtra("defaultFormat", defaultFormat);
         returnIntent.putExtra("defaultVolume", defaultVolume);
+        returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
         returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
@@ -171,6 +175,14 @@ public class SettingsActivity extends AppCompatActivity {
                     activity.defaultVolume = newValue.toString();
                     preference.setSummary(newValue.toString());
                 }
+                return true;
+            });
+
+            SwitchPreference prefShowErrorMessage = findPreference("isShowErrorMessage");
+            assert prefShowErrorMessage != null;
+            prefShowErrorMessage.setChecked(activity.isShowErrorMessage);
+            prefShowErrorMessage.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.isShowErrorMessage = (boolean) newValue;
                 return true;
             });
 
