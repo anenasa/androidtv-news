@@ -90,12 +90,7 @@ public class MainActivity extends AppCompatActivity {
             ytdlp = new YtDlp(this);
         } catch (PyException e) {
             Log.e(TAG, Log.getStackTraceString(e));
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("yt-dlp 載入失敗");
-            builder.setMessage(e.toString());
-            builder.setNegativeButton("確定", (dialog, id) -> finish());
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
+            // AlertDialog does not work in onCreate(), so I show it in onStart()
         }
         setContentView(R.layout.activity_main);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
@@ -153,6 +148,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        if (ytdlp == null){
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle("yt-dlp 載入失敗");
+            builder.setNegativeButton("確定", (dialog, id) -> finish());
+            AlertDialog alertDialog = builder.create();
+            alertDialog.show();
+        }
         isStarted = true;
         // Do not call play() more than once
         // play() will be called in onActivityResult()
