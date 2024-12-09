@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -68,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
     String defaultFormat;
     String defaultVolume;
     boolean isShowErrorMessage;
+    boolean enableBackgroundExtract;
 
     YtDlp ytdlp;
     ExoPlayer player = null;
@@ -75,6 +78,8 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     TextView textInfo;
     TextView errorMessageView;
+    Timer timer;
+    TimerTask timerTask;
 
     SharedPreferences preferences;
 
@@ -107,6 +112,7 @@ public class MainActivity extends AppCompatActivity {
         defaultFormat = preferences.getString("defaultFormat", "bv*+ba/b");
         defaultVolume = preferences.getString("defaultVolume", "1.0");
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false);
+        enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false);
 
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
@@ -150,6 +156,32 @@ public class MainActivity extends AppCompatActivity {
         }
         if(channelNum >= channel.size()){
             resetChannelNum();
+        }
+
+        if(enableBackgroundExtract) {
+            timer = new Timer();
+            timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    for (int i = 0; i < channel.size(); i++) {
+                        try {
+                            if (!channel.get(i).isHidden()) {
+                                channel.get(i).parse(ytdlp);
+                            }
+                        } catch (JSONException | IOException | InterruptedException |
+                                 InvalidAlgorithmParameterException | IllegalBlockSizeException |
+                                 NoSuchPaddingException | BadPaddingException |
+                                 NoSuchAlgorithmException |
+                                 InvalidKeyException | PyException e) {
+                            Log.e(TAG, Log.getStackTraceString(e));
+                        }
+                    }
+                    saveSettings();
+                }
+            };
+            // Delay timer for one second because if two requests are sent to
+            // Hami Video at the same time, one of them will fail.
+            timer.schedule(timerTask, 1000, 3600000);
         }
     }
 
@@ -452,6 +484,7 @@ public class MainActivity extends AppCompatActivity {
                 defaultFormat = data.getStringExtra("defaultFormat");
                 defaultVolume = data.getStringExtra("defaultVolume");
                 isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
+                enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false);
                 readChannelList();
                 if(data.getBooleanExtra("remove_cache", false)){
                     for(Channel i: channel) i.setVideo("");
@@ -669,6 +702,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("defaultFormat", defaultFormat);
         intentSettings.putExtra("defaultVolume", defaultVolume);
         intentSettings.putExtra("isShowErrorMessage", isShowErrorMessage);
+        intentSettings.putExtra("enableBackgroundExtract", enableBackgroundExtract);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -700,6 +734,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("defaultFormat", defaultFormat);
         editor.putString("defaultVolume", defaultVolume);
         editor.putBoolean("isShowErrorMessage", isShowErrorMessage);
+        editor.putBoolean("enableBackgroundExtract", enableBackgroundExtract);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();

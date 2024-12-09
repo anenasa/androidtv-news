@@ -37,6 +37,7 @@ public class SettingsActivity extends AppCompatActivity {
     String defaultFormat;
     String defaultVolume;
     boolean isShowErrorMessage;
+    boolean enableBackgroundExtract;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -47,6 +48,7 @@ public class SettingsActivity extends AppCompatActivity {
         defaultFormat = getIntent().getExtras().getString("defaultFormat");
         defaultVolume = getIntent().getExtras().getString("defaultVolume");
         isShowErrorMessage = getIntent().getExtras().getBoolean("isShowErrorMessage");
+        enableBackgroundExtract = getIntent().getExtras().getBoolean("enableBackgroundExtract");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -59,6 +61,7 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("defaultFormat", defaultFormat);
         returnIntent.putExtra("defaultVolume", defaultVolume);
         returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
+        returnIntent.putExtra("enableBackgroundExtract", enableBackgroundExtract);
         returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
@@ -183,6 +186,14 @@ public class SettingsActivity extends AppCompatActivity {
             prefShowErrorMessage.setChecked(activity.isShowErrorMessage);
             prefShowErrorMessage.setOnPreferenceChangeListener((preference, newValue) -> {
                 activity.isShowErrorMessage = (boolean) newValue;
+                return true;
+            });
+
+            SwitchPreference prefEnableBackgroundExtract = findPreference("enableBackgroundExtract");
+            assert prefEnableBackgroundExtract != null;
+            prefEnableBackgroundExtract.setChecked(activity.enableBackgroundExtract);
+            prefEnableBackgroundExtract.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.enableBackgroundExtract = (boolean) newValue;
                 return true;
             });
 

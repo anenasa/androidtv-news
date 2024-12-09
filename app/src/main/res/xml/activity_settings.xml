@@ -22,6 +22,11 @@
         app:layout="@layout/preference_layout"
         app:key="isShowErrorMessage"
         app:title="顯示錯誤訊息"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="enableBackgroundExtract"
+        app:title="預載影片網址"
+        app:summary="需重新啟動應用程式才能生效"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="remove_cache"
