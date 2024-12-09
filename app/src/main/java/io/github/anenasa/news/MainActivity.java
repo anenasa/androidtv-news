@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
             else
                 Log.e(TAG, Log.getStackTraceString(e));
             // AlertDialog does not work in onCreate(), so I show it in onStart()
+            return;
         }
         setContentView(R.layout.activity_main);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
@@ -750,6 +751,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if(player == null) return;
         player.release();
     }
 
@@ -757,6 +759,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         isStarted = false;
+        if(player == null) return;
         player.stop();
         saveSettings();
     }
