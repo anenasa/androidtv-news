@@ -88,8 +88,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         try {
             ytdlp = new YtDlp(this);
-        } catch (PyException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+        } catch (PyException | IOException e) {
+            // Log.getStackTraceString does not output UnknownHostException
+            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
+            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
+                Log.e(TAG, e.getMessage());
+                e.printStackTrace();
+            }
+            else
+                Log.e(TAG, Log.getStackTraceString(e));
             // AlertDialog does not work in onCreate(), so I show it in onStart()
         }
         setContentView(R.layout.activity_main);

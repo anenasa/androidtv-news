@@ -2,7 +2,6 @@ package io.github.anenasa.news;
 
 import android.content.Context;
 import android.os.StrictMode;
-import android.util.Log;
 
 import com.chaquo.python.PyException;
 import com.chaquo.python.PyObject;
@@ -24,18 +23,17 @@ public class YtDlp {
      * @param context Context
      * @throws PyException yt-dlp failed to load
      */
-    YtDlp(Context context) throws PyException {
-        if(!YtDlp.isDownloaded(context)) {
-            YtDlp.download(context);
-        }
+    YtDlp(Context context) throws PyException, IOException {
         try {
+            if(!YtDlp.isDownloaded(context)) {
+                YtDlp.download(context);
+            }
             Python py = Python.getInstance();
             String ytdl_filename = new File(context.getExternalFilesDir(null), "yt-dlp").toString();
             PyObject zipimport = py.getModule("zipimport");
             PyObject zip = zipimport.callAttr("zipimporter", ytdl_filename);
             yt_dlp = zip.callAttr("load_module", "yt_dlp");
-        } catch (PyException e){
-            Log.e(TAG, "yt-dlp 載入失敗");
+        } catch (PyException | IOException e){
             new File(context.getExternalFilesDir(null), "yt-dlp").delete();
             throw e;
         }
@@ -56,31 +54,26 @@ public class YtDlp {
      * @param context Context
      * @return true if download is successful, false otherwise
      */
-    public static boolean download(Context context){
-        try {
-            File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            URL url = new URL("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp");
-            HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-            urlConnection.setRequestMethod("GET");
-            urlConnection.connect();
+    public static void download(Context context) throws IOException {
+        File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
+        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+        URL url = new URL("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp");
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
 
-            FileOutputStream fileOutput = new FileOutputStream(file);
-            InputStream inputStream = urlConnection.getInputStream();
+        FileOutputStream fileOutput = new FileOutputStream(file);
+        InputStream inputStream = urlConnection.getInputStream();
 
-            byte[] buffer = new byte[1024];
-            int bufferLength = 0;
+        byte[] buffer = new byte[1024];
+        int bufferLength = 0;
 
-            while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
-                fileOutput.write(buffer, 0, bufferLength);
-            }
-            fileOutput.close();
-            file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"));
-        } catch (IOException e) {
-            return false;
+        while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
+            fileOutput.write(buffer, 0, bufferLength);
         }
-        return true;
+        fileOutput.close();
+        file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"));
     }
 
     /**
