@@ -26,6 +26,7 @@
         <activity android:name=".SettingsActivity" />
         <activity android:name=".ChannelListActivity" />
         <activity android:name=".MainActivity"
+            android:screenOrientation="sensorLandscape"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
