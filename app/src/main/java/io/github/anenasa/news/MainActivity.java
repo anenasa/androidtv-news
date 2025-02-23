@@ -209,6 +209,12 @@ public class MainActivity extends AppCompatActivity {
         play(channelNum);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+    }
+
     void readChannelList() {
         channel = new ArrayList<>();
         try {
