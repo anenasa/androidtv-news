@@ -11,6 +11,7 @@ import android.os.StrictMode;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
@@ -358,6 +359,28 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    void toPrevChannel(){
+        do {
+            if (channelNum == 0) {
+                channelNum = channel.size() - 1;
+            } else {
+                channelNum -= 1;
+            }
+        } while (channel.get(channelNum).isHidden());
+        switchChannel(channelNum);
+    }
+
+    void toNextChannel(){
+        do {
+            if (channelNum == channel.size() - 1) {
+                channelNum = 0;
+            } else {
+                channelNum += 1;
+            }
+        } while (channel.get(channelNum).isHidden());
+        switchChannel(channelNum);
+    }
+
     void switchChannel(int num)
     {
         player.stop();
@@ -551,25 +574,11 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_CHANNEL_DOWN:
-                    do {
-                        if (channelNum == 0) {
-                            channelNum = channel.size() - 1;
-                        } else {
-                            channelNum -= 1;
-                        }
-                    } while (channel.get(channelNum).isHidden());
-                    switchChannel(channelNum);
+                    toPrevChannel();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_CHANNEL_UP:
-                    do {
-                        if (channelNum == channel.size() - 1) {
-                            channelNum = 0;
-                        } else {
-                            channelNum += 1;
-                        }
-                    } while (channel.get(channelNum).isHidden());
-                    switchChannel(channelNum);
+                    toNextChannel();
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
@@ -616,6 +625,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         return super.dispatchKeyEvent(event);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() != MotionEvent.ACTION_DOWN){
+            return super.onTouchEvent(event);
+        }
+        getSupportFragmentManager().popBackStack();
+        if((int)event.getX() < playerView.getWidth() / 3){
+            toPrevChannel();
+        }
+        else if((int)event.getX() < playerView.getWidth() / 3 * 2){
+            showMenu();
+        }
+        else{
+            toNextChannel();
+        }
+        return true;
     }
 
     void appendInput(int num) {
