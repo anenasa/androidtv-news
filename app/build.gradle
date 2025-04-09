@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    compileSdk 34
+    compileSdk 35
 
     defaultConfig {
         applicationId "io.github.anenasa.news"
@@ -57,13 +57,13 @@ chaquopy {
 }
 
 dependencies {
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.3'
-    implementation 'androidx.media3:media3-exoplayer:1.4.1'
-    implementation 'androidx.media3:media3-exoplayer-hls:1.4.1'
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
+    implementation 'androidx.media3:media3-exoplayer:1.6.0'
+    implementation 'androidx.media3:media3-exoplayer-hls:1.6.0'
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.7.0'
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
-    implementation 'org.jsoup:jsoup:1.18.1'
+    implementation 'org.jsoup:jsoup:1.19.1'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
     implementation "ch.acra:acra-core:5.12.0"
     compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
