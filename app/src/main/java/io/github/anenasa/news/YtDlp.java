@@ -56,7 +56,6 @@ public class YtDlp {
     /**
      * Download yt-dlp binary to external storage
      * @param context Context
-     * @return true if download is successful, false otherwise
      */
     public static void download(Context context) throws IOException {
         File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
