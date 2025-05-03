@@ -77,7 +77,9 @@ public class YtDlp {
             fileOutput.write(buffer, 0, bufferLength);
         }
         fileOutput.close();
-        file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"));
+        if (!file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"))){
+            throw new IOException("renaming failed");
+        }
     }
 
     /**
