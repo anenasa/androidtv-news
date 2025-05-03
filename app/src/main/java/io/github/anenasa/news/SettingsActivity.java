@@ -208,6 +208,24 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
+            Preference update_ytdlp = findPreference("update_ytdlp");
+            assert update_ytdlp != null;
+            update_ytdlp.setSummary(YtDlp.version);
+            update_ytdlp.setOnPreferenceClickListener(preference -> {
+                update_ytdlp.setSummary("正在更新");
+                new Thread(() -> {
+                    try {
+                        YtDlp.download(activity);
+                        activity.runOnUiThread(() -> update_ytdlp.setSummary("已更新，請重新啟動應用程式"));
+                    }
+                    catch (IOException e) {
+                        activity.runOnUiThread(() -> update_ytdlp.setSummary("更新時發生錯誤"));
+                        Log.e(activity.TAG, Log.getStackTraceString(e));
+                    }
+                }).start();
+                return true;
+            });
+
             Preference update = findPreference("update");
             assert update != null;
             update.setOnPreferenceClickListener(preference -> {
@@ -231,7 +249,6 @@ public class SettingsActivity extends AppCompatActivity {
                             startActivity(intent);
                         }
                         else{
-                            YtDlp.download(activity);
                             activity.runOnUiThread(() -> update.setSummary("已經是最新版本"));
                         }
                     } catch (IOException e) {

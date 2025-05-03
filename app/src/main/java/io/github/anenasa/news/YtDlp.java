@@ -17,6 +17,7 @@ import java.net.URL;
 public class YtDlp {
     private final String TAG = "YtDlp";
     private PyObject yt_dlp;
+    static String version;
 
     /**
      * Initialize yt-dlp
@@ -30,9 +31,12 @@ public class YtDlp {
             }
             Python py = Python.getInstance();
             String ytdl_filename = new File(context.getExternalFilesDir(null), "yt-dlp").toString();
-            PyObject zipimport = py.getModule("zipimport");
-            PyObject zip = zipimport.callAttr("zipimporter", ytdl_filename);
-            yt_dlp = zip.callAttr("load_module", "yt_dlp");
+            PyObject sys = py.getModule("sys");
+            PyObject path = sys.get("path");
+            path.callAttr("insert", 0, ytdl_filename);
+            yt_dlp = py.getModule("yt_dlp");
+            PyObject version_module = py.getModule("yt_dlp.version");
+            version = version_module.get("__version__").toString();
         } catch (PyException | IOException e){
             new File(context.getExternalFilesDir(null), "yt-dlp").delete();
             throw e;

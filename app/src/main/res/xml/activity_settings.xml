@@ -41,6 +41,10 @@
         app:title="更新"/>
     <Preference
         app:layout="@layout/preference_layout"
+        app:key="update_ytdlp"
+        app:title="更新 yt-dlp"/>
+    <Preference
+        app:layout="@layout/preference_layout"
         app:key="about"
         app:title="關於"/>
 
