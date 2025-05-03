@@ -38,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
     String defaultVolume;
     boolean isShowErrorMessage;
     boolean enableBackgroundExtract;
+    boolean invertChannelButtons;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -49,6 +50,7 @@ public class SettingsActivity extends AppCompatActivity {
         defaultVolume = getIntent().getExtras().getString("defaultVolume");
         isShowErrorMessage = getIntent().getExtras().getBoolean("isShowErrorMessage");
         enableBackgroundExtract = getIntent().getExtras().getBoolean("enableBackgroundExtract");
+        invertChannelButtons = getIntent().getExtras().getBoolean("invertChannelButtons");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -62,6 +64,7 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("defaultVolume", defaultVolume);
         returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
         returnIntent.putExtra("enableBackgroundExtract", enableBackgroundExtract);
+        returnIntent.putExtra("invertChannelButtons", invertChannelButtons);
         returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
@@ -194,6 +197,14 @@ public class SettingsActivity extends AppCompatActivity {
             prefEnableBackgroundExtract.setChecked(activity.enableBackgroundExtract);
             prefEnableBackgroundExtract.setOnPreferenceChangeListener((preference, newValue) -> {
                 activity.enableBackgroundExtract = (boolean) newValue;
+                return true;
+            });
+
+            SwitchPreference prefInvertChannelButtons = findPreference("invertChannelButtons");
+            assert prefInvertChannelButtons != null;
+            prefInvertChannelButtons.setChecked(activity.invertChannelButtons);
+            prefInvertChannelButtons.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.invertChannelButtons = (boolean) newValue;
                 return true;
             });
 

@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
     String defaultVolume;
     boolean isShowErrorMessage;
     boolean enableBackgroundExtract;
+    boolean invertChannelButtons;
 
     YtDlp ytdlp;
     ExoPlayer player = null;
@@ -114,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
         defaultVolume = preferences.getString("defaultVolume", "1.0");
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false);
         enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false);
+        invertChannelButtons = preferences.getBoolean("invertChannelButtons", false);
 
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
@@ -514,6 +516,7 @@ public class MainActivity extends AppCompatActivity {
                 defaultVolume = data.getStringExtra("defaultVolume");
                 isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
                 enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false);
+                invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
                 readChannelList();
                 if(data.getBooleanExtra("remove_cache", false)){
                     for(Channel i: channel) i.setVideo("");
@@ -580,11 +583,21 @@ public class MainActivity extends AppCompatActivity {
                     return true;
                 case KeyEvent.KEYCODE_DPAD_DOWN:
                 case KeyEvent.KEYCODE_CHANNEL_DOWN:
-                    toPrevChannel();
+                    if (invertChannelButtons) {
+                        toNextChannel();
+                    }
+                    else{
+                        toPrevChannel();
+                    }
                     return true;
                 case KeyEvent.KEYCODE_DPAD_UP:
                 case KeyEvent.KEYCODE_CHANNEL_UP:
-                    toNextChannel();
+                    if (invertChannelButtons) {
+                        toPrevChannel();
+                    }
+                    else{
+                        toNextChannel();
+                    }
                     return true;
                 case KeyEvent.KEYCODE_DPAD_LEFT:
                     audioManager.adjustVolume(AudioManager.ADJUST_LOWER, AudioManager.FLAG_PLAY_SOUND);
@@ -640,13 +653,23 @@ public class MainActivity extends AppCompatActivity {
         }
         getSupportFragmentManager().popBackStack();
         if((int)event.getX() < playerView.getWidth() / 3){
-            toPrevChannel();
+            if (invertChannelButtons) {
+                toNextChannel();
+            }
+            else{
+                toPrevChannel();
+            }
         }
         else if((int)event.getX() < playerView.getWidth() / 3 * 2){
             showMenu();
         }
         else{
-            toNextChannel();
+            if (invertChannelButtons) {
+                toPrevChannel();
+            }
+            else{
+                toNextChannel();
+            }
         }
         return true;
     }
@@ -736,6 +759,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("defaultVolume", defaultVolume);
         intentSettings.putExtra("isShowErrorMessage", isShowErrorMessage);
         intentSettings.putExtra("enableBackgroundExtract", enableBackgroundExtract);
+        intentSettings.putExtra("invertChannelButtons", invertChannelButtons);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -768,6 +792,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putString("defaultVolume", defaultVolume);
         editor.putBoolean("isShowErrorMessage", isShowErrorMessage);
         editor.putBoolean("enableBackgroundExtract", enableBackgroundExtract);
+        editor.putBoolean("invertChannelButtons", invertChannelButtons);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
