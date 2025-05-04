@@ -73,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
     boolean isShowErrorMessage;
     boolean enableBackgroundExtract;
     boolean invertChannelButtons;
+    boolean hideNavigationBar;
+    boolean hideStatusBar;
 
     YtDlp ytdlp;
     ExoPlayer player = null;
@@ -116,6 +118,8 @@ public class MainActivity extends AppCompatActivity {
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false);
         enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false);
         invertChannelButtons = preferences.getBoolean("invertChannelButtons", false);
+        hideNavigationBar = preferences.getBoolean("hideNavigationBar", false);
+        hideStatusBar = preferences.getBoolean("hideStatusBar", false);
 
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
@@ -214,7 +218,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_FULLSCREEN);
+        int system_ui_flag = View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        if (hideStatusBar){
+            system_ui_flag += View.SYSTEM_UI_FLAG_FULLSCREEN;
+        }
+        if (hideNavigationBar){
+            system_ui_flag += View.SYSTEM_UI_FLAG_HIDE_NAVIGATION;
+        }
+        if (system_ui_flag != View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) {
+            getWindow().getDecorView().setSystemUiVisibility(system_ui_flag);
+        }
     }
 
     void readChannelList() {
@@ -517,6 +530,8 @@ public class MainActivity extends AppCompatActivity {
                 isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
                 enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false);
                 invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
+                hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
+                hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
                 readChannelList();
                 if(data.getBooleanExtra("remove_cache", false)){
                     for(Channel i: channel) i.setVideo("");
@@ -760,6 +775,8 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("isShowErrorMessage", isShowErrorMessage);
         intentSettings.putExtra("enableBackgroundExtract", enableBackgroundExtract);
         intentSettings.putExtra("invertChannelButtons", invertChannelButtons);
+        intentSettings.putExtra("hideNavigationBar", hideNavigationBar);
+        intentSettings.putExtra("hideStatusBar", hideStatusBar);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -793,6 +810,8 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("isShowErrorMessage", isShowErrorMessage);
         editor.putBoolean("enableBackgroundExtract", enableBackgroundExtract);
         editor.putBoolean("invertChannelButtons", invertChannelButtons);
+        editor.putBoolean("hideNavigationBar", hideNavigationBar);
+        editor.putBoolean("hideStatusBar", hideStatusBar);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();

@@ -39,6 +39,8 @@ public class SettingsActivity extends AppCompatActivity {
     boolean isShowErrorMessage;
     boolean enableBackgroundExtract;
     boolean invertChannelButtons;
+    boolean hideNavigationBar;
+    boolean hideStatusBar;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -51,6 +53,8 @@ public class SettingsActivity extends AppCompatActivity {
         isShowErrorMessage = getIntent().getExtras().getBoolean("isShowErrorMessage");
         enableBackgroundExtract = getIntent().getExtras().getBoolean("enableBackgroundExtract");
         invertChannelButtons = getIntent().getExtras().getBoolean("invertChannelButtons");
+        hideNavigationBar = getIntent().getExtras().getBoolean("hideNavigationBar");
+        hideStatusBar = getIntent().getExtras().getBoolean("hideStatusBar");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -65,6 +69,8 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
         returnIntent.putExtra("enableBackgroundExtract", enableBackgroundExtract);
         returnIntent.putExtra("invertChannelButtons", invertChannelButtons);
+        returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
+        returnIntent.putExtra("hideStatusBar", hideStatusBar);
         returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
@@ -205,6 +211,22 @@ public class SettingsActivity extends AppCompatActivity {
             prefInvertChannelButtons.setChecked(activity.invertChannelButtons);
             prefInvertChannelButtons.setOnPreferenceChangeListener((preference, newValue) -> {
                 activity.invertChannelButtons = (boolean) newValue;
+                return true;
+            });
+
+            SwitchPreference prefHideNavigationBar = findPreference("hideNavigationBar");
+            assert prefHideNavigationBar != null;
+            prefHideNavigationBar.setChecked(activity.hideNavigationBar);
+            prefHideNavigationBar.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.hideNavigationBar = (boolean) newValue;
+                return true;
+            });
+
+            SwitchPreference prefHideStatusBar = findPreference("hideStatusBar");
+            assert prefHideStatusBar != null;
+            prefHideStatusBar.setChecked(activity.hideStatusBar);
+            prefHideStatusBar.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.hideStatusBar = (boolean) newValue;
                 return true;
             });
 

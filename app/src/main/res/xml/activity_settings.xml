@@ -31,6 +31,14 @@
         app:layout="@layout/preference_layout"
         app:key="invertChannelButtons"
         app:title="反轉上下鍵"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="hideNavigationBar"
+        app:title="隱藏導覽列"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="hideStatusBar"
+        app:title="隱藏狀態列"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="remove_cache"
