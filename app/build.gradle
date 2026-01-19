@@ -12,7 +12,7 @@ android {
         // to use usesCleartextTraffic.
         // They are ignored in older versions.
         // https://stackoverflow.com/a/27100238
-        minSdkVersion 21
+        minSdkVersion 24
         // Need to set this to 29 so file access works on Android TV 11 and above
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
