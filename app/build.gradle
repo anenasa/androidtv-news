@@ -63,7 +63,8 @@ dependencies {
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
-    implementation 'org.jsoup:jsoup:1.22.1'
+    // https://github.com/jhy/jsoup/issues/2459
+    implementation 'org.jsoup:jsoup:1.21.2'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
     implementation "ch.acra:acra-core:5.13.1"
     compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
