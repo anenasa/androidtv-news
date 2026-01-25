@@ -1,2 +1,10 @@
+pluginManagement {
+    def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
+    def chaquopyVersion = useApi21 ? "15.0.1" : "17.0.0"
+    plugins {
+        id 'com.chaquo.python' version chaquopyVersion
+    }
+}
+
 rootProject.name = "新聞直播"
 include ':app'

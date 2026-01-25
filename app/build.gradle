@@ -3,6 +3,10 @@ plugins {
     id 'com.chaquo.python'
 }
 
+def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
+def apiVersion = useApi21 ? 21 : 24
+def media3Version = useApi21 ? "1.8.0" : "1.9.0"
+
 android {
     compileSdk = 36
 
@@ -12,7 +16,7 @@ android {
         // to use usesCleartextTraffic.
         // They are ignored in older versions.
         // https://stackoverflow.com/a/27100238
-        minSdkVersion 24
+        minSdkVersion apiVersion
         // Need to set this to 29 so file access works on Android TV 11 and above
         //noinspection ExpiredTargetSdkVersion
         targetSdkVersion 29
@@ -58,8 +62,10 @@ chaquopy {
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
-    implementation 'androidx.media3:media3-exoplayer:1.9.0'
-    implementation 'androidx.media3:media3-exoplayer-hls:1.9.0'
+    //noinspection GradleDependency
+    implementation "androidx.media3:media3-exoplayer:$media3Version"
+    //noinspection GradleDependency
+    implementation "androidx.media3:media3-exoplayer-hls:$media3Version"
     implementation 'androidx.preference:preference:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
