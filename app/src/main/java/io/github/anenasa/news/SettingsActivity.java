@@ -9,6 +9,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
@@ -16,6 +17,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.Manifest;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -105,6 +107,7 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 });
 
+        @SuppressLint("ObsoleteSdkInt")
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             activity = (SettingsActivity)getActivity();
@@ -266,7 +269,13 @@ public class SettingsActivity extends AppCompatActivity {
                         String version_new = reader.readLine();
                         if(!version_new.equals(BuildConfig.VERSION_NAME.split("-")[0])){
                             activity.runOnUiThread(() -> update.setSummary("有新版本"));
-                            String link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-" + version_new + ".apk";
+                            String link;
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                                link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-" + version_new + ".apk";
+                            }
+                            else {
+                                link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-api21-" + version_new + ".apk";
+                            }
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                             startActivity(intent);
                         }
