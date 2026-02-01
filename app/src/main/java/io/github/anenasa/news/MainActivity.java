@@ -882,6 +882,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (timerBackgroundExtract != null) {
+            timerBackgroundExtract.cancel();
+        }
+        if (timerReadChannelList != null) {
+            timerReadChannelList.cancel();
+        }
         if(player == null) return;
         player.release();
     }
