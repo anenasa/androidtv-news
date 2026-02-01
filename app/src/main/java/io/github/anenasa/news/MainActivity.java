@@ -206,6 +206,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void readChannelList() {
+        if(!isStarted) {
+            return;
+        }
         channelListLoaded = false;
         channel = new ArrayList<>();
         try {
