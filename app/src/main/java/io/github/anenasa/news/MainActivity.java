@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     boolean invertChannelButtons;
     boolean hideNavigationBar;
     boolean hideStatusBar;
+    boolean channelListLoaded = false;
 
     YtDlp ytdlp;
     ExoPlayer player = null;
@@ -82,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
     TextView textView;
     TextView textInfo;
     TextView errorMessageView;
-    Timer timer;
-    TimerTask timerTask;
+    Timer timerBackgroundExtract;
+    Timer timerReadChannelList;
 
     SharedPreferences preferences;
 
@@ -157,39 +158,14 @@ public class MainActivity extends AppCompatActivity {
         textInfo = findViewById(R.id.textInfo);
         errorMessageView = findViewById(R.id.errorMessage);
 
-        readChannelList();
-        if(channel == null){
-            return;
-        }
-        if(channelNum >= channel.size()){
-            resetChannelNum();
-        }
-
-        if(enableBackgroundExtract) {
-            timer = new Timer();
-            timerTask = new TimerTask() {
-                @Override
-                public void run() {
-                    for (int i = 0; i < channel.size(); i++) {
-                        try {
-                            if (!channel.get(i).isHidden()) {
-                                channel.get(i).parse(ytdlp);
-                            }
-                        } catch (JSONException | IOException | InterruptedException |
-                                 InvalidAlgorithmParameterException | IllegalBlockSizeException |
-                                 NoSuchPaddingException | BadPaddingException |
-                                 NoSuchAlgorithmException |
-                                 InvalidKeyException | PyException e) {
-                            Log.e(TAG, Log.getStackTraceString(e));
-                        }
-                    }
-                    saveSettings();
-                }
-            };
-            // Delay timer for one second because if two requests are sent to
-            // Hami Video at the same time, one of them will fail.
-            timer.schedule(timerTask, 1000, 3600000);
-        }
+        timerReadChannelList = new Timer();
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                readChannelList();
+            }
+        };
+        timerReadChannelList.schedule(timerTask, 0, 5000);
     }
 
     @Override
@@ -209,10 +185,6 @@ public class MainActivity extends AppCompatActivity {
             DO_NOT_PLAY_ON_START = false;
             return;
         }
-        if(channel == null){
-            return;
-        }
-        play(channelNum);
     }
 
     @Override
@@ -231,6 +203,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     void readChannelList() {
+        channelListLoaded = false;
         channel = new ArrayList<>();
         try {
             File configFile = new File(getExternalFilesDir(null), "config.txt");
@@ -296,29 +269,53 @@ public class MainActivity extends AppCompatActivity {
                     channel.add(ch);
                 }
             }
+            channelListLoaded = true;
+            runOnUiThread(() -> errorMessageView.setText(""));
+            timerReadChannelList.cancel();
+
+            if (timerBackgroundExtract != null) {
+                timerBackgroundExtract.cancel();
+            }
+            if(enableBackgroundExtract) {
+                timerBackgroundExtract = new Timer();
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        // FIXME: NPE if channel is set to null when running
+                        for (int i = 0; i < channel.size(); i++) {
+                            try {
+                                if (!channel.get(i).isHidden()) {
+                                    channel.get(i).parse(ytdlp);
+                                }
+                            } catch (JSONException | IOException | InterruptedException |
+                                     InvalidAlgorithmParameterException | IllegalBlockSizeException |
+                                     NoSuchPaddingException | BadPaddingException |
+                                     NoSuchAlgorithmException |
+                                     InvalidKeyException | PyException e) {
+                                Log.e(TAG, Log.getStackTraceString(e));
+                            }
+                        }
+                    }
+                };
+                // Delay timer for one second because if two requests are sent to
+                // Hami Video at the same time, one of them will fail.
+                timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
+            }
+
+            if(channelNum >= channel.size()){
+                resetChannelNum();
+            }
+            runOnUiThread(() -> play(channelNum));
         } catch (IOException | JSONException e) {
-            Log.e(TAG, Log.getStackTraceString(e));
+            runOnUiThread(() -> errorMessageView.setText("頻道清單讀取失敗，按 OK 或螢幕進入設定"));
+            // Log.getStackTraceString does not output UnknownHostException
+            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
+            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
+                Log.e(TAG, e.getMessage());
+            }
+            else
+                Log.e(TAG, Log.getStackTraceString(e));
             channel = null;
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("頻道清單讀取失敗，要重試嗎？");
-            builder.setMessage(e.toString());
-            builder.setPositiveButton("確定", (dialog, id) -> {
-                readChannelList();
-                if(channel == null){
-                    return;
-                }
-                if(channelNum >= channel.size()){
-                    resetChannelNum();
-                }
-                play(channelNum);
-            });
-            builder.setNeutralButton("進入設定", (dialogInterface, i) -> {
-                showSettings(findViewById(R.id.container));
-            });
-            builder.setNegativeButton("退出", (dialog, id) -> finish());
-            builder.setOnCancelListener(dialog -> finish());
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
         }
     }
 
@@ -532,17 +529,17 @@ public class MainActivity extends AppCompatActivity {
                 invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
-                readChannelList();
+                timerReadChannelList = new Timer();
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        readChannelList();
+                    }
+                };
+                timerReadChannelList.schedule(timerTask, 0, 5000);
                 if(data.getBooleanExtra("remove_cache", false)){
                     for(Channel i: channel) i.setVideo("");
                 }
-                if(channel == null){
-                    return;
-                }
-                if(channelNum >= channel.size()){
-                    resetChannelNum();
-                }
-                play(channelNum);
             }
         }
         else if(requestCode == 3){
@@ -571,7 +568,11 @@ public class MainActivity extends AppCompatActivity {
             switch (event.getKeyCode()) {
                 case KeyEvent.KEYCODE_DPAD_CENTER:
                 case KeyEvent.KEYCODE_ENTER:
-                    if(input.equals("")){
+                    if(!channelListLoaded) {
+                        timerReadChannelList.cancel();
+                        showSettings(findViewById(R.id.container));
+                    }
+                    else if(input.equals("")){
                         showMenu();
                     }
                     else if(Integer.parseInt(input) < channel.size()){
@@ -667,7 +668,11 @@ public class MainActivity extends AppCompatActivity {
             return super.onTouchEvent(event);
         }
         getSupportFragmentManager().popBackStack();
-        if((int)event.getX() < playerView.getWidth() / 3){
+        if(!channelListLoaded) {
+            timerReadChannelList.cancel();
+            showSettings(findViewById(R.id.container));
+        }
+        else if((int)event.getX() < playerView.getWidth() / 3){
             if (invertChannelButtons) {
                 toNextChannel();
             }

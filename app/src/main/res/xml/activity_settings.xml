@@ -25,8 +25,7 @@
     <SwitchPreference
         app:layout="@layout/preference_layout"
         app:key="enableBackgroundExtract"
-        app:title="預載影片網址"
-        app:summary="需重新啟動應用程式才能生效"/>
+        app:title="預載影片網址"/>
     <SwitchPreference
         app:layout="@layout/preference_layout"
         app:key="invertChannelButtons"
