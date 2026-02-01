@@ -158,7 +158,7 @@ public class MainActivity extends AppCompatActivity {
         textInfo = findViewById(R.id.textInfo);
         errorMessageView = findViewById(R.id.errorMessage);
 
-        timerReadChannelList = new Timer();
+        timerReadChannelList = new Timer(true);
         TimerTask timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -277,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                 timerBackgroundExtract.cancel();
             }
             if(enableBackgroundExtract) {
-                timerBackgroundExtract = new Timer();
+                timerBackgroundExtract = new Timer(true);
                 TimerTask timerTask = new TimerTask() {
                     @Override
                     public void run() {
@@ -529,7 +529,7 @@ public class MainActivity extends AppCompatActivity {
                 invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
-                timerReadChannelList = new Timer();
+                timerReadChannelList = new Timer(true);
                 TimerTask timerTask = new TimerTask() {
                     @Override
                     public void run() {
