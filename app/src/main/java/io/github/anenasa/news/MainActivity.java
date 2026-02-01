@@ -273,19 +273,23 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> errorMessageView.setText(""));
             timerReadChannelList.cancel();
 
-            if (timerBackgroundExtract != null) {
-                timerBackgroundExtract.cancel();
-            }
             if(enableBackgroundExtract) {
                 timerBackgroundExtract = new Timer(true);
                 TimerTask timerTask = new TimerTask() {
                     @Override
                     public void run() {
-                        // FIXME: NPE if channel is set to null when running
-                        for (int i = 0; i < channel.size(); i++) {
+                        // Prevent NPE
+                        ArrayList<Channel> channelInThread = channel;
+                        if(channel == null){
+                            return;
+                        }
+                        for (int i = 0; i < channelInThread.size(); i++) {
+                            if(channel == null){
+                                return;
+                            }
                             try {
-                                if (!channel.get(i).isHidden()) {
-                                    channel.get(i).parse(ytdlp);
+                                if (!channelInThread.get(i).isHidden()) {
+                                    channelInThread.get(i).parse(ytdlp);
                                 }
                             } catch (JSONException | IOException | InterruptedException |
                                      InvalidAlgorithmParameterException | IllegalBlockSizeException |
@@ -529,6 +533,10 @@ public class MainActivity extends AppCompatActivity {
                 invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
+
+                if (timerBackgroundExtract != null) {
+                    timerBackgroundExtract.cancel();
+                }
                 timerReadChannelList = new Timer(true);
                 TimerTask timerTask = new TimerTask() {
                     @Override
