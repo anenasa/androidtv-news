@@ -888,10 +888,11 @@ public class MainActivity extends AppCompatActivity {
         if (timerReadChannelList != null) {
             timerReadChannelList.cancel();
         }
+        if (player != null){
+            player.release();
+        }
         // Kill process, so new version of yt-dlp can be loaded
         System.exit(0);
-        if(player == null) return;
-        player.release();
     }
 
     @Override
