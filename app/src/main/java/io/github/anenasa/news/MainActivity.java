@@ -185,6 +185,9 @@ public class MainActivity extends AppCompatActivity {
             DO_NOT_PLAY_ON_START = false;
             return;
         }
+        if(channelListLoaded) {
+            play(channelNum);
+        }
     }
 
     @Override
@@ -273,6 +276,11 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> errorMessageView.setText(""));
             timerReadChannelList.cancel();
 
+            if(channelNum >= channel.size()){
+                resetChannelNum();
+            }
+            runOnUiThread(() -> play(channelNum));
+
             if(enableBackgroundExtract) {
                 timerBackgroundExtract = new Timer(true);
                 TimerTask timerTask = new TimerTask() {
@@ -305,11 +313,6 @@ public class MainActivity extends AppCompatActivity {
                 // Hami Video at the same time, one of them will fail.
                 timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
             }
-
-            if(channelNum >= channel.size()){
-                resetChannelNum();
-            }
-            runOnUiThread(() -> play(channelNum));
         } catch (IOException | JSONException e) {
             runOnUiThread(() -> errorMessageView.setText("頻道清單讀取失敗，按 OK 或螢幕進入設定"));
             // Log.getStackTraceString does not output UnknownHostException
