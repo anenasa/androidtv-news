@@ -6,6 +6,9 @@
 
 https://github.com/anenasa/androidtv-news/releases
 
+Android 7 以上系統可下載 androidtv-news-版本.apk
+Android 5 和 6 可下載 androidtv-news-api21-版本.apk
+
 ## 特色
 
 使用 [yt-dlp](https://github.com/yt-dlp/yt-dlp) 取得影片網址，無須安裝 Youtube 應用程式
