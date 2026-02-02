@@ -6,6 +6,7 @@ plugins {
 def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
 def apiVersion = useApi21 ? 21 : 24
 def media3Version = useApi21 ? "1.8.0" : "1.9.1"
+def api21Suffix = useApi21 ? "api21-" : ""
 
 android {
     compileSdk = 36
@@ -26,6 +27,13 @@ android {
         ndk {
             abiFilters "armeabi-v7a", "arm64-v8a", "x86_64"
         }
+
+        applicationVariants.all { variant ->
+            variant.outputs.all { output ->
+                output.outputFileName = "androidtv-news-${api21Suffix}${versionName}.apk"
+            }
+        }
+
     }
 
     buildTypes {
