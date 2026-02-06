@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
     boolean invertChannelButtons;
     boolean hideNavigationBar;
     boolean hideStatusBar;
+    boolean useExternalJS;
     boolean channelListLoaded = false;
 
     YtDlp ytdlp;
@@ -121,6 +122,9 @@ public class MainActivity extends AppCompatActivity {
         invertChannelButtons = preferences.getBoolean("invertChannelButtons", false);
         hideNavigationBar = preferences.getBoolean("hideNavigationBar", false);
         hideStatusBar = preferences.getBoolean("hideStatusBar", false);
+        useExternalJS = preferences.getBoolean("useExternalJS", false);
+
+        ytdlp.setUseExternalJS(useExternalJS);
 
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
@@ -539,6 +543,10 @@ public class MainActivity extends AppCompatActivity {
                 invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
+                useExternalJS = data.getBooleanExtra("useExternalJS", false);
+                saveSettings();
+
+                ytdlp.setUseExternalJS(useExternalJS);
 
                 if (timerBackgroundExtract != null) {
                     timerBackgroundExtract.cancel();
@@ -796,6 +804,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("invertChannelButtons", invertChannelButtons);
         intentSettings.putExtra("hideNavigationBar", hideNavigationBar);
         intentSettings.putExtra("hideStatusBar", hideStatusBar);
+        intentSettings.putExtra("useExternalJS", useExternalJS);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -831,6 +840,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("invertChannelButtons", invertChannelButtons);
         editor.putBoolean("hideNavigationBar", hideNavigationBar);
         editor.putBoolean("hideStatusBar", hideStatusBar);
+        editor.putBoolean("useExternalJS", useExternalJS);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();

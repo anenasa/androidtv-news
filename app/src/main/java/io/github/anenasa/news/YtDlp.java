@@ -2,6 +2,7 @@ package io.github.anenasa.news;
 
 import android.content.Context;
 import android.os.StrictMode;
+import android.util.Log;
 
 import com.chaquo.python.PyException;
 import com.chaquo.python.PyObject;
@@ -18,6 +19,8 @@ public class YtDlp {
     private final String TAG = "YtDlp";
     private PyObject yt_dlp;
     static String version;
+    Context context;
+    boolean useExternalJS = false;
 
     /**
      * Initialize yt-dlp
@@ -25,6 +28,7 @@ public class YtDlp {
      * @throws PyException yt-dlp failed to load
      */
     YtDlp(Context context) throws PyException, IOException {
+        this.context = context;
         try {
             if(!YtDlp.isDownloaded(context)) {
                 YtDlp.download(context);
@@ -82,6 +86,15 @@ public class YtDlp {
     }
 
     /**
+     * Always extract with external javascript runtime
+     * If set to false, only use EJS when old method fails
+     * @param useExternalJS Whether to always use EJS
+     */
+    public void setUseExternalJS(boolean useExternalJS) {
+        this.useExternalJS = useExternalJS;
+    }
+
+    /**
      * Extract video url
      * @param url url to extract
      * @param option python dictionary of options for yt-dlp
@@ -90,8 +103,23 @@ public class YtDlp {
      * @see <a href="https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184">list of options</a>
      */
     public String extract(String url, PyObject option) throws PyException {
+        if (useExternalJS) {
+            setEjs(option);
+        }
+
         PyObject ydl = yt_dlp.callAttr("YoutubeDL", option);
-        PyObject info_dict = ydl.callAttr("extract_info", url, false);
+        PyObject info_dict;
+        try {
+            info_dict = ydl.callAttr("extract_info", url, false);
+        } catch (PyException e) {
+            if (useExternalJS) {
+                throw e;
+            }
+            Log.e(TAG, "取得影片網址失敗，將使用 EJS 重試");
+            setEjs(option);
+            ydl = yt_dlp.callAttr("YoutubeDL", option);
+            info_dict = ydl.callAttr("extract_info", url, false);
+        }
         // url is in entries for playlist
         PyObject entries = info_dict.callAttr("get", "entries");
         if(entries != null){
@@ -108,5 +136,18 @@ public class YtDlp {
                     + requested_formats.callAttr("__getitem__", 1).callAttr("__getitem__", "url").toString();
         }
         throw new PyException("找不到影片網址");
+    }
+
+    /**
+     * Add EJS to option
+     * @param option python dictionary of options for yt-dlp
+     */
+    private void setEjs(PyObject option) {
+        String ejsPath = context.getApplicationInfo().nativeLibraryDir + "/libqjs.so";
+        PyObject path = Python.getInstance().getBuiltins().callAttr("dict");
+        path.callAttr("__setitem__", "path", ejsPath);
+        PyObject jsRuntimes = Python.getInstance().getBuiltins().callAttr("dict");
+        jsRuntimes.callAttr("__setitem__", "quickjs", path);
+        option.callAttr("__setitem__", "js_runtimes", jsRuntimes);
     }
 }

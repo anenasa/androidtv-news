@@ -43,6 +43,7 @@ public class SettingsActivity extends AppCompatActivity {
     boolean invertChannelButtons;
     boolean hideNavigationBar;
     boolean hideStatusBar;
+    boolean useExternalJS;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -57,6 +58,7 @@ public class SettingsActivity extends AppCompatActivity {
         invertChannelButtons = getIntent().getExtras().getBoolean("invertChannelButtons");
         hideNavigationBar = getIntent().getExtras().getBoolean("hideNavigationBar");
         hideStatusBar = getIntent().getExtras().getBoolean("hideStatusBar");
+        useExternalJS = getIntent().getExtras().getBoolean("useExternalJS");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -73,6 +75,7 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("invertChannelButtons", invertChannelButtons);
         returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
         returnIntent.putExtra("hideStatusBar", hideStatusBar);
+        returnIntent.putExtra("useExternalJS", useExternalJS);
         returnIntent.putExtra("remove_cache", remove_cache);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
@@ -233,6 +236,14 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
+            SwitchPreference prefUseExternalJS = findPreference("useExternalJS");
+            assert prefUseExternalJS != null;
+            prefUseExternalJS.setChecked(activity.useExternalJS);
+            prefUseExternalJS.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.useExternalJS = (boolean) newValue;
+                return true;
+            });
+
             Preference update_ytdlp = findPreference("update_ytdlp");
             assert update_ytdlp != null;
             update_ytdlp.setSummary(YtDlp.version);
@@ -294,11 +305,13 @@ public class SettingsActivity extends AppCompatActivity {
             assert about != null;
             about.setOnPreferenceClickListener(preference -> {
                 InputStream streamUnlicense = getResources().openRawResource(R.raw.unlicense);
-                InputStream streamMIT = getResources().openRawResource(R.raw.mit);
+                InputStream streamChaquopy = getResources().openRawResource(R.raw.chaquopy);
+                InputStream streamQuickjs = getResources().openRawResource(R.raw.quickjs);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
                 InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
                 BufferedReader readerUnlicense = new BufferedReader(new InputStreamReader(streamUnlicense));
-                BufferedReader readerMIT = new BufferedReader(new InputStreamReader(streamMIT));
+                BufferedReader readerChaquopy = new BufferedReader(new InputStreamReader(streamChaquopy));
+                BufferedReader readerQuickjs = new BufferedReader(new InputStreamReader(streamQuickjs));
                 BufferedReader readerApache2 = new BufferedReader(new InputStreamReader(streamApache2));
                 BufferedReader readerMPL2 = new BufferedReader(new InputStreamReader(streamMPL2));
                 StringBuilder stringBuilder = new StringBuilder();
@@ -308,6 +321,7 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("函式庫：").append('\n')
                         .append("yt-dlp - The Unlicense").append('\n')
                         .append("Chaquopy - MIT License").append('\n')
+                        .append("QuickJS - MIT License").append('\n')
                         .append("ExoPlayer - Apache License 2.0").append('\n')
                         .append("OkHttp - Apache License 2.0").append('\n')
                         .append("Storage Chooser - Mozilla Public License Version 2.0").append('\n')
@@ -318,7 +332,10 @@ public class SettingsActivity extends AppCompatActivity {
                         stringBuilder.append(line).append('\n');
                     }
                     stringBuilder.append("MIT License").append('\n');
-                    for (String line; (line = readerMIT.readLine()) != null; ) {
+                    for (String line; (line = readerChaquopy.readLine()) != null; ) {
+                        stringBuilder.append(line).append('\n');
+                    }
+                    for (String line; (line = readerQuickjs.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
                     }
                     for (String line; (line = readerApache2.readLine()) != null; ) {

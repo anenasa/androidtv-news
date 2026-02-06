@@ -38,6 +38,10 @@
         app:layout="@layout/preference_layout"
         app:key="hideStatusBar"
         app:title="隱藏狀態列"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="useExternalJS"
+        app:title="一律使用外部 JS 引擎"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="remove_cache"
