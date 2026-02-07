@@ -44,6 +44,7 @@ public class SettingsActivity extends AppCompatActivity {
     boolean hideNavigationBar;
     boolean hideStatusBar;
     boolean useExternalJS;
+    boolean ytdlpUpdated = false;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
 
@@ -77,6 +78,7 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("hideStatusBar", hideStatusBar);
         returnIntent.putExtra("useExternalJS", useExternalJS);
         returnIntent.putExtra("remove_cache", remove_cache);
+        returnIntent.putExtra("ytdlpUpdated", ytdlpUpdated);
         setResult(Activity.RESULT_OK, returnIntent);
         super.onBackPressed();
     }
@@ -252,7 +254,8 @@ public class SettingsActivity extends AppCompatActivity {
                 new Thread(() -> {
                     try {
                         YtDlp.download(activity);
-                        activity.runOnUiThread(() -> update_ytdlp.setSummary("已更新，請重新啟動應用程式"));
+                        activity.runOnUiThread(() -> update_ytdlp.setSummary("已更新，將重新啟動應用程式"));
+                        activity.ytdlpUpdated = true;
                     }
                     catch (IOException e) {
                         activity.runOnUiThread(() -> update_ytdlp.setSummary("更新時發生錯誤"));

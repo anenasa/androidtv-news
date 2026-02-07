@@ -544,6 +544,10 @@ public class MainActivity extends AppCompatActivity {
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
                 useExternalJS = data.getBooleanExtra("useExternalJS", false);
+                if (data.getBooleanExtra("ytdlpUpdated", false)) {
+                    // Kill process, so new version of yt-dlp can be loaded
+                    System.exit(0);
+                }
                 saveSettings();
 
                 ytdlp.setUseExternalJS(useExternalJS);
@@ -901,8 +905,6 @@ public class MainActivity extends AppCompatActivity {
         if (player != null){
             player.release();
         }
-        // Kill process, so new version of yt-dlp can be loaded
-        System.exit(0);
     }
 
     @Override
