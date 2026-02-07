@@ -194,11 +194,10 @@ public class Channel {
                 okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
             }
             Request okHttpRequest = okHttpRequestBuilder.build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            JSONObject object = new JSONObject(body.string());
-            url = object.getString("url");
+            try (Response response = okHttpClient.newCall(okHttpRequest).execute()) {
+                JSONObject object = new JSONObject(response.body().string());
+                url = object.getString("url");
+            }
         }
         else if(url.equals("https://news.ebc.net.tw/live")){
             Document doc = Jsoup.connect(url).get();
@@ -217,11 +216,10 @@ public class Channel {
             Request okHttpRequest = new Request.Builder()
                     .url("https://today.line.me/webapi/glplive/broadcasts/" + id)
                     .build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            JSONObject object = new JSONObject(body.string());
-            url = object.getJSONObject("hlsUrls").getString("abr");
+            try (Response response = okHttpClient.newCall(okHttpRequest).execute()) {
+                JSONObject object = new JSONObject(response.body().string());
+                url = object.getJSONObject("hlsUrls").getString("abr");
+            }
         }
         else if(url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")){
             String id;
@@ -240,12 +238,11 @@ public class Channel {
             Request okHttpRequest = new Request.Builder()
                     .url("https://app.4gtv.tv/Data/GetChannelURL_Mozai.ashx?callback=channelname&Type=LIVE&ChannelId=" + id)
                     .build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            String bodyString = body.string();
-            String videoUrl = bodyString.substring(bodyString.indexOf("VideoURL") + 11);
-            url = videoUrl.substring(0, videoUrl.indexOf("\""));
+            try (Response response = okHttpClient.newCall(okHttpRequest).execute()) {
+                String bodyString = response.body().string();
+                String videoUrl = bodyString.substring(bodyString.indexOf("VideoURL") + 11);
+                url = videoUrl.substring(0, videoUrl.indexOf("\""));
+            }
         }
         else if(url.startsWith("https://www.litv.tv/channel/watch.do")){
             String id = url.substring(url.indexOf("content_id") + 11);
@@ -261,21 +258,19 @@ public class Channel {
                 okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
             }
             Request okHttpRequest = okHttpRequestBuilder.build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            JSONObject object = new JSONObject(body.string());
-            url = object.getString("fullpath");
+            try (Response response = okHttpClient.newCall(okHttpRequest).execute()) {
+                JSONObject object = new JSONObject(response.body().string());
+                url = object.getString("fullpath");
+            }
         }
         else if(url.startsWith("https://www.ofiii.com/channel/watch/")){
             OkHttpClient okHttpClient = new OkHttpClient();
             // Get device id
             Request deviceidRequest = new Request.Builder().url("https://www.ofiii.com/api/deviceId").build();
-            Response deviceidResponse = okHttpClient.newCall(deviceidRequest).execute();
-            ResponseBody deviceidBody = deviceidResponse.body();
-            if (deviceidBody == null) throw new IOException("body is null");
-            String deviceid = deviceidBody.string().replace("\"","");
-
+            String deviceid;
+            try (Response response = okHttpClient.newCall(deviceidRequest).execute()) {
+                deviceid = response.body().string().replace("\"","");
+            }
             String id = url.substring(url.lastIndexOf("/") + 1);
             Request.Builder okHttpRequestBuilder = new Request.Builder()
                     .url(String.format("https://cdi.ofiii.com/ofiii_cdi/video/urls?device_type=pc&device_id=%s&media_type=channel&asset_id=%s&project_num=OFWEB00", deviceid, id));
@@ -283,11 +278,11 @@ public class Channel {
                 okHttpRequestBuilder.addHeader(entry.getKey(), entry.getValue());
             }
             Request okHttpRequest = okHttpRequestBuilder.build();
-            Response response = okHttpClient.newCall(okHttpRequest).execute();
-            ResponseBody body = response.body();
-            if (body == null) throw new IOException("body is null");
-            JSONObject object = new JSONObject(body.string());
-            url = object.getJSONArray("asset_urls").getString(0);
+            try (Response response = okHttpClient.newCall(okHttpRequest).execute()) {
+                ResponseBody body = response.body();
+                JSONObject object = new JSONObject(body.string());
+                url = object.getJSONArray("asset_urls").getString(0);
+            }
         }
 
         PyObject option = Python.getInstance().getBuiltins().callAttr("dict");
