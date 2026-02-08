@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
 
     SharedPreferences preferences;
 
-    boolean isStarted;
+    boolean isStarted = true;
     AudioManager audioManager;
     int errorCount = 0;
     boolean DO_NOT_PLAY_ON_START = false;
