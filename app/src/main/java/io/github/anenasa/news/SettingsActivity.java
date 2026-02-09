@@ -307,11 +307,13 @@ public class SettingsActivity extends AppCompatActivity {
             Preference about = findPreference("about");
             assert about != null;
             about.setOnPreferenceClickListener(preference -> {
+                InputStream streamGpl3 = getResources().openRawResource(R.raw.gpl3);
                 InputStream streamUnlicense = getResources().openRawResource(R.raw.unlicense);
                 InputStream streamChaquopy = getResources().openRawResource(R.raw.chaquopy);
                 InputStream streamQuickjs = getResources().openRawResource(R.raw.quickjs);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
                 InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
+                BufferedReader readerGpl3 = new BufferedReader(new InputStreamReader(streamGpl3));
                 BufferedReader readerUnlicense = new BufferedReader(new InputStreamReader(streamUnlicense));
                 BufferedReader readerChaquopy = new BufferedReader(new InputStreamReader(streamChaquopy));
                 BufferedReader readerQuickjs = new BufferedReader(new InputStreamReader(streamQuickjs));
@@ -330,6 +332,9 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("Storage Chooser - Mozilla Public License Version 2.0").append('\n')
                         .append('\n');
                 try{
+                    for (String line; (line = readerGpl3.readLine()) != null; ) {
+                        stringBuilder.append(line).append('\n');
+                    }
                     stringBuilder.append("The Unlicense").append('\n');
                     for (String line; (line = readerUnlicense.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
