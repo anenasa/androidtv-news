@@ -41,6 +41,10 @@ public class YtDlp {
             yt_dlp = py.getModule("yt_dlp");
             PyObject version_module = py.getModule("yt_dlp.version");
             version = version_module.get("__version__").toString();
+
+            // Fix OpenSSL configuration error of nodejs
+            PyObject os = py.getModule("os");
+            os.get("environ").callAttr("__setitem__", "OPENSSL_CONF", "/dev/null");
         } catch (PyException | IOException e){
             new File(context.getExternalFilesDir(null), "yt-dlp").delete();
             throw e;
@@ -143,11 +147,21 @@ public class YtDlp {
      * @param option python dictionary of options for yt-dlp
      */
     private void setEjs(PyObject option) {
-        String ejsPath = context.getApplicationInfo().nativeLibraryDir + "/libqjs.so";
-        PyObject path = Python.getInstance().getBuiltins().callAttr("dict");
-        path.callAttr("__setitem__", "path", ejsPath);
-        PyObject jsRuntimes = Python.getInstance().getBuiltins().callAttr("dict");
-        jsRuntimes.callAttr("__setitem__", "quickjs", path);
-        option.callAttr("__setitem__", "js_runtimes", jsRuntimes);
+        if (BuildConfig.USE_API_21) {
+            String ejsPath = context.getApplicationInfo().nativeLibraryDir + "/libqjs.so";
+            PyObject path = Python.getInstance().getBuiltins().callAttr("dict");
+            path.callAttr("__setitem__", "path", ejsPath);
+            PyObject jsRuntimes = Python.getInstance().getBuiltins().callAttr("dict");
+            jsRuntimes.callAttr("__setitem__", "quickjs", path);
+            option.callAttr("__setitem__", "js_runtimes", jsRuntimes);
+        }
+        else {
+            String ejsPath = context.getApplicationInfo().nativeLibraryDir + "/libnode.so";
+            PyObject path = Python.getInstance().getBuiltins().callAttr("dict");
+            path.callAttr("__setitem__", "path", ejsPath);
+            PyObject jsRuntimes = Python.getInstance().getBuiltins().callAttr("dict");
+            jsRuntimes.callAttr("__setitem__", "node", path);
+            option.callAttr("__setitem__", "js_runtimes", jsRuntimes);
+        }
     }
 }

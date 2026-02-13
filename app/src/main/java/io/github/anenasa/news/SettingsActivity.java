@@ -310,12 +310,14 @@ public class SettingsActivity extends AppCompatActivity {
                 InputStream streamGpl3 = getResources().openRawResource(R.raw.gpl3);
                 InputStream streamUnlicense = getResources().openRawResource(R.raw.unlicense);
                 InputStream streamChaquopy = getResources().openRawResource(R.raw.chaquopy);
+                InputStream streamNodejs = getResources().openRawResource(R.raw.nodejs);
                 InputStream streamQuickjs = getResources().openRawResource(R.raw.quickjs);
                 InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
                 InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
                 BufferedReader readerGpl3 = new BufferedReader(new InputStreamReader(streamGpl3));
                 BufferedReader readerUnlicense = new BufferedReader(new InputStreamReader(streamUnlicense));
                 BufferedReader readerChaquopy = new BufferedReader(new InputStreamReader(streamChaquopy));
+                BufferedReader readerNodejs = new BufferedReader(new InputStreamReader(streamNodejs));
                 BufferedReader readerQuickjs = new BufferedReader(new InputStreamReader(streamQuickjs));
                 BufferedReader readerApache2 = new BufferedReader(new InputStreamReader(streamApache2));
                 BufferedReader readerMPL2 = new BufferedReader(new InputStreamReader(streamMPL2));
@@ -326,6 +328,7 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("函式庫：").append('\n')
                         .append("yt-dlp - The Unlicense").append('\n')
                         .append("Chaquopy - MIT License").append('\n')
+                        .append("Node.js - MIT License").append('\n')
                         .append("QuickJS - MIT License").append('\n')
                         .append("ExoPlayer - Apache License 2.0").append('\n')
                         .append("OkHttp - Apache License 2.0").append('\n')
@@ -341,6 +344,9 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     stringBuilder.append("MIT License").append('\n');
                     for (String line; (line = readerChaquopy.readLine()) != null; ) {
+                        stringBuilder.append(line).append('\n');
+                    }
+                    for (String line; (line = readerNodejs.readLine()) != null; ) {
                         stringBuilder.append(line).append('\n');
                     }
                     for (String line; (line = readerQuickjs.readLine()) != null; ) {

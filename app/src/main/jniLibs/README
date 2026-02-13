@@ -1,2 +1,0 @@
-Both libqjs.so binaries are downloaded from https://github.com/ctn-malone/quickjs-cross-compiler/releases/tag/v2025-09-13_3%2Bext-lib-0.17.2
-Binaries from https://github.com/yausername/youtubedl-android/commit/4e2bb8b4dbe15d13f57cf37c72e155b9f359d3fb or termux also work, but run slower (ctn-malone build 45s, youtubedl-android build 50s, termux 20250913 build 50s, tested on MT5887 processor in 32-bit mode)
