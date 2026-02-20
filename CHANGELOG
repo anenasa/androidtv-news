@@ -1,3 +1,6 @@
+version 4.2.1 2026.02.20
+-外部 JS 引擎改用 Quickjs-ng 和 Node.js
+
 version 4.2.0 2026.02.08
 -無法取得影片網址時使用 quickjs 重試
 -設定中加入「一律使用外部 JS 引擎」選項
