@@ -44,6 +44,7 @@ public class SettingsActivity extends AppCompatActivity {
     boolean hideNavigationBar;
     boolean hideStatusBar;
     boolean useExternalJS;
+    boolean updateYtdlpOnStart;
     boolean ytdlpUpdated = false;
     final String TAG = "SettingsActivity";
     boolean remove_cache = false;
@@ -60,6 +61,7 @@ public class SettingsActivity extends AppCompatActivity {
         hideNavigationBar = getIntent().getExtras().getBoolean("hideNavigationBar");
         hideStatusBar = getIntent().getExtras().getBoolean("hideStatusBar");
         useExternalJS = getIntent().getExtras().getBoolean("useExternalJS");
+        updateYtdlpOnStart = getIntent().getExtras().getBoolean("updateYtdlpOnStart");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -77,6 +79,7 @@ public class SettingsActivity extends AppCompatActivity {
         returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
         returnIntent.putExtra("hideStatusBar", hideStatusBar);
         returnIntent.putExtra("useExternalJS", useExternalJS);
+        returnIntent.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
         returnIntent.putExtra("remove_cache", remove_cache);
         returnIntent.putExtra("ytdlpUpdated", ytdlpUpdated);
         setResult(Activity.RESULT_OK, returnIntent);
@@ -243,6 +246,14 @@ public class SettingsActivity extends AppCompatActivity {
             prefUseExternalJS.setChecked(activity.useExternalJS);
             prefUseExternalJS.setOnPreferenceChangeListener((preference, newValue) -> {
                 activity.useExternalJS = (boolean) newValue;
+                return true;
+            });
+
+            SwitchPreference prefUpdateYtdlpOnStart = findPreference("updateYtdlpOnStart");
+            assert prefUpdateYtdlpOnStart != null;
+            prefUpdateYtdlpOnStart.setChecked(activity.updateYtdlpOnStart);
+            prefUpdateYtdlpOnStart.setOnPreferenceChangeListener((preference, newValue) -> {
+                activity.updateYtdlpOnStart = (boolean) newValue;
                 return true;
             });
 

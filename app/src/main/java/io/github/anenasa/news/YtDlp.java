@@ -27,10 +27,10 @@ public class YtDlp {
      * @param context Context
      * @throws PyException yt-dlp failed to load
      */
-    YtDlp(Context context) throws PyException, IOException {
+    YtDlp(Context context, boolean updateYtdlpOnStart) throws PyException, IOException {
         this.context = context;
         try {
-            if(!YtDlp.isDownloaded(context)) {
+            if(updateYtdlpOnStart || !YtDlp.isDownloaded(context)) {
                 YtDlp.download(context);
             }
             Python py = Python.getInstance();

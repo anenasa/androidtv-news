@@ -42,6 +42,10 @@
         app:layout="@layout/preference_layout"
         app:key="useExternalJS"
         app:title="一律使用外部 JS 引擎"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
+        app:key="updateYtdlpOnStart"
+        app:title="啟動時更新 yt-dlp"/>
     <Preference
         app:layout="@layout/preference_layout"
         app:key="remove_cache"

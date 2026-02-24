@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     boolean hideNavigationBar;
     boolean hideStatusBar;
     boolean useExternalJS;
+    boolean updateYtdlpOnStart;
     boolean channelListLoaded = false;
 
     YtDlp ytdlp;
@@ -97,20 +98,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        try {
-            ytdlp = new YtDlp(this);
-        } catch (PyException | IOException e) {
-            // Log.getStackTraceString does not output UnknownHostException
-            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
-            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
-                Log.e(TAG, e.getMessage());
-                e.printStackTrace();
-            }
-            else
-                Log.e(TAG, Log.getStackTraceString(e));
-            // AlertDialog does not work in onCreate(), so I show it in onStart()
-            return;
-        }
         setContentView(R.layout.activity_main);
         audioManager = (AudioManager) getApplicationContext().getSystemService(Context.AUDIO_SERVICE);
         preferences = getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE);
@@ -123,7 +110,22 @@ public class MainActivity extends AppCompatActivity {
         hideNavigationBar = preferences.getBoolean("hideNavigationBar", false);
         hideStatusBar = preferences.getBoolean("hideStatusBar", false);
         useExternalJS = preferences.getBoolean("useExternalJS", false);
+        updateYtdlpOnStart = preferences.getBoolean("updateYtdlpOnStart", false);
 
+        try {
+            ytdlp = new YtDlp(this, updateYtdlpOnStart);
+        } catch (PyException | IOException e) {
+            // Log.getStackTraceString does not output UnknownHostException
+            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
+            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
+                Log.e(TAG, e.getMessage());
+                e.printStackTrace();
+            }
+            else
+                Log.e(TAG, Log.getStackTraceString(e));
+            // AlertDialog does not work in onCreate(), so I show it in onStart()
+            return;
+        }
         ytdlp.setUseExternalJS(useExternalJS);
 
         player = new ExoPlayer.Builder(this).build();
@@ -544,6 +546,7 @@ public class MainActivity extends AppCompatActivity {
                 hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
                 hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
                 useExternalJS = data.getBooleanExtra("useExternalJS", false);
+                updateYtdlpOnStart = data.getBooleanExtra("updateYtdlpOnStart", false);
                 if (data.getBooleanExtra("ytdlpUpdated", false)) {
                     // Kill process, so new version of yt-dlp can be loaded
                     System.exit(0);
@@ -809,6 +812,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("hideNavigationBar", hideNavigationBar);
         intentSettings.putExtra("hideStatusBar", hideStatusBar);
         intentSettings.putExtra("useExternalJS", useExternalJS);
+        intentSettings.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
         startActivityForResult(intentSettings, 2);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
@@ -845,6 +849,7 @@ public class MainActivity extends AppCompatActivity {
         editor.putBoolean("hideNavigationBar", hideNavigationBar);
         editor.putBoolean("hideStatusBar", hideStatusBar);
         editor.putBoolean("useExternalJS", useExternalJS);
+        editor.putBoolean("updateYtdlpOnStart", updateYtdlpOnStart);
         try {
             JSONObject jsonObject = new JSONObject();
             JSONObject channelListObject = new JSONObject();
