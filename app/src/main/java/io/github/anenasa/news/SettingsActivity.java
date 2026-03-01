@@ -107,18 +107,25 @@ public class SettingsActivity extends AppCompatActivity {
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
         SettingsActivity activity = (SettingsActivity) getActivity();
+        String SAVE_FILE_NAME;
 
-        private ActivityResultLauncher<String> requestPermissionConfigLauncher =
+        private final ActivityResultLauncher<String> requestPermissionLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
-                        activity.showFileChooser("config.txt");
+                        activity.showFileChooser(SAVE_FILE_NAME);
                     }
                 });
 
-        private ActivityResultLauncher<String> requestPermissionCookiesLauncher =
-                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-                    if (isGranted) {
-                        activity.showFileChooser("cookies.txt");
+        private final ActivityResultLauncher<String> selectFileLauncher =
+                registerForActivityResult(new ActivityResultContracts.GetContent(), uri -> {
+                    if (uri == null) return;
+                    try (InputStream inputStream = activity.getContentResolver().openInputStream(uri)) {
+                        if (inputStream == null) {
+                            throw new IOException("inputStream is null");
+                        }
+                        activity.copyToExternal(inputStream, SAVE_FILE_NAME);
+                    } catch (IOException e) {
+                        Log.e(activity.TAG, Log.getStackTraceString(e));
                     }
                 });
 
@@ -131,29 +138,7 @@ public class SettingsActivity extends AppCompatActivity {
             Preference config = findPreference("config");
             assert config != null;
             config.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("text/*");
-                PackageManager packageManager = requireActivity().getPackageManager();
-                ComponentName componentName = intent.resolveActivity(packageManager);
-                // Possible results of componentName:
-                // com.android.documentsui on non-Android TV
-                // null on Android TV <= 10
-                // com.google.android.tv.frameworkpackagestubs on Android TV 11
-                // com.android.tv.frameworkpackagestubs on Android TV 12 and 13
-                if(componentName != null && !componentName.getPackageName().endsWith("frameworkpackagestubs")){
-                    startActivityForResult(intent, 0);
-                }
-                else {
-                    // SAF does not work on Android TV
-                    // https://stackoverflow.com/a/38715569/20756028
-                    if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
-                        requestPermissionConfigLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    }
-                    else{
-                        activity.showFileChooser("config.txt");
-                    }
-                }
+                saveToFile("config.txt");
                 return true;
             });
 
@@ -179,29 +164,7 @@ public class SettingsActivity extends AppCompatActivity {
             Preference cookies = findPreference("cookies");
             assert cookies != null;
             cookies.setOnPreferenceClickListener(preference -> {
-                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
-                intent.addCategory(Intent.CATEGORY_OPENABLE);
-                intent.setType("text/*");
-                PackageManager packageManager = requireActivity().getPackageManager();
-                ComponentName componentName = intent.resolveActivity(packageManager);
-                // Possible results of componentName:
-                // com.android.documentsui on non-Android TV
-                // null on Android TV <= 10
-                // com.google.android.tv.frameworkpackagestubs on Android TV 11
-                // com.android.tv.frameworkpackagestubs on Android TV 12 and 13
-                if(componentName != null && !componentName.getPackageName().endsWith("frameworkpackagestubs")){
-                    startActivityForResult(intent, 1);
-                }
-                else {
-                    // SAF does not work on Android TV
-                    // https://stackoverflow.com/a/38715569/20756028
-                    if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
-                        requestPermissionCookiesLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
-                    }
-                    else{
-                        activity.showFileChooser("cookies.txt");
-                    }
-                }
+                saveToFile("cookies.txt");
                 return true;
             });
 
@@ -427,24 +390,31 @@ public class SettingsActivity extends AppCompatActivity {
             });
         }
 
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-            super.onActivityResult(requestCode, resultCode, resultData);
-            if (resultCode == Activity.RESULT_OK && resultData != null) {
-                Uri uri = resultData.getData();
-                try {
-                    InputStream inputStream = activity.getContentResolver().openInputStream(uri);
-                    if (requestCode == 0) {
-                        // config
-                        activity.copyToExternal(inputStream, "config.txt");
-                    }
-                    else {
-                        // cookies
-                        activity.copyToExternal(inputStream, "cookies.txt");
-                    }
+        void saveToFile(String outputName) {
+            SAVE_FILE_NAME = outputName;
 
-                } catch (IOException e) {
-                    Log.e(activity.TAG, Log.getStackTraceString(e));
+            // Check if system file picker is available
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+            intent.setType("text/*");
+            PackageManager packageManager = requireActivity().getPackageManager();
+            ComponentName componentName = intent.resolveActivity(packageManager);
+            // Possible results of componentName:
+            // com.android.documentsui on non-Android TV
+            // null on Android TV <= 10
+            // com.google.android.tv.frameworkpackagestubs on Android TV 11
+            // com.android.tv.frameworkpackagestubs on Android TV 12 and 13
+            if(componentName != null && !componentName.getPackageName().endsWith("frameworkpackagestubs")){
+                selectFileLauncher.launch("text/*");
+            }
+            else {
+                // SAF does not work on Android TV
+                // https://stackoverflow.com/a/38715569/20756028
+                if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
+                    requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                }
+                else{
+                    activity.showFileChooser(outputName);
                 }
             }
         }
