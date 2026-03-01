@@ -86,7 +86,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 
-    private void showConfigChooser() {
+    private void showFileChooser(String outputName) {
         StorageChooser chooser = new StorageChooser.Builder()
                 .withActivity(this)
                 .withFragmentManager(getFragmentManager())
@@ -98,7 +98,7 @@ public class SettingsActivity extends AppCompatActivity {
         chooser.setOnSelectListener(path -> {
             try {
                 InputStream inputStream = new FileInputStream(path);
-                copyConfig(inputStream);
+                copyToExternal(inputStream, outputName);
             } catch (IOException e) {
                 Log.e(TAG, Log.getStackTraceString(e));
             }
@@ -106,12 +106,19 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat {
-        SettingsActivity activity;
+        SettingsActivity activity = (SettingsActivity) getActivity();
 
-        private ActivityResultLauncher<String> requestPermissionLauncher =
+        private ActivityResultLauncher<String> requestPermissionConfigLauncher =
                 registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                     if (isGranted) {
-                        activity.showConfigChooser();
+                        activity.showFileChooser("config.txt");
+                    }
+                });
+
+        private ActivityResultLauncher<String> requestPermissionCookiesLauncher =
+                registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+                    if (isGranted) {
+                        activity.showFileChooser("cookies.txt");
                     }
                 });
 
@@ -141,10 +148,10 @@ public class SettingsActivity extends AppCompatActivity {
                     // SAF does not work on Android TV
                     // https://stackoverflow.com/a/38715569/20756028
                     if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
-                        requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                        requestPermissionConfigLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
                     }
                     else{
-                        activity.showConfigChooser();
+                        activity.showFileChooser("config.txt");
                     }
                 }
                 return true;
@@ -164,6 +171,35 @@ public class SettingsActivity extends AppCompatActivity {
                     } catch (IOException e) {
                         Log.e(activity.TAG, Log.getStackTraceString(e));
                         preference.setSummary(e.toString());
+                    }
+                }
+                return true;
+            });
+
+            Preference cookies = findPreference("cookies");
+            assert cookies != null;
+            cookies.setOnPreferenceClickListener(preference -> {
+                Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                intent.addCategory(Intent.CATEGORY_OPENABLE);
+                intent.setType("text/*");
+                PackageManager packageManager = requireActivity().getPackageManager();
+                ComponentName componentName = intent.resolveActivity(packageManager);
+                // Possible results of componentName:
+                // com.android.documentsui on non-Android TV
+                // null on Android TV <= 10
+                // com.google.android.tv.frameworkpackagestubs on Android TV 11
+                // com.android.tv.frameworkpackagestubs on Android TV 12 and 13
+                if(componentName != null && !componentName.getPackageName().endsWith("frameworkpackagestubs")){
+                    startActivityForResult(intent, 1);
+                }
+                else {
+                    // SAF does not work on Android TV
+                    // https://stackoverflow.com/a/38715569/20756028
+                    if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
+                        requestPermissionCookiesLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                    }
+                    else{
+                        activity.showFileChooser("cookies.txt");
                     }
                 }
                 return true;
@@ -390,25 +426,33 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
         }
-    }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
-        super.onActivityResult(requestCode, resultCode, resultData);
-        if (resultCode == Activity.RESULT_OK && resultData != null) {
-            Uri uri = resultData.getData();
-            try {
-                InputStream inputStream = getContentResolver().openInputStream(uri);
-                copyConfig(inputStream);
-            } catch (IOException e) {
-                Log.e(TAG, Log.getStackTraceString(e));
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent resultData) {
+            super.onActivityResult(requestCode, resultCode, resultData);
+            if (resultCode == Activity.RESULT_OK && resultData != null) {
+                Uri uri = resultData.getData();
+                try {
+                    InputStream inputStream = activity.getContentResolver().openInputStream(uri);
+                    if (requestCode == 0) {
+                        // config
+                        activity.copyToExternal(inputStream, "config.txt");
+                    }
+                    else {
+                        // cookies
+                        activity.copyToExternal(inputStream, "cookies.txt");
+                    }
+
+                } catch (IOException e) {
+                    Log.e(activity.TAG, Log.getStackTraceString(e));
+                }
             }
         }
     }
 
-    void copyConfig(InputStream inputStream) throws IOException {
-        File outputFile = new File(getExternalFilesDir(null), "config.txt");
-        // Without deleting first, when config.txt is already created with adb push,
+    void copyToExternal(InputStream inputStream, String outputName) throws IOException {
+        File outputFile = new File(getExternalFilesDir(null), outputName);
+        // Without deleting first, when output file is already created with adb push,
         // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
         outputFile.delete();
         OutputStream outputStream = new FileOutputStream(outputFile);

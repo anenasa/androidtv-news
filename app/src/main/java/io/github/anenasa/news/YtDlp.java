@@ -21,6 +21,7 @@ public class YtDlp {
     static String version;
     Context context;
     boolean useExternalJS = false;
+    String cookies;
 
     /**
      * Initialize yt-dlp
@@ -41,6 +42,7 @@ public class YtDlp {
             yt_dlp = py.getModule("yt_dlp");
             PyObject version_module = py.getModule("yt_dlp.version");
             version = version_module.get("__version__").toString();
+            cookies = new File(context.getExternalFilesDir(null), "cookies.txt").toString();
 
             // Fix OpenSSL configuration error of nodejs
             PyObject os = py.getModule("os");
@@ -110,6 +112,7 @@ public class YtDlp {
         if (useExternalJS) {
             setEjs(option);
         }
+        option.callAttr("__setitem__", "cookiefile", cookies);
 
         PyObject ydl = yt_dlp.callAttr("YoutubeDL", option);
         PyObject info_dict;

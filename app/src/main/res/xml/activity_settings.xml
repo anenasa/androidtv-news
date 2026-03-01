@@ -10,6 +10,10 @@
         app:layout="@layout/preference_layout"
         app:key="configurl"
         app:title="輸入頻道清單網址"/>
+    <Preference
+        app:layout="@layout/preference_layout"
+        app:key="cookies"
+        app:title="匯入 cookies"/>
     <EditTextPreference
         app:layout="@layout/preference_layout"
         app:key="format"
