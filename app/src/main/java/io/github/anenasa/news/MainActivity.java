@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
-import android.os.StrictMode;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -33,12 +32,10 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.UnknownHostException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -48,6 +45,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -62,6 +60,10 @@ import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory;
 import androidx.media3.exoplayer.source.MediaSource;
 import androidx.media3.exoplayer.source.MergingMediaSource;
+
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     final String TAG = "MainActivity";
@@ -89,6 +91,7 @@ public class MainActivity extends AppCompatActivity {
     TextView errorMessageView;
     Timer timerBackgroundExtract;
     Timer timerReadChannelList;
+    OkHttpClient okHttpClient;
 
     SharedPreferences preferences;
 
@@ -174,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         timerReadChannelList.schedule(timerTask, 0, 5000);
+        okHttpClient = new OkHttpClient();
     }
 
     @Override
@@ -221,23 +225,22 @@ public class MainActivity extends AppCompatActivity {
         channel = new ArrayList<>();
         try {
             File configFile = new File(getExternalFilesDir(null), "config.txt");
-            InputStream inputStream;
             if(configFile.exists()){
-                inputStream = new FileInputStream(configFile);
+                try (BufferedReader reader = new BufferedReader(new FileReader(configFile))) {
+                    readChannelListFromString(reader.lines().collect(Collectors.joining("\n")));
+                }
             }
             else{
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                URL url = new URL("https://anenasa.github.io/channel/config.txt");
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setReadTimeout(10000);
-                urlConnection.setConnectTimeout(15000);
-                urlConnection.setDoOutput(true);
-                urlConnection.connect();
-                inputStream = url.openStream();
+                Request request = new Request.Builder()
+                        .url("https://anenasa.github.io/channel/config.txt")
+                        .build();
+                try (Response response = okHttpClient.newCall(request).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("下載失敗：" + response);
+                    }
+                    readChannelListFromString(response.body().string());
+                }
             }
-            readChannelListFromStream(inputStream);
             channelLength_config = channel.size();
 
             JSONObject customJsonObject = null;
@@ -308,7 +311,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             try {
                                 if (!channelInThread.get(i).isHidden()) {
-                                    channelInThread.get(i).parse(ytdlp);
+                                    channelInThread.get(i).parse(ytdlp, okHttpClient);
                                 }
                             } catch (JSONException | IOException | InterruptedException |
                                      InvalidAlgorithmParameterException | IllegalBlockSizeException |
@@ -337,28 +340,22 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void readChannelListFromStream(InputStream inputStream) throws JSONException, IOException {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-        StringBuilder stringBuilder = new StringBuilder();
-        for (String line; (line = reader.readLine()) != null; ) {
-            stringBuilder.append(line).append('\n');
-        }
-        JSONObject json = new JSONObject(stringBuilder.toString());
+    void readChannelListFromString(String content) throws JSONException, IOException {
+        JSONObject json = new JSONObject(content);
         JSONArray channelList = json.getJSONArray("channelList");
 
         for(int i = 0; i < channelList.length(); i++){
             JSONObject channelObject = channelList.getJSONObject(i);
             if(channelObject.has("list")){
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                URL url = new URL(channelObject.getString("list"));
-                HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                urlConnection.setRequestMethod("GET");
-                urlConnection.setReadTimeout(10000);
-                urlConnection.setConnectTimeout(15000);
-                urlConnection.setDoOutput(true);
-                urlConnection.connect();
-                readChannelListFromStream(url.openStream());
+                Request request = new Request.Builder()
+                        .url(channelObject.getString("list"))
+                        .build();
+                try (Response response = okHttpClient.newCall(request).execute()) {
+                    if (!response.isSuccessful()) {
+                        throw new IOException("下載失敗：" + response);
+                    }
+                    readChannelListFromString(response.body().string());
+                }
                 continue;
             }
             String url = channelObject.getString("url");
@@ -432,7 +429,7 @@ public class MainActivity extends AppCompatActivity {
         new Thread(() -> {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
-                    channel.get(num).parse(ytdlp);
+                    channel.get(num).parse(ytdlp, okHttpClient);
                 } catch (JSONException | IOException | InterruptedException | PyException |
                          InvalidAlgorithmParameterException | IllegalBlockSizeException |
                          NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException |

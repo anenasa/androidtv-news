@@ -183,11 +183,10 @@ public class Channel {
         return NEEDPARSE_UNKNOWN;
     }
 
-    void parse(YtDlp ytdlp) throws JSONException, IOException, InterruptedException, PyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    void parse(YtDlp ytdlp, OkHttpClient okHttpClient) throws JSONException, IOException, InterruptedException, PyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, NoSuchPaddingException, BadPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         String url = getUrl();
         if(url.startsWith("https://hamivideo.hinet.net/") && url.endsWith(".do")){
             String id = url.substring(url.lastIndexOf("/") + 1, url.lastIndexOf("."));
-            OkHttpClient okHttpClient = new OkHttpClient();
             Request.Builder okHttpRequestBuilder = new Request.Builder()
                     .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=" + id);
             for(Map.Entry<String, String> entry : getHeaderMap().entrySet()){
@@ -212,7 +211,6 @@ public class Channel {
             String script = el.data();
             String id = script.substring(script.indexOf("broadcastId:")+13);
             id = id.substring(0,id.indexOf("\""));
-            OkHttpClient okHttpClient = new OkHttpClient();
             Request okHttpRequest = new Request.Builder()
                     .url("https://today.line.me/webapi/glplive/broadcasts/" + id)
                     .build();
@@ -234,7 +232,6 @@ public class Channel {
                 id = script.substring(script.indexOf("ChannelId") + 12);
                 id = id.substring(0, id.indexOf("\""));
             }
-            OkHttpClient okHttpClient = new OkHttpClient();
             Request okHttpRequest = new Request.Builder()
                     .url("https://app.4gtv.tv/Data/GetChannelURL_Mozai.ashx?callback=channelname&Type=LIVE&ChannelId=" + id)
                     .build();
@@ -248,7 +245,6 @@ public class Channel {
             String id = url.substring(url.indexOf("content_id") + 11);
             if(id.contains("&")) id = id.substring(0, id.indexOf("&"));
 
-            OkHttpClient okHttpClient = new OkHttpClient();
             String data = String.format("{\"type\":\"auth\",\"contentId\":\"%s\",\"contentType\":\"channel\"}", id);
             RequestBody requestBody = RequestBody.create(data, MediaType.parse("application/json"));
             Request.Builder okHttpRequestBuilder = new Request.Builder()
@@ -264,7 +260,6 @@ public class Channel {
             }
         }
         else if(url.startsWith("https://www.ofiii.com/channel/watch/")){
-            OkHttpClient okHttpClient = new OkHttpClient();
             // Get device id
             Request deviceidRequest = new Request.Builder().url("https://www.ofiii.com/api/deviceId").build();
             String deviceid;
