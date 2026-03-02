@@ -34,6 +34,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.stream.Collectors;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -319,20 +320,6 @@ public class SettingsActivity extends AppCompatActivity {
             Preference about = findPreference("about");
             assert about != null;
             about.setOnPreferenceClickListener(preference -> {
-                InputStream streamGpl3 = getResources().openRawResource(R.raw.gpl3);
-                InputStream streamUnlicense = getResources().openRawResource(R.raw.unlicense);
-                InputStream streamChaquopy = getResources().openRawResource(R.raw.chaquopy);
-                InputStream streamNodejs = getResources().openRawResource(R.raw.nodejs);
-                InputStream streamQuickjs = getResources().openRawResource(R.raw.quickjs);
-                InputStream streamApache2 = getResources().openRawResource(R.raw.apache2);
-                InputStream streamMPL2 = getResources().openRawResource(R.raw.mpl2);
-                BufferedReader readerGpl3 = new BufferedReader(new InputStreamReader(streamGpl3));
-                BufferedReader readerUnlicense = new BufferedReader(new InputStreamReader(streamUnlicense));
-                BufferedReader readerChaquopy = new BufferedReader(new InputStreamReader(streamChaquopy));
-                BufferedReader readerNodejs = new BufferedReader(new InputStreamReader(streamNodejs));
-                BufferedReader readerQuickjs = new BufferedReader(new InputStreamReader(streamQuickjs));
-                BufferedReader readerApache2 = new BufferedReader(new InputStreamReader(streamApache2));
-                BufferedReader readerMPL2 = new BufferedReader(new InputStreamReader(streamMPL2));
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.append(String.format("新聞直播 %s 版", BuildConfig.VERSION_NAME)).append('\n')
                         .append("專案頁面：https://github.com/anenasa/androidtv-news").append('\n')
@@ -347,31 +334,39 @@ public class SettingsActivity extends AppCompatActivity {
                         .append("Storage Chooser - Mozilla Public License Version 2.0").append('\n')
                         .append('\n');
                 try{
-                    for (String line; (line = readerGpl3.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.gpl3)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
                     stringBuilder.append("The Unlicense").append('\n');
-                    for (String line; (line = readerUnlicense.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.unlicense)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
                     stringBuilder.append("MIT License").append('\n');
-                    for (String line; (line = readerChaquopy.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.chaquopy)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
-                    for (String line; (line = readerNodejs.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.nodejs)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
-                    for (String line; (line = readerQuickjs.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.quickjs)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
-                    for (String line; (line = readerApache2.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.apache2)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
-                    for (String line; (line = readerMPL2.readLine()) != null; ) {
-                        stringBuilder.append(line).append('\n');
+                    try (InputStream stream = getResources().openRawResource(R.raw.mpl2)) {
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+                        stringBuilder.append(reader.lines().collect(Collectors.joining("\n"))).append('\n');
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Toast.makeText(activity, "讀取許可證失敗", Toast.LENGTH_SHORT).show();
+                    Log.e(activity.TAG, Log.getStackTraceString(e));
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(preference.getContext())
