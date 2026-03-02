@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.codekidlabs.storagechooser.StorageChooser;
 
@@ -96,10 +97,10 @@ public class SettingsActivity extends AppCompatActivity {
                 .build();
         chooser.show();
         chooser.setOnSelectListener(path -> {
-            try {
-                InputStream inputStream = new FileInputStream(path);
+            try (InputStream inputStream = new FileInputStream(path)) {
                 copyToExternal(inputStream, outputName);
             } catch (IOException e) {
+                Toast.makeText(this, "檔案匯入失敗", Toast.LENGTH_SHORT).show();
                 Log.e(TAG, Log.getStackTraceString(e));
             }
         });
@@ -125,6 +126,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                         activity.copyToExternal(inputStream, SAVE_FILE_NAME);
                     } catch (IOException e) {
+                        Toast.makeText(activity, "檔案匯入失敗", Toast.LENGTH_SHORT).show();
                         Log.e(activity.TAG, Log.getStackTraceString(e));
                     }
                 });

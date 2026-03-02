@@ -16,6 +16,7 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.chaquo.python.PyException;
 
@@ -37,6 +38,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -323,7 +325,7 @@ public class MainActivity extends AppCompatActivity {
                 timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
             }
         } catch (IOException | JSONException e) {
-            runOnUiThread(() -> errorMessageView.setText("頻道清單讀取失敗，按 OK 或螢幕進入設定"));
+            runOnUiThread(() -> errorMessageView.setText("頻道清單讀取失敗，按 OK 或螢幕進入設定\n" + e));
             // Log.getStackTraceString does not output UnknownHostException
             // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
             if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
@@ -877,6 +879,7 @@ public class MainActivity extends AppCompatActivity {
                 stream.write(json_string.getBytes());
             }
         } catch (JSONException | IOException e) {
+            Toast.makeText(this, "儲存設定失敗", Toast.LENGTH_SHORT).show();
             Log.e(TAG, Log.getStackTraceString(e));
         }
         editor.apply();
