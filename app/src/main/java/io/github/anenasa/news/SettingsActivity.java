@@ -149,12 +149,11 @@ public class SettingsActivity extends AppCompatActivity {
             assert prefConfigurl != null;
             prefConfigurl.setOnPreferenceChangeListener((preference, newValue) -> {
                 if (!newValue.toString().isEmpty()) {
-                    try {
-                        File file = new File(requireActivity().getExternalFilesDir(null), "config.txt");
-                        // Without deleting first, when config.txt is already created with adb push,
-                        // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
-                        file.delete();
-                        FileOutputStream stream = new FileOutputStream(file);
+                    File file = new File(requireActivity().getExternalFilesDir(null), "config.txt");
+                    // Without deleting first, when config.txt is already created with adb push,
+                    // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
+                    file.delete();
+                    try (FileOutputStream stream = new FileOutputStream(file)) {
                         stream.write(("{\"channelList\": [{\"list\": \"" + newValue + "\"}]}").getBytes());
                     } catch (IOException e) {
                         Log.e(activity.TAG, Log.getStackTraceString(e));
