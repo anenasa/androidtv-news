@@ -30,12 +30,9 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -248,13 +245,11 @@ public class MainActivity extends AppCompatActivity {
             JSONArray newChannelArray = null;
             File customFile = new File(getExternalFilesDir(null), "custom.txt");
             if(customFile.exists()){
-                InputStream customStream = new FileInputStream(customFile);
-                BufferedReader customReader = new BufferedReader(new InputStreamReader(customStream));
-                StringBuilder customStringBuilder = new StringBuilder();
-                for (String line; (line = customReader.readLine()) != null; ) {
-                    customStringBuilder.append(line).append('\n');
+                try (BufferedReader reader = new BufferedReader(new FileReader(customFile))) {
+                    StringBuilder customStringBuilder = new StringBuilder()
+                            .append(reader.lines().collect(Collectors.joining("\n")));
+                    customJsonObject = new JSONObject(customStringBuilder.toString());
                 }
-                customJsonObject = new JSONObject(customStringBuilder.toString());
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
                 newChannelArray = customJsonObject.getJSONArray("newChannelArray");
             }
