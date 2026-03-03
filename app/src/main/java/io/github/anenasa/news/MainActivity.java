@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     TextView errorMessageView;
     Timer timerBackgroundExtract;
     Timer timerReadChannelList;
-    OkHttpClient okHttpClient;
+    OkHttpClient okHttpClient = MyApplication.okHttpClient;
 
     SharedPreferences preferences;
 
@@ -174,7 +174,6 @@ public class MainActivity extends AppCompatActivity {
             }
         };
         timerReadChannelList.schedule(timerTask, 0, 5000);
-        okHttpClient = new OkHttpClient();
     }
 
     @Override

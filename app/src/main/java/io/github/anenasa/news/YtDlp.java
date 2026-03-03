@@ -9,11 +9,12 @@ import com.chaquo.python.PyObject;
 import com.chaquo.python.Python;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+
+import okhttp3.Request;
+import okhttp3.Response;
+import okio.BufferedSink;
+import okio.Okio;
 
 public class YtDlp {
     private final String TAG = "YtDlp";
@@ -71,21 +72,18 @@ public class YtDlp {
         File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
-        URL url = new URL("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp");
-        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-        urlConnection.setRequestMethod("GET");
-        urlConnection.connect();
-
-        FileOutputStream fileOutput = new FileOutputStream(file);
-        InputStream inputStream = urlConnection.getInputStream();
-
-        byte[] buffer = new byte[1024];
-        int bufferLength = 0;
-
-        while ( (bufferLength = inputStream.read(buffer)) > 0 ) {
-            fileOutput.write(buffer, 0, bufferLength);
+        Request request = new Request.Builder()
+                .url("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp")
+                .build();
+        try (Response response = MyApplication.okHttpClient.newCall(request).execute()) {
+            if (!response.isSuccessful()) {
+                throw new IOException("下載失敗：" + response);
+            }
+            try (BufferedSink sink = Okio.buffer(Okio.sink(file))) {
+                sink.writeAll(response.body().source());
+            }
         }
-        fileOutput.close();
+
         if (!file.renameTo(new File(context.getExternalFilesDir(null), "yt-dlp"))){
             throw new IOException("renaming failed");
         }

@@ -32,9 +32,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.stream.Collectors;
+
+import okhttp3.Request;
+import okhttp3.Response;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -283,16 +284,16 @@ public class SettingsActivity extends AppCompatActivity {
                 update.setSummary("正在檢查更新");
                 new Thread(() -> {
                     try {
-                        URL url = new URL("https://raw.githubusercontent.com/anenasa/androidtv-news/main/VERSION");
-                        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
-                        urlConnection.setRequestMethod("GET");
-                        urlConnection.setReadTimeout(10000);
-                        urlConnection.setConnectTimeout(15000);
-                        urlConnection.setDoOutput(true);
-                        urlConnection.connect();
-                        InputStream inputStream = url.openStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
-                        String version_new = reader.readLine();
+                        Request request = new Request.Builder()
+                                .url("https://raw.githubusercontent.com/anenasa/androidtv-news/main/VERSION")
+                                .build();
+                        String version_new;
+                        try (Response response = MyApplication.okHttpClient.newCall(request).execute()) {
+                            if (!response.isSuccessful()) {
+                                throw new IOException("下載失敗：" + response);
+                            }
+                            version_new = response.body().string().trim();
+                        }
                         if(!version_new.equals(BuildConfig.VERSION_NAME.split("-")[0])){
                             activity.runOnUiThread(() -> update.setSummary("有新版本"));
                             String link;
