@@ -114,22 +114,6 @@ public class MainActivity extends AppCompatActivity {
         useExternalJS = preferences.getBoolean("useExternalJS", false);
         updateYtdlpOnStart = preferences.getBoolean("updateYtdlpOnStart", false);
 
-        try {
-            ytdlp = new YtDlp(this, updateYtdlpOnStart);
-        } catch (PyException | IOException e) {
-            // Log.getStackTraceString does not output UnknownHostException
-            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
-            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
-                Log.e(TAG, e.getMessage());
-                e.printStackTrace();
-            }
-            else
-                Log.e(TAG, Log.getStackTraceString(e));
-            // AlertDialog does not work in onCreate(), so I show it in onStart()
-            return;
-        }
-        ytdlp.setUseExternalJS(useExternalJS);
-
         player = new ExoPlayer.Builder(this).build();
         player.addListener(new Player.Listener() {
             @Override
@@ -165,27 +149,12 @@ public class MainActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView);
         textInfo = findViewById(R.id.textInfo);
         errorMessageView = findViewById(R.id.errorMessage);
-
-        timerReadChannelList = new Timer(true);
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                readChannelList();
-            }
-        };
-        timerReadChannelList.schedule(timerTask, 0, 5000);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        if (ytdlp == null){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("yt-dlp 載入失敗");
-            builder.setNegativeButton("確定", (dialog, id) -> finish());
-            AlertDialog alertDialog = builder.create();
-            alertDialog.show();
-        }
+        new Thread(this::initializeYtDlp).start();
         isStarted = true;
         // Do not call play() more than once
         // play() will be called in onActivityResult()
@@ -210,6 +179,44 @@ public class MainActivity extends AppCompatActivity {
         }
         if (system_ui_flag != View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY) {
             getWindow().getDecorView().setSystemUiVisibility(system_ui_flag);
+        }
+    }
+
+    void initializeYtDlp() {
+        if (ytdlp != null) {
+            // Already initialized
+            return;
+        }
+        try {
+            ytdlp = new YtDlp(this, updateYtdlpOnStart);
+            ytdlp.setUseExternalJS(useExternalJS);
+
+            timerReadChannelList = new Timer(true);
+            TimerTask timerTask = new TimerTask() {
+                @Override
+                public void run() {
+                    readChannelList();
+                }
+            };
+            timerReadChannelList.schedule(timerTask, 0, 5000);
+        } catch (PyException | IOException e) {
+            // Log.getStackTraceString does not output UnknownHostException
+            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
+            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
+                Log.e(TAG, e.getMessage());
+                e.printStackTrace();
+            }
+            else {
+                Log.e(TAG, Log.getStackTraceString(e));
+            }
+            runOnUiThread(() -> {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("yt-dlp 載入失敗");
+                builder.setCancelable(false);
+                builder.setNegativeButton("確定", (dialog, id) -> finish());
+                AlertDialog alertDialog = builder.create();
+                alertDialog.show();
+            });
         }
     }
 
@@ -691,8 +698,10 @@ public class MainActivity extends AppCompatActivity {
         }
         getSupportFragmentManager().popBackStack();
         if(!channelListLoaded) {
-            timerReadChannelList.cancel();
-            showSettings(findViewById(R.id.container));
+            if (timerReadChannelList != null) {
+                timerReadChannelList.cancel();
+                showSettings(findViewById(R.id.container));
+            }
         }
         else if((int)event.getX() < playerView.getWidth() / 3){
             if (invertChannelButtons) {

@@ -1,7 +1,6 @@
 package io.github.anenasa.news;
 
 import android.content.Context;
-import android.os.StrictMode;
 import android.util.Log;
 
 import com.chaquo.python.PyException;
@@ -70,8 +69,6 @@ public class YtDlp {
      */
     public static void download(Context context) throws IOException {
         File file = new File(context.getExternalFilesDir(null), "yt-dlp.part");
-        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
         Request request = new Request.Builder()
                 .url("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp")
                 .build();
