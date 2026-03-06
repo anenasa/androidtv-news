@@ -17,7 +17,7 @@ import okio.Okio;
 
 public class YtDlp {
     private final String TAG = "YtDlp";
-    private PyObject yt_dlp;
+    private final PyObject yt_dlp;
     static String version;
     Context context;
     boolean useExternalJS = false;

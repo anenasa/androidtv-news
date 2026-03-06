@@ -39,6 +39,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -204,7 +205,6 @@ public class MainActivity extends AppCompatActivity {
             // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
             if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
                 Log.e(TAG, e.getMessage());
-                e.printStackTrace();
             }
             else {
                 Log.e(TAG, Log.getStackTraceString(e));
@@ -252,9 +252,8 @@ public class MainActivity extends AppCompatActivity {
             File customFile = new File(getExternalFilesDir(null), "custom.txt");
             if(customFile.exists()){
                 try (BufferedReader reader = new BufferedReader(new FileReader(customFile))) {
-                    StringBuilder customStringBuilder = new StringBuilder()
-                            .append(reader.lines().collect(Collectors.joining("\n")));
-                    customJsonObject = new JSONObject(customStringBuilder.toString());
+                    String customString = reader.lines().collect(Collectors.joining("\n"));
+                    customJsonObject = new JSONObject(customString);
                 }
                 customChannelList = customJsonObject.getJSONObject("customChannelList");
                 newChannelArray = customJsonObject.getJSONArray("newChannelArray");
@@ -426,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
     @OptIn(markerClass = UnstableApi.class)
     void play(int num)
     {
-        textInfo.setText(String.format("正在載入 %d %s", num, channel.get(num).getName()));
+        textInfo.setText(String.format(Locale.ROOT, "正在載入 %d %s", num, channel.get(num).getName()));
         new Thread(() -> {
             if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
                 try {
@@ -601,7 +600,7 @@ public class MainActivity extends AppCompatActivity {
                         timerReadChannelList.cancel();
                         showSettings(findViewById(R.id.container));
                     }
-                    else if(input.equals("")){
+                    else if(input.isEmpty()){
                         showMenu();
                     }
                     else if(Integer.parseInt(input) < channel.size()){
@@ -613,7 +612,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     return true;
                 case KeyEvent.KEYCODE_BACK:
-                    if(!input.equals("")){
+                    if(!input.isEmpty()){
                         clearInput();
                     }
                     else{
