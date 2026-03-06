@@ -19,6 +19,8 @@ import android.widget.Toast;
 
 import com.chaquo.python.PyException;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.OptIn;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
@@ -97,6 +99,127 @@ public class MainActivity extends AppCompatActivity {
     AudioManager audioManager;
     int errorCount = 0;
     boolean DO_NOT_PLAY_ON_START = false;
+
+    private final ActivityResultLauncher<Intent> showChannelListLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK && data != null) {
+                    switchChannel(data.getIntExtra("channelNum", 0));
+                } else {
+                    play(channelNum);
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> showChannelInfoLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK && data != null) {
+                    if(data.getBooleanExtra("delete", false)){
+                        channel.remove(channelNum);
+                        resetChannelNum();
+                        play(channelNum);
+                        saveSettings();
+                        return;
+                    }
+
+                    if(data.getBooleanExtra("remove_cache", false)){
+                        channel.get(channelNum).setVideo("");
+                    }
+                    String url_old = channel.get(channelNum).getUrl();
+                    String url_new;
+                    if(data.getStringExtra("customUrl").isEmpty()) {
+                        url_new = channel.get(channelNum).defaultUrl;
+                    }
+                    else{
+                        url_new = data.getStringExtra("customUrl");
+                    }
+                    String format_old = channel.get(channelNum).getFormat();
+                    String format_new;
+                    if(data.getStringExtra("customFormat").isEmpty()){
+                        format_new = channel.get(channelNum).defaultFormat;
+                    }
+                    else{
+                        format_new = data.getStringExtra("customFormat");
+                    }
+                    if(!url_old.equals(url_new) || !format_old.equals(format_new)){
+                        channel.get(channelNum).setVideo("");
+                    }
+                    channel.get(channelNum).setName(data.getStringExtra("customName"));
+                    channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
+                    channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
+                    channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
+                    channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
+                    channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
+                    play(channelNum);
+                    saveSettings();
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> addNewChannelLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK && data != null) {
+                    if(data.getBooleanExtra("delete", false)){
+                        return;
+                    }
+                    Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "", new HashMap<>());
+                    ch.setName(data.getStringExtra("customName"));
+                    ch.setHidden(data.getBooleanExtra("isHidden", false));
+                    ch.setUrl(data.getStringExtra("customUrl"));
+                    ch.setFormat(data.getStringExtra("customFormat"));
+                    ch.setVolume(data.getStringExtra("customVolume"));
+                    ch.setHeader(data.getStringExtra("customHeader"));
+                    channel.add(ch);
+                    saveSettings();
+                    switchChannel(channel.size()-1);
+                }
+            }
+    );
+
+    private final ActivityResultLauncher<Intent> showSettingsLauncher = registerForActivityResult(
+            new ActivityResultContracts.StartActivityForResult(),
+            result -> {
+                Intent data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK && data != null) {
+                    defaultFormat = data.getStringExtra("defaultFormat");
+                    defaultVolume = data.getStringExtra("defaultVolume");
+                    isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
+                    enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false);
+                    invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
+                    hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
+                    hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
+                    useExternalJS = data.getBooleanExtra("useExternalJS", false);
+                    updateYtdlpOnStart = data.getBooleanExtra("updateYtdlpOnStart", false);
+                    if (data.getBooleanExtra("ytdlpUpdated", false)) {
+                        // Kill process, so new version of yt-dlp can be loaded
+                        System.exit(0);
+                    }
+                    saveSettings();
+
+                    ytdlp.setUseExternalJS(useExternalJS);
+
+                    if (timerBackgroundExtract != null) {
+                        timerBackgroundExtract.cancel();
+                    }
+                    timerReadChannelList = new Timer(true);
+                    TimerTask timerTask = new TimerTask() {
+                        @Override
+                        public void run() {
+                            readChannelList();
+                        }
+                    };
+                    timerReadChannelList.schedule(timerTask, 0, 5000);
+                    if(data.getBooleanExtra("remove_cache", false)){
+                        for(Channel i: channel) i.setVideo("");
+                    }
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -481,117 +604,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 0) {
-            // ChannelListActivity
-            if (resultCode == Activity.RESULT_OK) {
-                switchChannel(data.getIntExtra("channelNum", 0));
-            }
-            else{
-                play(channelNum);
-            }
-        }
-        else if(requestCode == 1){
-            // ChannelInfoActivity - existing channel
-            if (resultCode == Activity.RESULT_OK) {
-                if(data.getBooleanExtra("delete", false)){
-                    channel.remove(channelNum);
-                    resetChannelNum();
-                    play(channelNum);
-                    saveSettings();
-                    return;
-                }
-
-                if(data.getBooleanExtra("remove_cache", false)){
-                    channel.get(channelNum).setVideo("");
-                }
-                String url_old = channel.get(channelNum).getUrl();
-                String url_new;
-                if(data.getStringExtra("customUrl").isEmpty()) {
-                    url_new = channel.get(channelNum).defaultUrl;
-                }
-                else{
-                    url_new = data.getStringExtra("customUrl");
-                }
-                String format_old = channel.get(channelNum).getFormat();
-                String format_new;
-                if(data.getStringExtra("customFormat").isEmpty()){
-                    format_new = channel.get(channelNum).defaultFormat;
-                }
-                else{
-                    format_new = data.getStringExtra("customFormat");
-                }
-                if(!url_old.equals(url_new) || !format_old.equals(format_new)){
-                    channel.get(channelNum).setVideo("");
-                }
-                channel.get(channelNum).setName(data.getStringExtra("customName"));
-                channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
-                channel.get(channelNum).setUrl(data.getStringExtra("customUrl"));
-                channel.get(channelNum).setFormat(data.getStringExtra("customFormat"));
-                channel.get(channelNum).setVolume(data.getStringExtra("customVolume"));
-                channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
-                play(channelNum);
-                saveSettings();
-            }
-        }
-        else if (requestCode == 2) {
-            // SettingsActivity
-            if (resultCode == Activity.RESULT_OK) {
-                defaultFormat = data.getStringExtra("defaultFormat");
-                defaultVolume = data.getStringExtra("defaultVolume");
-                isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false);
-                enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false);
-                invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false);
-                hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false);
-                hideStatusBar = data.getBooleanExtra("hideStatusBar", false);
-                useExternalJS = data.getBooleanExtra("useExternalJS", false);
-                updateYtdlpOnStart = data.getBooleanExtra("updateYtdlpOnStart", false);
-                if (data.getBooleanExtra("ytdlpUpdated", false)) {
-                    // Kill process, so new version of yt-dlp can be loaded
-                    System.exit(0);
-                }
-                saveSettings();
-
-                ytdlp.setUseExternalJS(useExternalJS);
-
-                if (timerBackgroundExtract != null) {
-                    timerBackgroundExtract.cancel();
-                }
-                timerReadChannelList = new Timer(true);
-                TimerTask timerTask = new TimerTask() {
-                    @Override
-                    public void run() {
-                        readChannelList();
-                    }
-                };
-                timerReadChannelList.schedule(timerTask, 0, 5000);
-                if(data.getBooleanExtra("remove_cache", false)){
-                    for(Channel i: channel) i.setVideo("");
-                }
-            }
-        }
-        else if(requestCode == 3){
-            // ChannelInfoActivity - new channel
-            if (resultCode == Activity.RESULT_OK) {
-                if(data.getBooleanExtra("delete", false)){
-                    return;
-                }
-                Channel ch = new Channel("", "", defaultFormat, Float.parseFloat(defaultVolume), "", new HashMap<>());
-                ch.setName(data.getStringExtra("customName"));
-                ch.setHidden(data.getBooleanExtra("isHidden", false));
-                ch.setUrl(data.getStringExtra("customUrl"));
-                ch.setFormat(data.getStringExtra("customFormat"));
-                ch.setVolume(data.getStringExtra("customVolume"));
-                ch.setHeader(data.getStringExtra("customHeader"));
-                channel.add(ch);
-                saveSettings();
-                switchChannel(channel.size()-1);
-            }
-        }
-    }
-
-    @Override
     public boolean dispatchKeyEvent (KeyEvent event){
         if(event.getAction() == KeyEvent.ACTION_DOWN && getSupportFragmentManager().getFragments().isEmpty()) {
             switch (event.getKeyCode()) {
@@ -755,7 +767,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("nameArray", nameArray);
         intent.putExtra("isHiddenArray", isHiddenArray);
         intent.putExtra("currentNum", channelNum);
-        startActivityForResult(intent, 0);
+        showChannelListLauncher.launch(intent);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
     }
@@ -777,7 +789,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("isHidden", channel.get(channelNum).isHidden());
         intent.putExtra("width", player.getVideoSize().width);
         intent.putExtra("height", player.getVideoSize().height);
-        startActivityForResult(intent, 1);
+        showChannelInfoLauncher.launch(intent);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
     }
@@ -799,7 +811,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("isHidden", false);
         intent.putExtra("width", 0);
         intent.putExtra("height", 0);
-        startActivityForResult(intent, 3);
+        addNewChannelLauncher.launch(intent);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
     }
@@ -815,7 +827,7 @@ public class MainActivity extends AppCompatActivity {
         intentSettings.putExtra("hideStatusBar", hideStatusBar);
         intentSettings.putExtra("useExternalJS", useExternalJS);
         intentSettings.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
-        startActivityForResult(intentSettings, 2);
+        showSettingsLauncher.launch(intentSettings);
         getSupportFragmentManager().popBackStack();
         DO_NOT_PLAY_ON_START = true;
     }
