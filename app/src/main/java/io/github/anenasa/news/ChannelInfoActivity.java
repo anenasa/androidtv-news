@@ -1,5 +1,6 @@
 package io.github.anenasa.news;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
@@ -55,20 +56,22 @@ public class ChannelInfoActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.container, fragment)
                 .commit();
-    }
 
-    @Override
-    public void onBackPressed() {
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("customName", fragment.activity.customName);
-        returnIntent.putExtra("isHidden", fragment.prefIsHidden.isChecked());
-        returnIntent.putExtra("customUrl", fragment.activity.customUrl);
-        returnIntent.putExtra("customFormat", fragment.activity.customFormat);
-        returnIntent.putExtra("customVolume", fragment.activity.customVolume);
-        returnIntent.putExtra("customHeader", fragment.activity.customHeader);
-        returnIntent.putExtra("remove_cache", fragment.activity.remove_cache);
-        setResult(Activity.RESULT_OK, returnIntent);
-        super.onBackPressed();
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("customName", fragment.activity.customName);
+                returnIntent.putExtra("isHidden", fragment.prefIsHidden.isChecked());
+                returnIntent.putExtra("customUrl", fragment.activity.customUrl);
+                returnIntent.putExtra("customFormat", fragment.activity.customFormat);
+                returnIntent.putExtra("customVolume", fragment.activity.customVolume);
+                returnIntent.putExtra("customHeader", fragment.activity.customHeader);
+                returnIntent.putExtra("remove_cache", fragment.activity.remove_cache);
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
+            }
+        });
     }
 
     public static class ChannelInfoFragment extends PreferenceFragmentCompat {

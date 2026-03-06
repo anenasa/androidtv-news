@@ -1,5 +1,6 @@
 package io.github.anenasa.news;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
@@ -69,24 +70,26 @@ public class SettingsActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
                 .commit();
-    }
 
-    @Override
-    public void onBackPressed() {
-        Intent returnIntent = new Intent();
-        returnIntent.putExtra("defaultFormat", defaultFormat);
-        returnIntent.putExtra("defaultVolume", defaultVolume);
-        returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
-        returnIntent.putExtra("enableBackgroundExtract", enableBackgroundExtract);
-        returnIntent.putExtra("invertChannelButtons", invertChannelButtons);
-        returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
-        returnIntent.putExtra("hideStatusBar", hideStatusBar);
-        returnIntent.putExtra("useExternalJS", useExternalJS);
-        returnIntent.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
-        returnIntent.putExtra("remove_cache", remove_cache);
-        returnIntent.putExtra("ytdlpUpdated", ytdlpUpdated);
-        setResult(Activity.RESULT_OK, returnIntent);
-        super.onBackPressed();
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Intent returnIntent = new Intent();
+                returnIntent.putExtra("defaultFormat", defaultFormat);
+                returnIntent.putExtra("defaultVolume", defaultVolume);
+                returnIntent.putExtra("isShowErrorMessage", isShowErrorMessage);
+                returnIntent.putExtra("enableBackgroundExtract", enableBackgroundExtract);
+                returnIntent.putExtra("invertChannelButtons", invertChannelButtons);
+                returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
+                returnIntent.putExtra("hideStatusBar", hideStatusBar);
+                returnIntent.putExtra("useExternalJS", useExternalJS);
+                returnIntent.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
+                returnIntent.putExtra("remove_cache", remove_cache);
+                returnIntent.putExtra("ytdlpUpdated", ytdlpUpdated);
+                setResult(Activity.RESULT_OK, returnIntent);
+                finish();
+            }
+        });
     }
 
     private void showFileChooser(String outputName) {
