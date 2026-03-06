@@ -212,6 +212,7 @@ public class MainActivity extends AppCompatActivity {
             runOnUiThread(() -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("yt-dlp 載入失敗");
+                builder.setMessage(e.toString());
                 builder.setCancelable(false);
                 builder.setNegativeButton("確定", (dialog, id) -> finish());
                 AlertDialog alertDialog = builder.create();
