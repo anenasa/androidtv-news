@@ -11,10 +11,13 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 public class ChannelInfoActivity extends AppCompatActivity {
 
     ChannelInfoFragment fragment = new ChannelInfoFragment();
+    final String TAG = "ChannelInfoActivity";
     boolean isNewChannel;
     int channelIndex;
     String defaultUrl;
@@ -37,21 +40,28 @@ public class ChannelInfoActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        isNewChannel = getIntent().getExtras().getBoolean("isNewChannel");
-        channelIndex = getIntent().getExtras().getInt("index");
-        defaultUrl = getIntent().getExtras().getString("defaultUrl");
-        defaultName = getIntent().getExtras().getString("defaultName");
-        defaultFormat = getIntent().getExtras().getString("defaultFormat");
-        defaultVolume = getIntent().getExtras().getFloat("defaultVolume");
-        defaultHeader = getIntent().getExtras().getString("defaultHeader");
-        customUrl = getIntent().getExtras().getString("customUrl");
-        customName = getIntent().getExtras().getString("customName");
-        customFormat = getIntent().getExtras().getString("customFormat");
-        customVolume = getIntent().getExtras().getString("customVolume");
-        customHeader = getIntent().getExtras().getString("customHeader");
-        channelIsHidden = getIntent().getExtras().getBoolean("isHidden");
-        channelWidth = getIntent().getExtras().getInt("width");
-        channelHeight = getIntent().getExtras().getInt("height");
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras == null) {
+            Toast.makeText(this, "Error: intentExtras is null", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error: intentExtras is null");
+            finish();
+            return;
+        }
+        isNewChannel = intentExtras.getBoolean("isNewChannel");
+        channelIndex = intentExtras.getInt("index");
+        defaultUrl = intentExtras.getString("defaultUrl");
+        defaultName = intentExtras.getString("defaultName");
+        defaultFormat = intentExtras.getString("defaultFormat");
+        defaultVolume = intentExtras.getFloat("defaultVolume");
+        defaultHeader = intentExtras.getString("defaultHeader");
+        customUrl = intentExtras.getString("customUrl");
+        customName = intentExtras.getString("customName");
+        customFormat = intentExtras.getString("customFormat");
+        customVolume = intentExtras.getString("customVolume");
+        customHeader = intentExtras.getString("customHeader");
+        channelIsHidden = intentExtras.getBoolean("isHidden");
+        channelWidth = intentExtras.getInt("width");
+        channelHeight = intentExtras.getInt("height");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, fragment)

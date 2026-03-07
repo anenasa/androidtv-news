@@ -57,15 +57,22 @@ public class SettingsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        defaultFormat = getIntent().getExtras().getString("defaultFormat");
-        defaultVolume = getIntent().getExtras().getString("defaultVolume");
-        isShowErrorMessage = getIntent().getExtras().getBoolean("isShowErrorMessage");
-        enableBackgroundExtract = getIntent().getExtras().getBoolean("enableBackgroundExtract");
-        invertChannelButtons = getIntent().getExtras().getBoolean("invertChannelButtons");
-        hideNavigationBar = getIntent().getExtras().getBoolean("hideNavigationBar");
-        hideStatusBar = getIntent().getExtras().getBoolean("hideStatusBar");
-        useExternalJS = getIntent().getExtras().getBoolean("useExternalJS");
-        updateYtdlpOnStart = getIntent().getExtras().getBoolean("updateYtdlpOnStart");
+        Bundle intentExtras = getIntent().getExtras();
+        if (intentExtras == null) {
+            Toast.makeText(this, "Error: intentExtras is null", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Error: intentExtras is null");
+            finish();
+            return;
+        }
+        defaultFormat = intentExtras.getString("defaultFormat");
+        defaultVolume = intentExtras.getString("defaultVolume");
+        isShowErrorMessage = intentExtras.getBoolean("isShowErrorMessage");
+        enableBackgroundExtract = intentExtras.getBoolean("enableBackgroundExtract");
+        invertChannelButtons = intentExtras.getBoolean("invertChannelButtons");
+        hideNavigationBar = intentExtras.getBoolean("hideNavigationBar");
+        hideStatusBar = intentExtras.getBoolean("hideStatusBar");
+        useExternalJS = intentExtras.getBoolean("useExternalJS");
+        updateYtdlpOnStart = intentExtras.getBoolean("updateYtdlpOnStart");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -156,7 +163,9 @@ public class SettingsActivity extends AppCompatActivity {
                     File file = new File(requireActivity().getExternalFilesDir(null), "config.txt");
                     // Without deleting first, when config.txt is already created with adb push,
                     // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
-                    file.delete();
+                    if (file.exists() && !file.delete()) {
+                        Log.e(activity.TAG, "failed to delete file");
+                    }
                     try (FileOutputStream stream = new FileOutputStream(file)) {
                         stream.write(("{\"channelList\": [{\"list\": \"" + newValue + "\"}]}").getBytes());
                     } catch (IOException e) {
@@ -299,13 +308,8 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                         if(!version_new.equals(BuildConfig.VERSION_NAME.split("-")[0])){
                             activity.runOnUiThread(() -> update.setSummary("有新版本"));
-                            String link;
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                                link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-" + version_new + ".apk";
-                            }
-                            else {
-                                link = "https://github.com/anenasa/androidtv-news/releases/download/v" + version_new + "/androidtv-news-api21-" + version_new + ".apk";
-                            }
+                            String apiString = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) ? "" : "-api21";
+                            String link = String.format("https://github.com/anenasa/androidtv-news/releases/download/v%1$s/androidtv-news%2$s-%1$s.apk", version_new, apiString);
                             Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(link));
                             startActivity(intent);
                         }
@@ -424,7 +428,9 @@ public class SettingsActivity extends AppCompatActivity {
         File outputFile = new File(getExternalFilesDir(null), outputName);
         // Without deleting first, when output file is already created with adb push,
         // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
-        outputFile.delete();
+        if (outputFile.exists() && !outputFile.delete()) {
+            Log.e(TAG, "failed to delete file");
+        }
         OutputStream outputStream = new FileOutputStream(outputFile);
         byte[] buf = new byte[1024];
         int len;

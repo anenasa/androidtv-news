@@ -155,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                     channel.get(channelNum).setHeader(data.getStringExtra("customHeader"));
                     play(channelNum);
                     saveSettings();
+                } else {
+                    play(channelNum);
                 }
             }
     );
@@ -177,6 +179,8 @@ public class MainActivity extends AppCompatActivity {
                     channel.add(ch);
                     saveSettings();
                     switchChannel(channel.size()-1);
+                } else {
+                    play(channelNum);
                 }
             }
     );
@@ -217,6 +221,8 @@ public class MainActivity extends AppCompatActivity {
                     if(data.getBooleanExtra("remove_cache", false)){
                         for(Channel i: channel) i.setVideo("");
                     }
+                } else {
+                    play(channelNum);
                 }
             }
     );
