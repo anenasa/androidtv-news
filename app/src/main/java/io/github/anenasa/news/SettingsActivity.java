@@ -397,13 +397,13 @@ public class SettingsActivity extends AppCompatActivity {
         void saveToFile(String outputName) {
             SAVE_FILE_NAME = outputName;
 
-            // Check if system file picker is available
+            // Check if file picker is available
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
             intent.addCategory(Intent.CATEGORY_OPENABLE);
             intent.setType("text/*");
             PackageManager packageManager = requireActivity().getPackageManager();
             ComponentName componentName = intent.resolveActivity(packageManager);
-            // Possible results of componentName:
+            // Possible results of componentName if no third-party file picker is installed:
             // com.android.documentsui on non-Android TV
             // null on Android TV <= 10
             // com.google.android.tv.frameworkpackagestubs on Android TV 11
@@ -412,7 +412,7 @@ public class SettingsActivity extends AppCompatActivity {
                 selectFileLauncher.launch("text/*");
             }
             else {
-                // SAF does not work on Android TV
+                // No file picker available
                 // https://stackoverflow.com/a/38715569/20756028
                 if(ContextCompat.checkSelfPermission(activity, Manifest.permission.READ_EXTERNAL_STORAGE) == -1) {
                     requestPermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
