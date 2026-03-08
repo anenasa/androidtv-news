@@ -129,16 +129,16 @@ public class MainActivity extends AppCompatActivity {
                         channel.get(channelNum).setVideo("");
                     }
                     String url_old = channel.get(channelNum).getUrl();
-                    String url_new;
-                    if(data.getStringExtra("customUrl").isEmpty()) {
+                    String url_new = data.getStringExtra("customUrl");
+                    if(url_new == null || url_new.isEmpty()) {
                         url_new = channel.get(channelNum).defaultUrl;
                     }
                     else{
                         url_new = data.getStringExtra("customUrl");
                     }
                     String format_old = channel.get(channelNum).getFormat();
-                    String format_new;
-                    if(data.getStringExtra("customFormat").isEmpty()){
+                    String format_new = data.getStringExtra("customFormat");
+                    if(format_new == null || format_new.isEmpty()){
                         format_new = channel.get(channelNum).defaultFormat;
                     }
                     else{
@@ -458,7 +458,7 @@ public class MainActivity extends AppCompatActivity {
                 timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
             }
         } catch (IOException | JSONException e) {
-            runOnUiThread(() -> errorMessageView.setText("頻道清單讀取失敗，按 OK 或螢幕進入設定\n" + e));
+            runOnUiThread(() -> errorMessageView.setText(String.format("頻道清單讀取失敗，按 OK 或螢幕進入設定\n%s", e)));
             // Log.getStackTraceString does not output UnknownHostException
             // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
             if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
