@@ -28,6 +28,7 @@ import com.codekidlabs.storagechooser.StorageChooser;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -113,7 +114,7 @@ public class SettingsActivity extends AppCompatActivity {
                 copyToExternal(inputStream, outputName);
             } catch (IOException e) {
                 Toast.makeText(this, "檔案匯入失敗", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, Log.getStackTraceString(e));
+                Log.e(TAG, "showFileChooser error", e);
             }
         });
     }
@@ -139,7 +140,7 @@ public class SettingsActivity extends AppCompatActivity {
                         activity.copyToExternal(inputStream, SAVE_FILE_NAME);
                     } catch (IOException e) {
                         Toast.makeText(activity, "檔案匯入失敗", Toast.LENGTH_SHORT).show();
-                        Log.e(activity.TAG, Log.getStackTraceString(e));
+                        Log.e(activity.TAG, "selectFileLauncher error", e);
                     }
                 });
 
@@ -169,8 +170,8 @@ public class SettingsActivity extends AppCompatActivity {
                     try (FileOutputStream stream = new FileOutputStream(file)) {
                         stream.write(("{\"channelList\": [{\"list\": \"" + newValue + "\"}]}").getBytes());
                     } catch (IOException e) {
-                        Log.e(activity.TAG, Log.getStackTraceString(e));
-                        preference.setSummary(e.toString());
+                        Log.e(activity.TAG, "prefConfigurl error", e);
+                        preference.setSummary(e.getMessage());
                     }
                 }
                 return true;
@@ -284,7 +285,7 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                     catch (IOException e) {
                         activity.runOnUiThread(() -> update_ytdlp.setSummary("更新時發生錯誤"));
-                        Log.e(activity.TAG, Log.getStackTraceString(e));
+                        Log.e(activity.TAG, "Preference update_ytdlp error", e);
                     }
                 }).start();
                 return true;
@@ -318,7 +319,7 @@ public class SettingsActivity extends AppCompatActivity {
                         }
                     } catch (IOException e) {
                         activity.runOnUiThread(() -> update.setSummary("更新時發生錯誤"));
-                        Log.e(activity.TAG, Log.getStackTraceString(e));
+                        Log.e(activity.TAG, "Preference update error", e);
                     }
                 }).start();
                 return true;
@@ -373,7 +374,7 @@ public class SettingsActivity extends AppCompatActivity {
                     }
                 } catch (IOException e) {
                     Toast.makeText(activity, "讀取許可證失敗", Toast.LENGTH_SHORT).show();
-                    Log.e(activity.TAG, Log.getStackTraceString(e));
+                    Log.e(activity.TAG, "Read license error", e);
                 }
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(preference.getContext())

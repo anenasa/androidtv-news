@@ -248,8 +248,8 @@ public class MainActivity extends AppCompatActivity {
         player.addListener(new Player.Listener() {
             @Override
             public void onPlayerError(@NonNull PlaybackException error) {
-                Log.e(TAG, Log.getStackTraceString(error));
-                showErrorMessage(error.toString());
+                Log.e(TAG, "Player error", error);
+                showErrorMessage(error.getMessage());
                 if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
                     if(errorCount > 0) {
                         // Force parse by removing video url
@@ -330,18 +330,11 @@ public class MainActivity extends AppCompatActivity {
             };
             timerReadChannelList.schedule(timerTask, 0, 5000);
         } catch (PyException | IOException e) {
-            // Log.getStackTraceString does not output UnknownHostException
-            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
-            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
-                Log.e(TAG, e.getMessage());
-            }
-            else {
-                Log.e(TAG, Log.getStackTraceString(e));
-            }
+            Log.e(TAG, e.toString(), e);
             runOnUiThread(() -> {
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("yt-dlp 載入失敗");
-                builder.setMessage(e.toString());
+                builder.setMessage(e.getMessage());
                 builder.setCancelable(false);
                 builder.setNegativeButton("確定", (dialog, id) -> finish());
                 AlertDialog alertDialog = builder.create();
@@ -448,7 +441,7 @@ public class MainActivity extends AppCompatActivity {
                                      NoSuchPaddingException | BadPaddingException |
                                      NoSuchAlgorithmException |
                                      InvalidKeyException | PyException e) {
-                                Log.e(TAG, Log.getStackTraceString(e));
+                                Log.e(TAG, "Background extract error", e);
                             }
                         }
                     }
@@ -458,14 +451,8 @@ public class MainActivity extends AppCompatActivity {
                 timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
             }
         } catch (IOException | JSONException | IllegalArgumentException e) {
-            runOnUiThread(() -> errorMessageView.setText(String.format("頻道清單讀取失敗，按 OK 或螢幕進入設定\n%s", e)));
-            // Log.getStackTraceString does not output UnknownHostException
-            // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
-            if(Log.getStackTraceString(e).isEmpty() && e.getMessage() != null) {
-                Log.e(TAG, e.getMessage());
-            }
-            else
-                Log.e(TAG, Log.getStackTraceString(e));
+            runOnUiThread(() -> errorMessageView.setText(String.format("頻道清單讀取失敗，按 OK 或螢幕進入設定\n%s", e.getMessage())));
+            Log.e(TAG, e.toString(), e);
             channel = null;
         }
     }
@@ -565,8 +552,8 @@ public class MainActivity extends AppCompatActivity {
                          NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException |
                          InvalidKeyException e) {
                     if(channelNum!=num) return;
-                    Log.e(TAG, Log.getStackTraceString(e));
-                    showErrorMessage(e.toString());
+                    Log.e(TAG, "Channel.parse error", e);
+                    showErrorMessage(e.getMessage());
                 }
             }
             if(channelNum!=num) return;
@@ -898,7 +885,7 @@ public class MainActivity extends AppCompatActivity {
             }
         } catch (JSONException | IOException e) {
             Toast.makeText(this, "儲存設定失敗", Toast.LENGTH_SHORT).show();
-            Log.e(TAG, Log.getStackTraceString(e));
+            Log.e(TAG, "Save settings error", e);
         }
         editor.apply();
     }
