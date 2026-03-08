@@ -6,8 +6,7 @@
 
 https://github.com/anenasa/androidtv-news/releases
 
-Android 7 以上系統可下載 androidtv-news-版本.apk
-Android 5 和 6 可下載 androidtv-news-api21-版本.apk
+Android 7 以上系統可下載 androidtv-news-版本.apk，Android 5 和 6 可下載 androidtv-news-api21-版本.apk
 
 ## 特色
 
@@ -39,7 +38,7 @@ Android 5 和 6 可下載 androidtv-news-api21-版本.apk
 
 ## 自訂頻道
 
-以 json 格式自訂頻道，將自訂頻道檔案放在 /storage/emulated/0/Android/data/io.github.anenasa.news/files/config.txt，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
+以 json 格式自訂頻道，可在設定畫面匯入頻道清單或選擇網址，可參考[預設頻道檔案](https://anenasa.github.io/channel/config.txt)。
 
 ### 自訂頻道檔案格式
 
