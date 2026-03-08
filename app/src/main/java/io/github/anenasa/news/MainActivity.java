@@ -457,7 +457,7 @@ public class MainActivity extends AppCompatActivity {
                 // Hami Video at the same time, one of them will fail.
                 timerBackgroundExtract.schedule(timerTask, 1000, 3600000);
             }
-        } catch (IOException | JSONException e) {
+        } catch (IOException | JSONException | IllegalArgumentException e) {
             runOnUiThread(() -> errorMessageView.setText(String.format("頻道清單讀取失敗，按 OK 或螢幕進入設定\n%s", e)));
             // Log.getStackTraceString does not output UnknownHostException
             // https://stackoverflow.com/questions/18544539/android-log-x-not-printing-stacktrace
