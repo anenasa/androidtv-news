@@ -159,13 +159,13 @@ public class SettingsActivity extends AppCompatActivity {
             EditTextPreference prefConfigurl = findPreference("configurl");
             assert prefConfigurl != null;
             prefConfigurl.setOnPreferenceChangeListener((preference, newValue) -> {
+                File file = new File(requireActivity().getExternalFilesDir(null), "config.txt");
+                // Without deleting first, when config.txt is already created with adb push,
+                // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
+                if (file.exists() && !file.delete()) {
+                    Log.e(activity.TAG, "failed to delete file");
+                }
                 if (!newValue.toString().isEmpty()) {
-                    File file = new File(requireActivity().getExternalFilesDir(null), "config.txt");
-                    // Without deleting first, when config.txt is already created with adb push,
-                    // writing will fail with "java.io.FileNotFoundException" "open failed: EACCES (Permission denied)"
-                    if (file.exists() && !file.delete()) {
-                        Log.e(activity.TAG, "failed to delete file");
-                    }
                     try (FileOutputStream stream = new FileOutputStream(file)) {
                         stream.write(("{\"channelList\": [{\"list\": \"" + newValue + "\"}]}").getBytes());
                     } catch (IOException e) {
