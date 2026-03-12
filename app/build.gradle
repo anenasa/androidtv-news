@@ -1,6 +1,7 @@
 plugins {
     id 'com.android.application'
     id 'com.chaquo.python'
+    id 'org.jetbrains.kotlin.android'
 }
 
 def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
@@ -76,6 +77,9 @@ android {
             useLegacyPackaging true
         }
     }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
 }
 
 chaquopy {
@@ -85,6 +89,7 @@ chaquopy {
 }
 
 dependencies {
+    implementation 'androidx.core:core-ktx:1.17.0'
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation "androidx.media3:media3-exoplayer:$media3Version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3Version"
