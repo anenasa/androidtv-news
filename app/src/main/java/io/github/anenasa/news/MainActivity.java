@@ -318,9 +318,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         try {
-            ytdlp = new YtDlp(this, updateYtdlpOnStart);
-            ytdlp.setUseExternalJS(useExternalJS);
-
+            ytdlp = YtDlp.create(this, updateYtdlpOnStart, useExternalJS);
             timerReadChannelList = new Timer(true);
             TimerTask timerTask = new TimerTask() {
                 @Override

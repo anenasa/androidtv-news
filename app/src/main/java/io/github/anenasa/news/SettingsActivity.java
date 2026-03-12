@@ -278,7 +278,7 @@ public class SettingsActivity extends AppCompatActivity {
                 update_ytdlp.setSummary("正在更新");
                 new Thread(() -> {
                     try {
-                        YtDlp.download(activity);
+                        YtDlp.download(activity.getExternalFilesDir(null));
                         activity.runOnUiThread(() -> update_ytdlp.setSummary("已更新，將重新啟動應用程式"));
                         activity.ytdlpUpdated = true;
                     }
