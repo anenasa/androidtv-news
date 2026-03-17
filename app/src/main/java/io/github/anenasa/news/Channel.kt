@@ -2,11 +2,8 @@ package io.github.anenasa.news
 
 import com.chaquo.python.PyException
 import com.chaquo.python.Python
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONException
 import org.json.JSONObject
 import org.jsoup.Jsoup
@@ -94,7 +91,7 @@ class Channel(
 
     fun needExtract(): Int {
         val url = url
-        if (video.isEmpty() || url.startsWith("https://today.line.me")) {
+        if (video.isEmpty()) {
             return NEED_EXTRACT_YES
         }
         if (url.endsWith("m3u8")) {
@@ -150,23 +147,6 @@ class Channel(
                 val jSONObject = JSONObject(response.body.string())
                 url = jSONObject.getString("url")
             }
-        } else if (url == "https://news.ebc.net.tw/live") {
-            val doc = Jsoup.connect(url).get()
-            val el = doc.selectFirst("div#live-slider div.live-else-little-box") ?: throw IOException("找不到 div")
-            url = el.attr("data-code")
-        } else if (url.startsWith("https://today.line.me/tw/v2/article/")) {
-            val doc = Jsoup.connect(url).get()
-            val el = doc.selectFirst("script:containsData(__NUXT__)") ?: throw IOException("找不到 script")
-            val script = el.data()
-            var id = script.substring(script.indexOf("broadcastId:") + 13)
-            id = id.substring(0, id.indexOf("\""))
-            val okHttpRequest = Request.Builder()
-                .url("https://today.line.me/webapi/glplive/broadcasts/$id")
-                .build()
-            okHttpClient.newCall(okHttpRequest).execute().use { response ->
-                val jSONObject = JSONObject(response.body.string())
-                url = jSONObject.getJSONObject("hlsUrls").getString("abr")
-            }
         } else if (url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
             var id: String
             if (url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
@@ -182,26 +162,6 @@ class Channel(
             okHttpClient.newCall(okHttpRequest).execute().use { response ->
                 val bodyString = response.body.string()
                 url = bodyString.substringAfter("VideoURL\":\"").substringBefore("\"")
-            }
-        } else if (url.startsWith("https://www.litv.tv/channel/watch.do")) {
-            var id = url.substring(url.indexOf("content_id") + 11)
-            if (id.contains("&")) id = id.substring(0, id.indexOf("&"))
-
-            val data = String.format(
-                "{\"type\":\"auth\",\"contentId\":\"%s\",\"contentType\":\"channel\"}",
-                id
-            )
-            val requestBody: RequestBody = data.toRequestBody("application/json".toMediaType())
-            val okHttpRequestBuilder = Request.Builder()
-                .url("https://www.litv.tv/channel/ajax/getUrl")
-                .post(requestBody)
-            for (entry in headerMap.entries) {
-                okHttpRequestBuilder.addHeader(entry.key, entry.value)
-            }
-            val okHttpRequest = okHttpRequestBuilder.build()
-            okHttpClient.newCall(okHttpRequest).execute().use { response ->
-                val jSONObject = JSONObject(response.body.string())
-                url = jSONObject.getString("fullpath")
             }
         } else if (url.startsWith("https://www.ofiii.com/channel/watch/")) {
             // Get device id
