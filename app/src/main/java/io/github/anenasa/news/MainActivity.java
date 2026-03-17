@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
                     }
 
                     if(data.getBooleanExtra("remove_cache", false)){
-                        channel.get(channelNum).setVideo("");
+                        channel.get(channelNum).video = "";
                     }
                     String url_old = channel.get(channelNum).getUrl();
                     String url_new = data.getStringExtra("customUrl");
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
                         format_new = data.getStringExtra("customFormat");
                     }
                     if(!url_old.equals(url_new) || !format_old.equals(format_new)){
-                        channel.get(channelNum).setVideo("");
+                        channel.get(channelNum).video = "";
                     }
                     channel.get(channelNum).setName(data.getStringExtra("customName"));
                     channel.get(channelNum).setHidden(data.getBooleanExtra("isHidden", false));
@@ -219,7 +219,7 @@ public class MainActivity extends AppCompatActivity {
                     };
                     timerReadChannelList.schedule(timerTask, 0, 5000);
                     if(data.getBooleanExtra("remove_cache", false)){
-                        for(Channel i: channel) i.setVideo("");
+                        for(Channel i: channel) i.video = "";
                     }
                 } else {
                     play(channelNum);
@@ -250,10 +250,10 @@ public class MainActivity extends AppCompatActivity {
             public void onPlayerError(@NonNull PlaybackException error) {
                 Log.e(TAG, "Player error", error);
                 showErrorMessage(error.getMessage());
-                if(channel.get(channelNum).needParse() != Channel.NEEDPARSE_NO) {
+                if(channel.get(channelNum).needExtract() != Channel.NEED_EXTRACT_NO) {
                     if(errorCount > 0) {
                         // Force parse by removing video url
-                        channel.get(channelNum).setVideo("");
+                        channel.get(channelNum).video = "";
                         errorCount = 0;
                     }
                     else errorCount++;
@@ -269,7 +269,7 @@ public class MainActivity extends AppCompatActivity {
                     errorCount = 0;
                 }
                 else if(state == Player.STATE_ENDED){
-                    channel.get(channelNum).setVideo("");
+                    channel.get(channelNum).video = "";
                     play(channelNum);
                 }
             }
@@ -432,7 +432,7 @@ public class MainActivity extends AppCompatActivity {
                             }
                             try {
                                 if (!channelInThread.get(i).isHidden()) {
-                                    channelInThread.get(i).parse(ytdlp, okHttpClient);
+                                    channelInThread.get(i).extract(ytdlp, okHttpClient);
                                 }
                             } catch (JSONException | IOException | InterruptedException |
                                      InvalidAlgorithmParameterException | IllegalBlockSizeException |
@@ -542,9 +542,9 @@ public class MainActivity extends AppCompatActivity {
     {
         textInfo.setText(String.format(Locale.ROOT, "正在載入 %d %s", num, channel.get(num).getName()));
         new Thread(() -> {
-            if(channel.get(num).needParse() == Channel.NEEDPARSE_YES) {
+            if(channel.get(num).needExtract() == Channel.NEED_EXTRACT_YES) {
                 try {
-                    channel.get(num).parse(ytdlp, okHttpClient);
+                    channel.get(num).extract(ytdlp, okHttpClient);
                 } catch (JSONException | IOException | InterruptedException | PyException |
                          InvalidAlgorithmParameterException | IllegalBlockSizeException |
                          NoSuchPaddingException | BadPaddingException | NoSuchAlgorithmException |
@@ -559,7 +559,7 @@ public class MainActivity extends AppCompatActivity {
             DataSource.Factory factory = new DefaultHttpDataSource.Factory()
                     .setDefaultRequestProperties(channel.get(num).getHeaderMap());
             MediaSource mediaSource;
-            String url = channel.get(num).getVideo();
+            String url = channel.get(num).video;
             int split = url.indexOf('\n');
             if(split == -1){
                 MediaItem mediaItem = MediaItem.fromUri(url);
