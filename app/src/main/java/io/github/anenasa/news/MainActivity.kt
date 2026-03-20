@@ -567,6 +567,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 KeyEvent.KEYCODE_DPAD_DOWN, KeyEvent.KEYCODE_CHANNEL_DOWN -> {
+                    if (!channelListLoaded) return true
                     if (invertChannelButtons) {
                         toNextChannel()
                     } else {
@@ -576,6 +577,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 KeyEvent.KEYCODE_DPAD_UP, KeyEvent.KEYCODE_CHANNEL_UP -> {
+                    if (!channelListLoaded) return true
                     if (invertChannelButtons) {
                         toPrevChannel()
                     } else {
@@ -601,11 +603,13 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 KeyEvent.KEYCODE_INFO -> {
+                    if (!channelListLoaded) return true
                     showChannelInfo(findViewById(R.id.container))
                     return true
                 }
 
                 KeyEvent.KEYCODE_MENU -> {
+                    if (!channelListLoaded) return true
                     showSettings(findViewById(R.id.container))
                     return true
                 }
