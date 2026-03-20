@@ -130,10 +130,7 @@ class MainActivity : AppCompatActivity() {
 
     private val addNewChannelLauncher = registerForActivityResult(StartActivityForResult()) { result: ActivityResult? ->
         val data = result?.data
-        if (result?.resultCode == RESULT_OK && data != null) {
-            if (data.getBooleanExtra("delete", false)) {
-                return@registerForActivityResult
-            }
+        if (result?.resultCode == RESULT_OK && data != null && !data.getBooleanExtra("delete", false)) {
             val ch = Channel(
                 "",
                 "",
