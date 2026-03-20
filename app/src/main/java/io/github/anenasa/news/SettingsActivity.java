@@ -72,7 +72,7 @@ public class SettingsActivity extends AppCompatActivity {
         hideNavigationBar = intentExtras.getBoolean("hideNavigationBar");
         hideStatusBar = intentExtras.getBoolean("hideStatusBar");
         useExternalJS = intentExtras.getBoolean("useExternalJS");
-        updateYtdlpOnStart = intentExtras.getBoolean("updateYtdlpOnStart");
+        updateYtdlpOnStart = intentExtras.getBoolean("updateYtDlpOnStart");
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.container, new SettingsFragment())
@@ -90,9 +90,9 @@ public class SettingsActivity extends AppCompatActivity {
                 returnIntent.putExtra("hideNavigationBar", hideNavigationBar);
                 returnIntent.putExtra("hideStatusBar", hideStatusBar);
                 returnIntent.putExtra("useExternalJS", useExternalJS);
-                returnIntent.putExtra("updateYtdlpOnStart", updateYtdlpOnStart);
+                returnIntent.putExtra("updateYtDlpOnStart", updateYtdlpOnStart);
                 returnIntent.putExtra("remove_cache", remove_cache);
-                returnIntent.putExtra("ytdlpUpdated", ytdlpUpdated);
+                returnIntent.putExtra("ytDlpUpdated", ytdlpUpdated);
                 setResult(Activity.RESULT_OK, returnIntent);
                 finish();
             }
@@ -263,10 +263,10 @@ public class SettingsActivity extends AppCompatActivity {
                 return true;
             });
 
-            SwitchPreference prefUpdateYtdlpOnStart = findPreference("updateYtdlpOnStart");
-            assert prefUpdateYtdlpOnStart != null;
-            prefUpdateYtdlpOnStart.setChecked(activity.updateYtdlpOnStart);
-            prefUpdateYtdlpOnStart.setOnPreferenceChangeListener((preference, newValue) -> {
+            SwitchPreference prefUpdateYtDlpOnStart = findPreference("updateYtDlpOnStart");
+            assert prefUpdateYtDlpOnStart != null;
+            prefUpdateYtDlpOnStart.setChecked(activity.updateYtdlpOnStart);
+            prefUpdateYtDlpOnStart.setOnPreferenceChangeListener((preference, newValue) -> {
                 activity.updateYtdlpOnStart = (boolean) newValue;
                 return true;
             });
