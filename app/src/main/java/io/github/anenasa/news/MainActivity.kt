@@ -44,7 +44,7 @@ import java.util.TimerTask
 import java.util.stream.Collectors
 import kotlin.system.exitProcess
 import androidx.core.content.edit
-import kotlin.concurrent.thread
+import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -72,6 +72,7 @@ class MainActivity : AppCompatActivity() {
     var timerBackgroundExtract: Timer? = null
     var timerReadChannelList: Timer? = null
     val okHttpClient: OkHttpClient = MyApplication.okHttpClient
+    private val threadPool = Executors.newCachedThreadPool()
 
     val preferences: SharedPreferences by lazy { getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE) }
 
@@ -235,7 +236,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        thread { this.initializeYtDlp() }
+        threadPool.execute { initializeYtDlp() }
         isStarted = true
         // Do not call play() more than once
         // play() will be called in onActivityResult()
@@ -482,17 +483,17 @@ class MainActivity : AppCompatActivity() {
             num,
             channel[num].name
         )
-        thread {
+        threadPool.execute {
             if (channel[num].needExtract() == Channel.NEED_EXTRACT_YES) {
                 try {
                     channel[num].extract(ytDlp!!, okHttpClient)
                 } catch (e: Exception) {
-                    if (channelNum != num) return@thread
+                    if (channelNum != num) return@execute
                     Log.e(TAG, "Channel.parse error", e)
                     showErrorMessage(e.message)
                 }
             }
-            if (channelNum != num) return@thread
+            if (channelNum != num) return@execute
 
             val factory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 .setDefaultRequestProperties(channel[num].headerMap)
@@ -881,6 +882,7 @@ class MainActivity : AppCompatActivity() {
         timerBackgroundExtract?.cancel()
         timerReadChannelList?.cancel()
         player.release()
+        threadPool.shutdown()
     }
 
     override fun onStop() {
