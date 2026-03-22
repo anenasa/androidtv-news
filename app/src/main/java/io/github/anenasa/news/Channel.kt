@@ -36,6 +36,16 @@ class Channel(
     @JvmField
     var customHeader: String = ""
     var isHidden: Boolean = false
+    val headerMap: MutableMap<String, String>
+
+    init {
+        headerMap = header.split("\\r\\n")
+            .filter { it.isNotEmpty() }
+            .associate {
+                it.substringBefore(":") to it.substringAfter(":").removePrefix(" ")
+            }
+            .toMutableMap()
+    }
 
     var url: String
         get() {
@@ -76,13 +86,13 @@ class Channel(
         }
         set(header) {
             customHeader = header
-        }
-
-    val headerMap: Map<String, String>
-        get() {
-            return header.split("\\r\\n")
+            headerMap.clear()
+            customHeader.ifEmpty { defaultHeader }
+                .split("\\r\\n")
                 .filter { it.isNotEmpty() }
-                .associate { it.substringBefore(":") to it.substringAfter(":") }
+                .associateTo(headerMap) {
+                    it.substringBefore(":") to it.substringAfter(":").removePrefix(" ")
+                }
         }
 
     fun setVolume(volume: String) {
@@ -147,6 +157,7 @@ class Channel(
                 val jSONObject = JSONObject(response.body.string())
                 url = jSONObject.getString("url")
             }
+            headerMap.putIfAbsent("Referer", "https://hamivideo.hinet.net/")
         } else if (url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
             var id: String
             if (url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
@@ -185,7 +196,7 @@ class Channel(
 
         val option = Python.getInstance().builtins.callAttr("dict")
         option.callAttr("__setitem__", "format", format)
-        if (!header.isEmpty()) {
+        if (!headerMap.isEmpty()) {
             val headerDict = Python.getInstance().builtins.callAttr("dict")
             for (entry in headerMap.entries) {
                 headerDict.callAttr("__setitem__", entry.key, entry.value)
