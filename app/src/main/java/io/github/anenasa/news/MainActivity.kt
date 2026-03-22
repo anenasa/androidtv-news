@@ -171,6 +171,7 @@ class MainActivity : AppCompatActivity() {
                 // Kill process, so new version of yt-dlp can be loaded
                 exitProcess(0)
             }
+            MyApplication.cookieJar.loadFile(File(getExternalFilesDir(null), "cookies.txt"))
             saveSettings()
 
             ytDlp!!.useExternalJS = useExternalJS
