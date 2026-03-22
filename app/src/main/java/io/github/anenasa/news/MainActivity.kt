@@ -828,7 +828,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Channel list not initialized, do not write empty list
-        if (channel.isEmpty()) return
+        if (!channelListLoaded) return
         try {
             val channelListObject = JSONObject()
             val newChannelArray = JSONArray()
