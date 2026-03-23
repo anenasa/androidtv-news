@@ -1,39 +1,25 @@
 package io.github.anenasa.news
 
-import com.chaquo.python.PyException
 import com.chaquo.python.Python
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONException
 import org.json.JSONObject
 import org.jsoup.Jsoup
 import java.io.IOException
-import java.security.InvalidAlgorithmParameterException
-import java.security.InvalidKeyException
-import java.security.NoSuchAlgorithmException
-import javax.crypto.BadPaddingException
-import javax.crypto.IllegalBlockSizeException
-import javax.crypto.NoSuchPaddingException
 
 class Channel(
-    @JvmField val defaultUrl: String,
-    @JvmField val defaultName: String,
-    @JvmField val defaultFormat: String,
-    @JvmField val defaultVolume: Float,
-    @JvmField val defaultHeader: String,
+    val defaultUrl: String,
+    val defaultName: String,
+    val defaultFormat: String,
+    val defaultVolume: Float,
+    val defaultHeader: String,
     val ydlOptions: MutableMap<String, String>
 ) {
-    @JvmField
     var video: String = ""
-    @JvmField
     var customUrl: String = ""
-    @JvmField
     var customName: String = ""
-    @JvmField
     var customFormat: String = ""
-    @JvmField
     var customVolume: String = ""
-    @JvmField
     var customHeader: String = ""
     var isHidden: Boolean = false
     val headerMap: MutableMap<String, String>
@@ -131,18 +117,6 @@ class Channel(
         return NEED_EXTRACT_UNKNOWN
     }
 
-    @Throws(
-        JSONException::class,
-        IOException::class,
-        InterruptedException::class,
-        PyException::class,
-        InvalidAlgorithmParameterException::class,
-        IllegalBlockSizeException::class,
-        NoSuchPaddingException::class,
-        BadPaddingException::class,
-        NoSuchAlgorithmException::class,
-        InvalidKeyException::class
-    )
     fun extract(ytDlp: YtDlp, okHttpClient: OkHttpClient) {
         var url = url
         if (url.startsWith("https://hamivideo.hinet.net/") && url.endsWith(".do")) {

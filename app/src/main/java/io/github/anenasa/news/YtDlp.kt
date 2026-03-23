@@ -95,7 +95,6 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
 
     companion object {
         private const val TAG = "YtDlp"
-        @JvmField
         var version: String? = null
 
         /**
@@ -106,8 +105,6 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
          * @exception IOException Downloading yt-dlp failed
          * @exception PyException Python exception
          */
-        @JvmStatic
-        @Throws(IOException::class)
         fun create(context: Context, updateYtDlpOnStart: Boolean, useExternalJS: Boolean): YtDlp {
             val externalFilesDir: File = context.getExternalFilesDir(null) ?: throw IOException("externalFilesDir is null")
             val nativeLibraryDir: String = context.applicationInfo.nativeLibraryDir
@@ -128,8 +125,6 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
          * @param externalFilesDir Context.getExternalFilesDir(null)
          * @exception IOException Downloading yt-dlp failed
          */
-        @JvmStatic
-        @Throws(IOException::class)
         fun download(externalFilesDir: File?) {
             externalFilesDir ?: throw IOException("externalFilesDir is null")
             val file = File(externalFilesDir, "yt-dlp.part")
