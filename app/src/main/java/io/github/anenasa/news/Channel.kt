@@ -137,9 +137,12 @@ class Channel(
             if (url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
                 id = url.substringAfterLast("/")
             } else {
-                val doc = Jsoup.connect(url).get()
-                val script = doc.selectFirst("script:containsData(ChannelId)")?.data() ?: throw IOException("找不到 script")
-                id = script.substringAfter("ChannelId: \"").substringBefore("\"")
+                val okHttpRequest = Request.Builder().url(url).build()
+                okHttpClient.newCall(okHttpRequest).execute().use { response ->
+                    val doc = Jsoup.parse(response.body.string())
+                    val script = doc.selectFirst("script:containsData(ChannelId)")?.data() ?: throw IOException("找不到 script")
+                    id = script.substringAfter("ChannelId: \"").substringBefore("\"")
+                }
             }
             val okHttpRequest = Request.Builder()
                 .url("https://app.4gtv.tv/Data/GetChannelURL_Mozai.ashx?callback=channelname&Type=LIVE&ChannelId=$id")
