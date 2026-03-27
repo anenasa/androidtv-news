@@ -47,8 +47,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
-import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
 
@@ -76,7 +76,6 @@ class MainActivity : AppCompatActivity() {
     var backgroundExtractJob: Job? = null
     var readChannelListJob: Job? = null
     val okHttpClient: OkHttpClient = MyApplication.okHttpClient
-    private val threadPool = Executors.newCachedThreadPool()
 
     val preferences: SharedPreferences by lazy { getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE) }
 
@@ -239,7 +238,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        threadPool.execute { initializeYtDlp() }
+        lifecycleScope.launch(Dispatchers.IO) { initializeYtDlp() }
         isStarted = true
         // Do not call play() more than once
         // play() will be called in onActivityResult()
@@ -266,7 +265,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun initializeYtDlp() {
+    suspend fun initializeYtDlp() {
         if (ytDlp != null) {
             // Already initialized
             return
@@ -281,8 +280,8 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e(TAG, e.toString(), e)
-            runOnUiThread {
-                AlertDialog.Builder(this)
+            withContext(Dispatchers.Main) {
+                AlertDialog.Builder(this@MainActivity)
                     .setTitle("yt-dlp 載入失敗")
                     .setMessage(e.message)
                     .setCancelable(false)
@@ -292,7 +291,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun readChannelList() {
+    suspend fun readChannelList() {
         if (!isStarted) {
             return
         }
@@ -369,13 +368,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             channelListLoaded = true
-            runOnUiThread { errorMessageView.text = "" }
-            readChannelListJob?.cancel()
+            withContext(Dispatchers.Main) { errorMessageView.text = "" }
 
             if (channelNum >= channel.size) {
                 resetChannelNum()
             }
-            runOnUiThread { play(channelNum) }
+            withContext(Dispatchers.Main) { play(channelNum) }
 
             if (enableBackgroundExtract) {
                 backgroundExtractJob = lifecycleScope.launch(Dispatchers.IO) {
@@ -396,8 +394,9 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
             }
+            readChannelListJob?.cancel()
         } catch (e: Exception) {
-            runOnUiThread {
+            withContext(Dispatchers.Main) {
                 errorMessageView.text = String.format(
                     "頻道清單讀取失敗，按 OK 或螢幕進入設定\n%s",
                     e.message
@@ -482,17 +481,17 @@ class MainActivity : AppCompatActivity() {
             num,
             channel[num].name
         )
-        threadPool.execute {
+        lifecycleScope.launch(Dispatchers.IO) {
             if (channel[num].needExtract() == Channel.NEED_EXTRACT_YES) {
                 try {
                     channel[num].extract(ytDlp!!, okHttpClient)
                 } catch (e: Exception) {
-                    if (channelNum != num) return@execute
+                    if (channelNum != num) return@launch
                     Log.e(TAG, "Channel.parse error", e)
-                    showErrorMessage(e.message)
+                    withContext(Dispatchers.Main) { showErrorMessage(e.message) }
                 }
             }
-            if (channelNum != num) return@execute
+            if (channelNum != num) return@launch
 
             val factory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 .setDefaultRequestProperties(channel[num].headerMap)
@@ -515,10 +514,10 @@ class MainActivity : AppCompatActivity() {
             }
 
             // player needs to run on main thread
-            runOnUiThread {
+            withContext(Dispatchers.Main) {
                 if (num != channelNum) {
                     // Already switched to another channel, do not play this
-                    return@runOnUiThread
+                    return@withContext
                 }
                 player.setMediaSource(mediaSource)
                 player.prepare()
@@ -869,17 +868,14 @@ class MainActivity : AppCompatActivity() {
 
     fun showErrorMessage(message: String?) {
         if (!isShowErrorMessage) return
-        runOnUiThread {
-            if (!player.isPlaying) {
-                errorMessageView.text = message
-            }
+        if (!player.isPlaying) {
+            errorMessageView.text = message
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
         player.release()
-        threadPool.shutdown()
     }
 
     override fun onStop() {
