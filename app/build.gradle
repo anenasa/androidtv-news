@@ -100,6 +100,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.21.2'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
     implementation "ch.acra:acra-core:5.13.1"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.10.0"
     compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
     annotationProcessor "com.google.auto.service:auto-service:1.1.1"
 }

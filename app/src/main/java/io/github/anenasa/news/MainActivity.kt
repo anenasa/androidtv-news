@@ -39,11 +39,15 @@ import java.io.FileOutputStream
 import java.io.FileReader
 import java.io.IOException
 import java.util.Locale
-import java.util.Timer
-import java.util.TimerTask
 import java.util.stream.Collectors
 import kotlin.system.exitProcess
 import androidx.core.content.edit
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.yield
 import java.util.concurrent.Executors
 
 class MainActivity : AppCompatActivity() {
@@ -69,8 +73,8 @@ class MainActivity : AppCompatActivity() {
     val textView: TextView by lazy { findViewById(R.id.textView) }
     val textInfo: TextView by lazy { findViewById(R.id.textInfo) }
     val errorMessageView: TextView by lazy { findViewById(R.id.errorMessage) }
-    var timerBackgroundExtract: Timer? = null
-    var timerReadChannelList: Timer? = null
+    var backgroundExtractJob: Job? = null
+    var readChannelListJob: Job? = null
     val okHttpClient: OkHttpClient = MyApplication.okHttpClient
     private val threadPool = Executors.newCachedThreadPool()
 
@@ -176,14 +180,12 @@ class MainActivity : AppCompatActivity() {
 
             ytDlp!!.useExternalJS = useExternalJS
 
-            timerBackgroundExtract?.cancel()
-            val timerTask: TimerTask = object : TimerTask() {
-                override fun run() {
+            backgroundExtractJob?.cancel()
+            readChannelListJob = lifecycleScope.launch(Dispatchers.IO) {
+                while (true) {
                     readChannelList()
+                    delay(5000)
                 }
-            }
-            timerReadChannelList = Timer(true).apply {
-                schedule(timerTask, 0, 5000)
             }
             if (data.getBooleanExtra("remove_cache", false)) {
                 for (ch in channel) ch.video = ""
@@ -271,13 +273,11 @@ class MainActivity : AppCompatActivity() {
         }
         try {
             ytDlp = create(this, updateYtDlpOnStart, useExternalJS)
-            val timerTask: TimerTask = object : TimerTask() {
-                override fun run() {
+            readChannelListJob = lifecycleScope.launch(Dispatchers.IO) {
+                while (true) {
                     readChannelList()
+                    delay(5000)
                 }
-            }
-            timerReadChannelList = Timer(true).apply {
-                schedule(timerTask, 0, 5000)
             }
         } catch (e: Exception) {
             Log.e(TAG, e.toString(), e)
@@ -370,7 +370,7 @@ class MainActivity : AppCompatActivity() {
             }
             channelListLoaded = true
             runOnUiThread { errorMessageView.text = "" }
-            timerReadChannelList?.cancel()
+            readChannelListJob?.cancel()
 
             if (channelNum >= channel.size) {
                 resetChannelNum()
@@ -378,9 +378,8 @@ class MainActivity : AppCompatActivity() {
             runOnUiThread { play(channelNum) }
 
             if (enableBackgroundExtract) {
-                timerBackgroundExtract = Timer(true)
-                val timerTask: TimerTask = object : TimerTask() {
-                    override fun run() {
+                backgroundExtractJob = lifecycleScope.launch(Dispatchers.IO) {
+                    while (true) {
                         // Prevent NPE
                         val channelInThread = channel
                         for (i in channelInThread.indices) {
@@ -391,12 +390,11 @@ class MainActivity : AppCompatActivity() {
                             } catch (e: Exception) {
                                 Log.e(TAG, "Background extract error", e)
                             }
+                            yield()
                         }
+                        delay(3600000)
                     }
                 }
-                // Delay timer for one second because if two requests are sent to
-                // Hami Video at the same time, one of them will fail.
-                timerBackgroundExtract!!.schedule(timerTask, 1000, 3600000)
             }
         } catch (e: Exception) {
             runOnUiThread {
@@ -539,7 +537,7 @@ class MainActivity : AppCompatActivity() {
             when (event.keyCode) {
                 KeyEvent.KEYCODE_DPAD_CENTER, KeyEvent.KEYCODE_ENTER -> {
                     if (!channelListLoaded) {
-                        timerReadChannelList?.let {
+                        readChannelListJob?.let {
                             it.cancel()
                             showSettings(findViewById(R.id.container))
                         }
@@ -676,7 +674,7 @@ class MainActivity : AppCompatActivity() {
         }
         supportFragmentManager.popBackStack()
         if (!channelListLoaded) {
-            timerReadChannelList?.let {
+            readChannelListJob?.let {
                 it.cancel()
                 showSettings(findViewById(R.id.container))
             }
@@ -880,8 +878,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        timerBackgroundExtract?.cancel()
-        timerReadChannelList?.cancel()
         player.release()
         threadPool.shutdown()
     }
