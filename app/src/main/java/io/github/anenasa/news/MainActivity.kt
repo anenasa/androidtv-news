@@ -33,13 +33,10 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
-import java.io.FileReader
 import java.io.IOException
 import java.util.Locale
-import java.util.stream.Collectors
 import kotlin.system.exitProcess
 import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
@@ -300,12 +297,8 @@ class MainActivity : AppCompatActivity() {
         try {
             val configFile = File(getExternalFilesDir(null), "config.txt")
             if (configFile.exists()) {
-                BufferedReader(FileReader(configFile)).use { reader ->
-                    readChannelListFromString(
-                        reader.lines().collect(
-                            Collectors.joining("\n")
-                        )
-                    )
+                configFile.bufferedReader().use { reader ->
+                    readChannelListFromString(reader.readText())
                 }
             } else {
                 val request = Request.Builder()
@@ -324,8 +317,8 @@ class MainActivity : AppCompatActivity() {
             var newChannelArray: JSONArray? = null
             val customFile = File(getExternalFilesDir(null), "custom.txt")
             if (customFile.exists()) {
-                BufferedReader(FileReader(customFile)).use { reader ->
-                    val customString = reader.lines().collect(Collectors.joining("\n"))
+                customFile.bufferedReader().use { reader ->
+                    val customString = reader.readText()
                     val customJsonObject = JSONObject(customString)
                     customChannelList = customJsonObject.getJSONObject("customChannelList")
                     newChannelArray = customJsonObject.getJSONArray("newChannelArray")

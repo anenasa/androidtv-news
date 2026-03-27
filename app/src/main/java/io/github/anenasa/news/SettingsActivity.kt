@@ -22,14 +22,11 @@ import androidx.preference.SwitchPreference
 import com.codekidlabs.storagechooser.StorageChooser
 import io.github.anenasa.news.YtDlp.Companion.download
 import okhttp3.Request
-import java.io.BufferedReader
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.io.InputStreamReader
-import java.util.stream.Collectors
 import kotlin.concurrent.thread
 import androidx.core.net.toUri
 
@@ -331,42 +328,28 @@ class SettingsActivity : AppCompatActivity() {
                         .append("OkHttp - Apache License 2.0\n")
                         .append("Storage Chooser - Mozilla Public License Version 2.0\n\n")
                     try {
-                        resources.openRawResource(R.raw.gpl3).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.gpl3).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
                         stringBuilder.append("The Unlicense").append('\n')
-                        resources.openRawResource(R.raw.unlicense).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.unlicense).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
                         stringBuilder.append("MIT License").append('\n')
-                        resources.openRawResource(R.raw.chaquopy).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.chaquopy).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
-                        resources.openRawResource(R.raw.nodejs).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.nodejs).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
-                        resources.openRawResource(R.raw.quickjs).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.quickjs).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
-                        resources.openRawResource(R.raw.apache2).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.apache2).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText()).append('\n')
                         }
-                        resources.openRawResource(R.raw.mpl2).use { stream ->
-                            val reader = BufferedReader(InputStreamReader(stream))
-                            stringBuilder.append(reader.lines().collect(Collectors.joining("\n")))
-                                .append('\n')
+                        resources.openRawResource(R.raw.mpl2).bufferedReader().use { reader ->
+                            stringBuilder.append(reader.readText())
                         }
                     } catch (e: IOException) {
                         Toast.makeText(myActivity, "讀取許可證失敗", Toast.LENGTH_SHORT).show()
