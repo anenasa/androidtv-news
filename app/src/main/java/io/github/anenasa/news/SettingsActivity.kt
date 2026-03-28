@@ -15,19 +15,22 @@ import androidx.activity.result.contract.ActivityResultContracts.GetContent
 import androidx.activity.result.contract.ActivityResultContracts.RequestPermission
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.EditTextPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreference
 import com.codekidlabs.storagechooser.StorageChooser
 import io.github.anenasa.news.YtDlp.Companion.download
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Request
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import kotlin.concurrent.thread
 import androidx.core.net.toUri
 
 class SettingsActivity : AppCompatActivity() {
@@ -266,13 +269,13 @@ class SettingsActivity : AppCompatActivity() {
                 setSummary(YtDlp.version)
                 setOnPreferenceClickListener { _: Preference? ->
                     setSummary("正在更新")
-                    thread {
+                    lifecycleScope.launch(Dispatchers.IO) {
                         try {
                             download(myActivity.getExternalFilesDir(null))
-                            myActivity.runOnUiThread { setSummary("已更新，將重新啟動應用程式") }
+                            withContext(Dispatchers.Main) { setSummary("已更新，將重新啟動應用程式") }
                             myActivity.ytDlpUpdated = true
                         } catch (e: IOException) {
-                            myActivity.runOnUiThread { setSummary("更新時發生錯誤") }
+                            withContext(Dispatchers.Main) { setSummary("更新時發生錯誤") }
                             Log.e(TAG, "Preference update_ytdlp error", e)
                         }
                     }
@@ -283,7 +286,7 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<Preference>("update")?.apply {
                 setOnPreferenceClickListener { _: Preference? ->
                     setSummary("正在檢查更新")
-                    thread {
+                    lifecycleScope.launch(Dispatchers.IO) {
                         try {
                             val request = Request.Builder()
                                 .url("https://raw.githubusercontent.com/anenasa/androidtv-news/main/VERSION")
@@ -296,16 +299,16 @@ class SettingsActivity : AppCompatActivity() {
                                 versionNew = response.body.string().trim()
                             }
                             if (versionNew != BuildConfig.VERSION_NAME.substringBefore("-")) {
-                                myActivity.runOnUiThread { setSummary("有新版本") }
+                                withContext(Dispatchers.Main) { setSummary("有新版本") }
                                 val apiString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) "" else "-api21"
                                 val link = "https://github.com/anenasa/androidtv-news/releases/download/v$versionNew/androidtv-news$apiString-$versionNew.apk"
                                 val intent = Intent(Intent.ACTION_VIEW, link.toUri())
                                 startActivity(intent)
                             } else {
-                                myActivity.runOnUiThread { setSummary("已經是最新版本") }
+                                withContext(Dispatchers.Main) { setSummary("已經是最新版本") }
                             }
                         } catch (e: IOException) {
-                            myActivity.runOnUiThread { setSummary("更新時發生錯誤") }
+                            withContext(Dispatchers.Main) { setSummary("更新時發生錯誤") }
                             Log.e(TAG, "Preference update error", e)
                         }
                     }
