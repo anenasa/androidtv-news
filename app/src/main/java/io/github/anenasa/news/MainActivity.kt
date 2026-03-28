@@ -209,10 +209,10 @@ class MainActivity : AppCompatActivity() {
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "Player error", error)
                 showErrorMessage(error.message)
-                if (channel[channelNum].needExtract() != Channel.NEED_EXTRACT_NO) {
+                if (channel.getOrNull(channelNum)?.needExtract() != Channel.NEED_EXTRACT_NO) {
                     if (errorCount > 0) {
                         // Force extract by removing video url
-                        channel[channelNum].video = ""
+                        channel.getOrNull(channelNum)?.video = ""
                         errorCount = 0
                     } else errorCount++
                 }
