@@ -7,6 +7,7 @@ plugins {
 def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
 def apiVersion = useApi21 ? 21 : 24
 def media3Version = useApi21 ? "1.8.0" : "1.9.2"
+def lifecycleVersion = useApi21 ? "2.9.4" : "2.10.0"
 def api21Suffix = useApi21 ? "api21-" : ""
 
 android {
@@ -100,7 +101,7 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.21.2'
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
     implementation "ch.acra:acra-core:5.13.1"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.10.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
     compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
     annotationProcessor "com.google.auto.service:auto-service:1.1.1"
 }
