@@ -6,12 +6,8 @@ import okhttp3.CookieJar
 import okhttp3.HttpUrl
 import java.io.File
 
-class TxtCookieJar(cookiesFile: File) : CookieJar {
+class TxtCookieJar : CookieJar {
     private var cookies = mutableListOf<Cookie>()
-
-    init {
-        loadFile(cookiesFile)
-    }
 
     fun loadFile(cookiesFile: File) {
         if (!cookiesFile.exists()) return

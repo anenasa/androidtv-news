@@ -4,12 +4,11 @@ import android.content.Context
 import com.chaquo.python.android.PyApplication
 import okhttp3.OkHttpClient
 import org.acra.ACRA.init
-import java.io.File
 
 class MyApplication : PyApplication() {
     override fun onCreate() {
         super.onCreate()
-        cookieJar = TxtCookieJar(File(getExternalFilesDir(null), "cookies.txt"))
+        cookieJar = TxtCookieJar()
         okHttpClient = OkHttpClient.Builder()
             .cookieJar(cookieJar)
             .build()

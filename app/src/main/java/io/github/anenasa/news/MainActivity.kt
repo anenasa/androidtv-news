@@ -231,6 +231,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
         player.setVideoSurfaceView(playerView)
+        MyApplication.cookieJar.loadFile(File(getExternalFilesDir(null), "cookies.txt"))
     }
 
     override fun onStart() {
