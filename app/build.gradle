@@ -103,6 +103,4 @@ dependencies {
     implementation 'com.github.mendhak:storage-chooser:2.0.4.4b'
     implementation "ch.acra:acra-core:5.13.1"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion"
-    compileOnly "com.google.auto.service:auto-service-annotations:1.1.1"
-    annotationProcessor "com.google.auto.service:auto-service:1.1.1"
 }
