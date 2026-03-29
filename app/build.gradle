@@ -6,7 +6,8 @@ plugins {
 
 def useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
 def apiVersion = useApi21 ? 21 : 24
-def media3Version = useApi21 ? "1.8.0" : "1.9.2"
+def coreKtxVersion = useApi21 ? "1.17.0" : "1.18.0"
+def media3Version = useApi21 ? "1.8.0" : "1.10.0"
 def lifecycleVersion = useApi21 ? "2.9.4" : "2.10.0"
 def api21Suffix = useApi21 ? "api21-" : ""
 
@@ -90,11 +91,11 @@ chaquopy {
 }
 
 dependencies {
-    implementation 'androidx.core:core-ktx:1.17.0'
+    implementation "androidx.core:core-ktx:$coreKtxVersion"
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
     implementation "androidx.media3:media3-exoplayer:$media3Version"
     implementation "androidx.media3:media3-exoplayer-hls:$media3Version"
-    implementation 'androidx.preference:preference:1.2.1'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
     implementation 'androidx.appcompat:appcompat:1.7.1'
     implementation 'com.squareup.okhttp3:okhttp:5.3.2'
     // https://github.com/jhy/jsoup/issues/2459
