@@ -1,6 +1,8 @@
 package io.github.anenasa.news
 
 import com.chaquo.python.Python
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -15,7 +17,9 @@ class Channel(
     val defaultHeader: String,
     val ydlOptions: MutableMap<String, String>
 ) {
+    @Volatile
     var video: String = ""
+        private set
     var customUrl: String = ""
     var customName: String = ""
     var customFormat: String = ""
@@ -23,6 +27,9 @@ class Channel(
     var customHeader: String = ""
     var isHidden: Boolean = false
     val headerMap: MutableMap<String, String>
+    @Volatile
+    var time: Long = 0L
+    private val mutex = Mutex()
 
     init {
         headerMap = header.split("\\r\\n")
@@ -85,6 +92,11 @@ class Channel(
         customVolume = volume
     }
 
+    fun clearVideo() {
+        video = ""
+        time = 0L
+    }
+
     fun needExtract(): Int {
         val url = url
         if (video.isEmpty()) {
@@ -117,7 +129,17 @@ class Channel(
         return NEED_EXTRACT_UNKNOWN
     }
 
-    fun extract(ytDlp: YtDlp, okHttpClient: OkHttpClient) {
+    suspend fun extract(ytDlp: YtDlp, okHttpClient: OkHttpClient) {
+        mutex.withLock {
+            val current = System.currentTimeMillis()
+            if (current - time > 60000L) {
+                extractMutex(ytDlp, okHttpClient)
+                time = current
+            }
+        }
+    }
+
+    fun extractMutex(ytDlp: YtDlp, okHttpClient: OkHttpClient) {
         var url = url
         if (url.startsWith("https://hamivideo.hinet.net/") && url.endsWith(".do")) {
             val id = url.substringAfterLast("/").substringBeforeLast(".")

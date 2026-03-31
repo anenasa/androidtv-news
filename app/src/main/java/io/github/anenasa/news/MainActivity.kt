@@ -102,7 +102,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             if (data.getBooleanExtra("remove_cache", false)) {
-                channel[channelNum].video = ""
+                channel[channelNum].clearVideo()
             }
 
             // If url or format changes, clear video to extract again
@@ -113,7 +113,7 @@ class MainActivity : AppCompatActivity() {
             var formatNew = data.getStringExtra("customFormat")?.takeIf { it.isNotEmpty() }
                 ?: channel[channelNum].defaultFormat
             if (urlOld != urlNew || formatOld != formatNew) {
-                channel[channelNum].video = ""
+                channel[channelNum].clearVideo()
             }
 
             channel[channelNum].name = data.getStringExtra("customName").orEmpty()
@@ -184,7 +184,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             if (data.getBooleanExtra("remove_cache", false)) {
-                for (ch in channel) ch.video = ""
+                for (ch in channel) ch.clearVideo()
             }
         } else {
             play(channelNum)
@@ -212,7 +212,7 @@ class MainActivity : AppCompatActivity() {
                 if (channel.getOrNull(channelNum)?.needExtract() != Channel.NEED_EXTRACT_NO) {
                     if (errorCount > 0) {
                         // Force extract by removing video url
-                        channel.getOrNull(channelNum)?.video = ""
+                        channel.getOrNull(channelNum)?.clearVideo()
                         errorCount = 0
                     } else errorCount++
                 }
@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
                     textInfo.text = ""
                     errorCount = 0
                 } else if (state == Player.STATE_ENDED) {
-                    channel[channelNum].video = ""
+                    channel[channelNum].clearVideo()
                     play(channelNum)
                 }
             }
