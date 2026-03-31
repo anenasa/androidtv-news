@@ -1,5 +1,6 @@
 package io.github.anenasa.news
 
+import android.util.Log
 import com.chaquo.python.Python
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -105,26 +106,30 @@ class Channel(
         if (url.endsWith("m3u8")) {
             return NEED_EXTRACT_NO
         }
-        if (url.startsWith("https://www.youtube.com/")) {
-            val current = System.currentTimeMillis() / 1000
-            val expire = video.substringAfter("expire/").substringBefore("/").toLong()
-            return if (current < expire) {
-                NEED_EXTRACT_NO
-            } else {
-                NEED_EXTRACT_YES
+        try {
+            if (url.startsWith("https://www.youtube.com/")) {
+                val current = System.currentTimeMillis() / 1000L
+                // Can be "expire=" or "expire/"
+                val expire = video.substringAfter("expire").substring(1, 11).toLong()
+                return if (current < expire) {
+                    NEED_EXTRACT_NO
+                } else {
+                    NEED_EXTRACT_YES
+                }
             }
-        }
-        if (url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") ||
-            url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")
-        ) {
-            val current = System.currentTimeMillis() / 1000
-            val pos = video.indexOf("expires") + 8
-            val expire = video.substring(pos, pos + 10).toLong()
-            return if (current < expire) {
-                NEED_EXTRACT_NO
-            } else {
-                NEED_EXTRACT_YES
+            if (url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") ||
+                url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")
+            ) {
+                val current = System.currentTimeMillis() / 1000L
+                val expire = video.substringAfter("expires").substring(1, 11).toLong()
+                return if (current < expire) {
+                    NEED_EXTRACT_NO
+                } else {
+                    NEED_EXTRACT_YES
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "needExtract error", e)
         }
         return NEED_EXTRACT_UNKNOWN
     }
@@ -209,6 +214,7 @@ class Channel(
     }
 
     companion object {
+        private const val TAG = "Channel"
         const val NEED_EXTRACT_NO: Int = 0
         const val NEED_EXTRACT_YES: Int = 1
         const val NEED_EXTRACT_UNKNOWN: Int = 2
