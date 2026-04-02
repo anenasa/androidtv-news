@@ -24,10 +24,6 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
         ytDlp = py.getModule("yt_dlp")
         version = py.getModule("yt_dlp.version")["__version__"].toString()
         cookies = File(externalFilesDir, "cookies.txt").toString()
-
-        // Fix OpenSSL configuration error of nodejs
-        val environ = py.getModule("os")["environ"] ?: throw PyException("os.environ is null")
-        environ.callAttr("__setitem__", "OPENSSL_CONF", "/dev/null")
     }
 
     /**
