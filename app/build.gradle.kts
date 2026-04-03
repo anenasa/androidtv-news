@@ -101,6 +101,11 @@ dependencies {
     implementation("androidx.core:core-ktx:$coreKtxVersion")
     implementation("androidx.media3:media3-exoplayer:${media3Version}")
     implementation("androidx.media3:media3-exoplayer-hls:${media3Version}")
+    implementation("androidx.media3:media3-datasource-rtmp:${media3Version}") {
+        // https://github.com/ant-media/LibRtmp-Client-for-Android/issues/109
+        exclude("io.antmedia", "rtmp-client")
+    }
+    implementation("com.github.mcxinyu:LibRtmp-Client-for-Android:v3.2.0.m2")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")

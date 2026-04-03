@@ -23,6 +23,7 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
@@ -487,8 +488,9 @@ class MainActivity : AppCompatActivity() {
             }
             if (channelNum != num) return@launch
 
-            val factory: DataSource.Factory = DefaultHttpDataSource.Factory()
+            val httpFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 .setDefaultRequestProperties(channel[num].headerMap)
+            val factory = DefaultDataSource.Factory(this@MainActivity, httpFactory)
             val url = channel[num].video
             val split = url.indexOf('\n')
             val mediaSource: MediaSource = if (split == -1) {
