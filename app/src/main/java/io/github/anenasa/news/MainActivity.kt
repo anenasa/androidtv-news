@@ -62,7 +62,6 @@ class MainActivity : AppCompatActivity() {
     var hideNavigationBar: Boolean = false
     var hideStatusBar: Boolean = false
     var useExternalJS: Boolean = false
-    var updateYtDlpOnStart: Boolean = false
     var channelListLoaded: Boolean = false
 
     var ytDlp: YtDlp? = null
@@ -167,7 +166,6 @@ class MainActivity : AppCompatActivity() {
             hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false)
             hideStatusBar = data.getBooleanExtra("hideStatusBar", false)
             useExternalJS = data.getBooleanExtra("useExternalJS", false)
-            updateYtDlpOnStart = data.getBooleanExtra("updateYtDlpOnStart", false)
             if (data.getBooleanExtra("ytDlpUpdated", false)) {
                 // Kill process, so new version of yt-dlp can be loaded
                 exitProcess(0)
@@ -204,7 +202,6 @@ class MainActivity : AppCompatActivity() {
         hideNavigationBar = preferences.getBoolean("hideNavigationBar", false)
         hideStatusBar = preferences.getBoolean("hideStatusBar", false)
         useExternalJS = preferences.getBoolean("useExternalJS", false)
-        updateYtDlpOnStart = preferences.getBoolean("updateYtDlpOnStart", false)
 
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
@@ -270,7 +267,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
         try {
-            ytDlp = create(this, updateYtDlpOnStart, useExternalJS)
+            ytDlp = create(this, useExternalJS)
             readChannelListJob = lifecycleScope.launch(Dispatchers.IO) {
                 while (true) {
                     readChannelList()
@@ -783,7 +780,6 @@ class MainActivity : AppCompatActivity() {
             putExtra("hideNavigationBar", hideNavigationBar)
             putExtra("hideStatusBar", hideStatusBar)
             putExtra("useExternalJS", useExternalJS)
-            putExtra("updateYtDlpOnStart", updateYtDlpOnStart)
         }
         showSettingsLauncher.launch(intent)
         supportFragmentManager.popBackStack()
@@ -817,7 +813,6 @@ class MainActivity : AppCompatActivity() {
             putBoolean("hideNavigationBar", hideNavigationBar)
             putBoolean("hideStatusBar", hideStatusBar)
             putBoolean("useExternalJS", useExternalJS)
-            putBoolean("updateYtDlpOnStart", updateYtDlpOnStart)
         }
 
         // Channel list not initialized, do not write empty list

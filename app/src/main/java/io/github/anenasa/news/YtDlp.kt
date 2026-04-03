@@ -102,11 +102,11 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
          * @exception IOException Downloading yt-dlp failed
          * @exception PyException Python exception
          */
-        fun create(context: Context, updateYtDlpOnStart: Boolean, useExternalJS: Boolean): YtDlp {
+        fun create(context: Context, useExternalJS: Boolean): YtDlp {
             val externalFilesDir: File = context.getExternalFilesDir(null) ?: throw IOException("externalFilesDir is null")
             val nativeLibraryDir: String = context.applicationInfo.nativeLibraryDir
             try {
-                if (updateYtDlpOnStart || !File(externalFilesDir, "yt-dlp").exists()) {
+                if (!File(externalFilesDir, "yt-dlp").exists()) {
                     download(externalFilesDir)
                 }
                 return YtDlp(externalFilesDir, nativeLibraryDir, useExternalJS)

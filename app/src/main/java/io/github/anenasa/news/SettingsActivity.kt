@@ -42,7 +42,6 @@ class SettingsActivity : AppCompatActivity() {
     var hideNavigationBar: Boolean = false
     var hideStatusBar: Boolean = false
     var useExternalJS: Boolean = false
-    var updateYtDlpOnStart: Boolean = false
     var ytDlpUpdated: Boolean = false
     var removeCache: Boolean = false
 
@@ -63,7 +62,6 @@ class SettingsActivity : AppCompatActivity() {
         hideNavigationBar = intentExtras.getBoolean("hideNavigationBar")
         hideStatusBar = intentExtras.getBoolean("hideStatusBar")
         useExternalJS = intentExtras.getBoolean("useExternalJS")
-        updateYtDlpOnStart = intentExtras.getBoolean("updateYtDlpOnStart")
         supportFragmentManager
             .beginTransaction()
             .replace(R.id.container, SettingsFragment())
@@ -80,7 +78,6 @@ class SettingsActivity : AppCompatActivity() {
                     putExtra("hideNavigationBar", hideNavigationBar)
                     putExtra("hideStatusBar", hideStatusBar)
                     putExtra("useExternalJS", useExternalJS)
-                    putExtra("updateYtDlpOnStart", updateYtDlpOnStart)
                     putExtra("remove_cache", removeCache)
                     putExtra("ytDlpUpdated", ytDlpUpdated)
                 }
@@ -253,14 +250,6 @@ class SettingsActivity : AppCompatActivity() {
                 setChecked(myActivity.useExternalJS)
                 setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
                     myActivity.useExternalJS = newValue as Boolean
-                    true
-                }
-            }
-
-            findPreference<SwitchPreference>("updateYtDlpOnStart")?.apply {
-                setChecked(myActivity.updateYtDlpOnStart)
-                setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
-                    myActivity.updateYtDlpOnStart = newValue as Boolean
                     true
                 }
             }
