@@ -98,48 +98,41 @@ class Channel(
         time = 0L
     }
 
-    fun needExtract(): Int {
+    private fun needExtract(isBackGround: Boolean): Boolean {
         val url = url
         if (video.isEmpty()) {
-            return NEED_EXTRACT_YES
+            return true
         }
         if (url.endsWith("m3u8")) {
-            return NEED_EXTRACT_NO
+            return false
         }
         try {
-            if (url.startsWith("https://www.youtube.com/")) {
-                val current = System.currentTimeMillis() / 1000L
+            val current = System.currentTimeMillis() / 1000L
+            val timeout = if(isBackGround) 7200L else 60L
+            val expire: Long = if (url.startsWith("https://www.youtube.com/")) {
                 // Can be "expire=" or "expire/"
-                val expire = video.substringAfter("expire").substring(1, 11).toLong()
-                return if (current < expire) {
-                    NEED_EXTRACT_NO
-                } else {
-                    NEED_EXTRACT_YES
-                }
-            }
-            if (url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") ||
+                video.substringAfter("expire").substring(1, 11).toLong()
+            } else if (url.startsWith("https://hamivideo.hinet.net/") || url.startsWith("https://embed.4gtv.tv/") ||
                 url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")
             ) {
-                val current = System.currentTimeMillis() / 1000L
-                val expire = video.substringAfter("expires").substring(1, 11).toLong()
-                return if (current < expire) {
-                    NEED_EXTRACT_NO
-                } else {
-                    NEED_EXTRACT_YES
-                }
+                video.substringAfter("expires").substring(1, 11).toLong()
+            } else {
+                // Assume 2 hours
+                time + 7200L
             }
+            return current + timeout >= expire
         } catch (e: Exception) {
             Log.e(TAG, "needExtract error", e)
+            return true
         }
-        return NEED_EXTRACT_UNKNOWN
     }
 
-    suspend fun extract(ytDlp: YtDlp, okHttpClient: OkHttpClient) {
+    suspend fun extract(ytDlp: YtDlp, okHttpClient: OkHttpClient, isBackGround: Boolean = false) {
         mutex.withLock {
             val current = System.currentTimeMillis()
-            if (current - time > 60000L) {
+            if (needExtract(isBackGround)) {
                 extractMutex(ytDlp, okHttpClient)
-                time = current
+                time = current / 1000L
             }
         }
     }
@@ -215,8 +208,5 @@ class Channel(
 
     companion object {
         private const val TAG = "Channel"
-        const val NEED_EXTRACT_NO: Int = 0
-        const val NEED_EXTRACT_YES: Int = 1
-        const val NEED_EXTRACT_UNKNOWN: Int = 2
     }
 }

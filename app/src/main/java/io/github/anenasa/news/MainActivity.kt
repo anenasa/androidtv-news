@@ -207,13 +207,11 @@ class MainActivity : AppCompatActivity() {
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "Player error", error)
                 showErrorMessage(error.message)
-                if (channel.getOrNull(channelNum)?.needExtract() != Channel.NEED_EXTRACT_NO) {
-                    if (errorCount > 0) {
-                        // Force extract by removing video url
-                        channel.getOrNull(channelNum)?.clearVideo()
-                        errorCount = 0
-                    } else errorCount++
-                }
+                if (errorCount > 0) {
+                    // Force extract by removing video url
+                    channel.getOrNull(channelNum)?.clearVideo()
+                    errorCount = 0
+                } else errorCount++
                 play(channelNum)
             }
 
@@ -375,7 +373,7 @@ class MainActivity : AppCompatActivity() {
                         for (i in channelInThread.indices) {
                             try {
                                 if (!channelInThread[i].isHidden) {
-                                    channelInThread[i].extract(ytDlp!!, okHttpClient)
+                                    channelInThread[i].extract(ytDlp!!, okHttpClient, true)
                                 }
                             } catch (e: Exception) {
                                 Log.e(TAG, "Background extract error", e)
@@ -474,14 +472,12 @@ class MainActivity : AppCompatActivity() {
             channel[num].name
         )
         lifecycleScope.launch(Dispatchers.IO) {
-            if (channel[num].needExtract() == Channel.NEED_EXTRACT_YES) {
-                try {
-                    channel[num].extract(ytDlp!!, okHttpClient)
-                } catch (e: Exception) {
-                    if (channelNum != num) return@launch
-                    Log.e(TAG, "Channel.parse error", e)
-                    withContext(Dispatchers.Main) { showErrorMessage(e.message) }
-                }
+            try {
+                channel[num].extract(ytDlp!!, okHttpClient)
+            } catch (e: Exception) {
+                if (channelNum != num) return@launch
+                Log.e(TAG, "Channel.parse error", e)
+                withContext(Dispatchers.Main) { showErrorMessage(e.message) }
             }
             if (channelNum != num) return@launch
 
