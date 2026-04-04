@@ -206,7 +206,9 @@ class MainActivity : AppCompatActivity() {
         player.addListener(object : Player.Listener {
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(TAG, "Player error", error)
-                showErrorMessage(error.message)
+                if (!channel.getOrNull(channelNum)?.video.isNullOrEmpty()) {
+                    showErrorMessage(error.message)
+                }
                 if (errorCount > 0) {
                     // Force extract by removing video url
                     channel.getOrNull(channelNum)?.clearVideo()
