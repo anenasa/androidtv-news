@@ -1,7 +1,6 @@
 package io.github.anenasa.news
 
 import android.content.Context
-import android.os.Build
 import android.util.Log
 import com.chaquo.python.PyException
 import com.chaquo.python.PyObject
@@ -127,11 +126,7 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
             val request = Request.Builder()
                 .url("https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp")
                 .build()
-            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.N) {
-                MyApplication.insecureClient.newCall(request).execute()
-            } else {
-                MyApplication.okHttpClient.newCall(request).execute()
-            }.use { response ->
+            MyApplication.okHttpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {
                     throw IOException("下載失敗：$response")
                 }

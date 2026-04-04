@@ -10,12 +10,13 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.X509TrustManager
 
 class MyApplication : PyApplication() {
+    private lateinit var insecureClient: OkHttpClient
+
     override fun onCreate() {
         super.onCreate()
         cookieJar = TxtCookieJar()
-        okHttpClient = OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .cookieJar(cookieJar)
-            .build()
         // Dirty hack for https://github.com/anenasa/androidtv-news/issues/6
         // java.security.cert.CertPathValidatorException:
         // Trust anchor for certification path not found.
@@ -32,7 +33,14 @@ class MyApplication : PyApplication() {
             insecureClient = OkHttpClient.Builder()
                 .sslSocketFactory(sslContext.socketFactory, myTrustManager)
                 .build()
+            builder.addInterceptor { chain ->
+                if (!chain.request().url.host.contains("github")) {
+                    return@addInterceptor chain.proceed(chain.request())
+                }
+                return@addInterceptor insecureClient.newCall(chain.request()).execute()
+            }
         }
+        okHttpClient = builder.build()
     }
 
     override fun attachBaseContext(base: Context?) {
@@ -44,6 +52,5 @@ class MyApplication : PyApplication() {
     companion object {
         lateinit var okHttpClient: OkHttpClient
         lateinit var cookieJar: TxtCookieJar
-        lateinit var insecureClient: OkHttpClient
     }
 }
