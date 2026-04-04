@@ -301,7 +301,7 @@ class MainActivity : AppCompatActivity() {
                 }
             } else {
                 val request = Request.Builder()
-                    .url("https://anenasa.gitlab.io/channel/config.txt")
+                    .url("https://anenasa.github.io/channel/config.txt")
                     .build()
                 okHttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
