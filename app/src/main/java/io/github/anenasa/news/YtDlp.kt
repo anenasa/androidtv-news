@@ -96,7 +96,6 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
         /**
          * Create YtDlp object
          * @param context Context
-         * @param updateYtDlpOnStart Download yt-dlp from GitHub before initializing
          * @param useExternalJS Use external js runtime by default, otherwise only after failure
          * @exception IOException Downloading yt-dlp failed
          * @exception PyException Python exception
