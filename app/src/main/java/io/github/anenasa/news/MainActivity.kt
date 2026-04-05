@@ -50,6 +50,7 @@ import kotlinx.coroutines.yield
 
 class MainActivity : AppCompatActivity() {
 
+    @Volatile
     var channelNum: Int = 0
     var channel: ArrayList<Channel> = ArrayList()
     var channelLengthOfConfig: Int = 0
@@ -76,6 +77,7 @@ class MainActivity : AppCompatActivity() {
 
     val preferences: SharedPreferences by lazy { getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE) }
 
+    @Volatile
     var isStarted: Boolean = true
     val audioManager: AudioManager by lazy { applicationContext.getSystemService(AUDIO_SERVICE) as AudioManager }
     var errorCount: Int = 0

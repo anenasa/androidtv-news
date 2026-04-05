@@ -21,11 +21,17 @@ class Channel(
     @Volatile
     var video: String = ""
         private set
+    @Volatile
     var customUrl: String = ""
+    @Volatile
     var customName: String = ""
+    @Volatile
     var customFormat: String = ""
+    @Volatile
     var customVolume: String = ""
+    @Volatile
     var customHeader: String = ""
+    @Volatile
     var isHidden: Boolean = false
     val headerMap: MutableMap<String, String>
     @Volatile
