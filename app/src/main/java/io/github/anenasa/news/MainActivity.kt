@@ -368,6 +368,7 @@ class MainActivity : AppCompatActivity() {
             if (saveVideoUrl) {
                 for (ch in channel) {
                     ch.video = preferences.getString("${ch.url} ${ch.format}", "")!!
+                    ch.time = preferences.getLong("${ch.url} ${ch.format} time", 0)
                 }
             }
 
@@ -829,6 +830,7 @@ class MainActivity : AppCompatActivity() {
             if (saveVideoUrl) {
                 for (ch in channel) {
                     putString("${ch.url} ${ch.format}", ch.video)
+                    putLong("${ch.url} ${ch.format} time", ch.time)
                 }
             }
         }
