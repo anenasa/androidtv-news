@@ -32,6 +32,10 @@
         app:title="預載影片網址"/>
     <SwitchPreference
         app:layout="@layout/preference_layout"
+        app:key="saveVideoUrl"
+        app:title="儲存影片網址"/>
+    <SwitchPreference
+        app:layout="@layout/preference_layout"
         app:key="invertChannelButtons"
         app:title="反轉上下鍵"/>
     <SwitchPreference

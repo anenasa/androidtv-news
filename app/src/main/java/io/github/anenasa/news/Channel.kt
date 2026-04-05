@@ -20,7 +20,6 @@ class Channel(
 ) {
     @Volatile
     var video: String = ""
-        private set
     @Volatile
     var customUrl: String = ""
     @Volatile

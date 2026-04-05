@@ -38,6 +38,7 @@ class SettingsActivity : AppCompatActivity() {
     var defaultVolume: String = ""
     var isShowErrorMessage: Boolean = false
     var enableBackgroundExtract: Boolean = false
+    var saveVideoUrl: Boolean = false
     var invertChannelButtons: Boolean = false
     var hideNavigationBar: Boolean = false
     var hideStatusBar: Boolean = false
@@ -58,6 +59,7 @@ class SettingsActivity : AppCompatActivity() {
         defaultVolume = intentExtras.getString("defaultVolume") ?: "1.0"
         isShowErrorMessage = intentExtras.getBoolean("isShowErrorMessage")
         enableBackgroundExtract = intentExtras.getBoolean("enableBackgroundExtract")
+        saveVideoUrl = intentExtras.getBoolean("saveVideoUrl")
         invertChannelButtons = intentExtras.getBoolean("invertChannelButtons")
         hideNavigationBar = intentExtras.getBoolean("hideNavigationBar")
         hideStatusBar = intentExtras.getBoolean("hideStatusBar")
@@ -74,6 +76,7 @@ class SettingsActivity : AppCompatActivity() {
                     putExtra("defaultVolume", defaultVolume)
                     putExtra("isShowErrorMessage", isShowErrorMessage)
                     putExtra("enableBackgroundExtract", enableBackgroundExtract)
+                    putExtra("saveVideoUrl", saveVideoUrl)
                     putExtra("invertChannelButtons", invertChannelButtons)
                     putExtra("hideNavigationBar", hideNavigationBar)
                     putExtra("hideStatusBar", hideStatusBar)
@@ -218,6 +221,14 @@ class SettingsActivity : AppCompatActivity() {
                 setChecked(myActivity.enableBackgroundExtract)
                 setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
                     myActivity.enableBackgroundExtract = newValue as Boolean
+                    true
+                }
+            }
+
+            findPreference<SwitchPreference>("saveVideoUrl")?.apply {
+                setChecked(myActivity.saveVideoUrl)
+                setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
+                    myActivity.saveVideoUrl = newValue as Boolean
                     true
                 }
             }

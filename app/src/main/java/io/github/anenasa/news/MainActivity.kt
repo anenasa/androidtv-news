@@ -59,6 +59,7 @@ class MainActivity : AppCompatActivity() {
     var defaultVolume: String = ""
     var isShowErrorMessage: Boolean = false
     var enableBackgroundExtract: Boolean = false
+    var saveVideoUrl: Boolean = false
     var invertChannelButtons: Boolean = false
     var hideNavigationBar: Boolean = false
     var hideStatusBar: Boolean = false
@@ -164,6 +165,7 @@ class MainActivity : AppCompatActivity() {
             defaultVolume = data.getStringExtra("defaultVolume").orEmpty()
             isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false)
             enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false)
+            saveVideoUrl = data.getBooleanExtra("saveVideoUrl", false)
             invertChannelButtons = data.getBooleanExtra("invertChannelButtons", false)
             hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false)
             hideStatusBar = data.getBooleanExtra("hideStatusBar", false)
@@ -200,6 +202,7 @@ class MainActivity : AppCompatActivity() {
         defaultVolume = preferences.getString("defaultVolume", "1.0")!!
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false)
         enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false)
+        saveVideoUrl = preferences.getBoolean("saveVideoUrl", false)
         invertChannelButtons = preferences.getBoolean("invertChannelButtons", false)
         hideNavigationBar = preferences.getBoolean("hideNavigationBar", false)
         hideStatusBar = preferences.getBoolean("hideStatusBar", false)
@@ -361,6 +364,13 @@ class MainActivity : AppCompatActivity() {
                     channel.add(ch)
                 }
             }
+
+            if (saveVideoUrl) {
+                for (ch in channel) {
+                    ch.video = preferences.getString("${ch.url}${ch.format}", "")!!
+                }
+            }
+
             channelListLoaded = true
             withContext(Dispatchers.Main) { errorMessageView.text = "" }
 
@@ -776,6 +786,7 @@ class MainActivity : AppCompatActivity() {
             putExtra("defaultVolume", defaultVolume)
             putExtra("isShowErrorMessage", isShowErrorMessage)
             putExtra("enableBackgroundExtract", enableBackgroundExtract)
+            putExtra("saveVideoUrl", saveVideoUrl)
             putExtra("invertChannelButtons", invertChannelButtons)
             putExtra("hideNavigationBar", hideNavigationBar)
             putExtra("hideStatusBar", hideStatusBar)
@@ -809,10 +820,17 @@ class MainActivity : AppCompatActivity() {
             putString("defaultVolume", defaultVolume)
             putBoolean("isShowErrorMessage", isShowErrorMessage)
             putBoolean("enableBackgroundExtract", enableBackgroundExtract)
+            putBoolean("saveVideoUrl", saveVideoUrl)
             putBoolean("invertChannelButtons", invertChannelButtons)
             putBoolean("hideNavigationBar", hideNavigationBar)
             putBoolean("hideStatusBar", hideStatusBar)
             putBoolean("useExternalJS", useExternalJS)
+
+            if (saveVideoUrl) {
+                for (ch in channel) {
+                    putString("${ch.url}${ch.format}", ch.video)
+                }
+            }
         }
 
         // Channel list not initialized, do not write empty list
