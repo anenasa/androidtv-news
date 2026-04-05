@@ -75,5 +75,8 @@ yt-dlp 格式請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/READ
 
 ytdl-options 請參考[這裡](https://github.com/yt-dlp/yt-dlp/blob/master/yt_dlp/YoutubeDL.py#L184)。目前只支援字串的選項，如果你想使用的選項不支援歡迎回報。
 
+## Cookies
+可在設定畫面匯入，請參考 https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp
+
 ## 許可證
 [GNU General Public License v3.0](https://github.com/anenasa/androidtv-news/blob/main/LICENSE)
