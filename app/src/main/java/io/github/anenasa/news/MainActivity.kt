@@ -367,7 +367,7 @@ class MainActivity : AppCompatActivity() {
 
             if (saveVideoUrl) {
                 for (ch in channel) {
-                    ch.video = preferences.getString("${ch.url}${ch.format}", "")!!
+                    ch.video = preferences.getString("${ch.url} ${ch.format}", "")!!
                 }
             }
 
@@ -828,7 +828,7 @@ class MainActivity : AppCompatActivity() {
 
             if (saveVideoUrl) {
                 for (ch in channel) {
-                    putString("${ch.url}${ch.format}", ch.video)
+                    putString("${ch.url} ${ch.format}", ch.video)
                 }
             }
         }
