@@ -27,8 +27,8 @@ android {
         // Need to set this to 29 so file access works on Android TV 11 and above
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 29
-        versionCode = 40201
-        versionName = "4.2.1"
+        versionCode = 50000
+        versionName = "5.0.0"
 
         buildConfigField("boolean", "USE_API_21", "$useApi21")
 
