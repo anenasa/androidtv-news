@@ -121,6 +121,8 @@ class Channel(
                 url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")
             ) {
                 video.substringAfter("expires").substring(1, 11).toLong()
+            } else if (url.startsWith("https://www.ofiii.com/channel/watch/")) {
+                time + 14400L
             } else {
                 // Assume 2 hours
                 time + 7200L
