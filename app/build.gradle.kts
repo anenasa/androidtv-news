@@ -105,7 +105,7 @@ dependencies {
         // https://github.com/ant-media/LibRtmp-Client-for-Android/issues/109
         exclude("io.antmedia", "rtmp-client")
     }
-    implementation("com.github.mcxinyu:LibRtmp-Client-for-Android:v3.2.0.m2")
+    implementation("com.github.anenasa:LibRtmp-Client-for-Android:16647b19d5")
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.appcompat:appcompat:1.7.1")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
