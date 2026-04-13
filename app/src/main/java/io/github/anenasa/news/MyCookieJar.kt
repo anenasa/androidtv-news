@@ -46,8 +46,8 @@ class TxtCookieJar : CookieJar {
         url: HttpUrl,
         cookies: List<Cookie>
     ) {
-        // TODO: Save to file
-        this@TxtCookieJar.cookies.addAll(cookies)
+        // TODO: Save cookies
+        // https://github.com/anenasa/androidtv-news/issues/8
     }
 
     override fun loadForRequest(url: HttpUrl): List<Cookie> {
