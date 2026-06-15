@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -51,6 +52,27 @@ class ChannelListActivity : Activity() {
             }
         }
 
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (event.action == KeyEvent.ACTION_DOWN) {
+            when (event.keyCode) {
+                KeyEvent.KEYCODE_CHANNEL_DOWN, KeyEvent.KEYCODE_CHANNEL_UP -> {
+                    val listView = findViewById<ListView>(R.id.channelListView) ?: return super.dispatchKeyEvent(event)
+                    val firstVisible = listView.firstVisiblePosition
+                    val lastVisible = listView.lastVisiblePosition
+                    val pageSize = (lastVisible - firstVisible).coerceAtLeast(1)
+                    val targetPosition = if (event.keyCode == KeyEvent.KEYCODE_CHANNEL_UP) {
+                        (firstVisible - pageSize).coerceAtLeast(0)
+                    } else { // KEYCODE_CHANNEL_DOWN
+                        (firstVisible + pageSize).coerceAtMost(listView.adapter.count - 1)
+                    }
+                    listView.setSelection(targetPosition)
+                    return true
+                }
+            }
+        }
+        return super.dispatchKeyEvent(event)
     }
 
     companion object {
