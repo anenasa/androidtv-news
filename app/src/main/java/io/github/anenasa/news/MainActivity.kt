@@ -68,6 +68,7 @@ class MainActivity : AppCompatActivity() {
 
     var ytDlp: YtDlp? = null
     val player: ExoPlayer by lazy { ExoPlayer.Builder(this).build() }
+    val webViewHelper: WebViewHelper by lazy { WebViewHelper(findViewById(R.id.webView)) }
     val playerView: SurfaceView by lazy { findViewById(R.id.playerView) }
     val textView: TextView by lazy { findViewById(R.id.textView) }
     val textInfo: TextView by lazy { findViewById(R.id.textInfo) }
@@ -141,7 +142,8 @@ class MainActivity : AppCompatActivity() {
                 defaultFormat,
                 defaultVolume.toFloat(),
                 "",
-                HashMap()
+                HashMap(),
+                false
             ).apply {
                 name = data.getStringExtra("customName").orEmpty()
                 isHidden = data.getBooleanExtra("isHidden", false)
@@ -352,7 +354,8 @@ class MainActivity : AppCompatActivity() {
                         defaultFormat,
                         defaultVolume.toFloat(),
                         "",
-                        HashMap()
+                        HashMap(),
+                        false
                     ).apply {
                         url = newChannelObject.getString("customUrl")
                         name = newChannelObject.getString("customName")
@@ -436,6 +439,7 @@ class MainActivity : AppCompatActivity() {
             val volume: Float = channelObject.optDouble("volume", defaultVolume.toDouble()).toFloat()
             val header: String = channelObject.optString("header", "")
             val ytdlOptions: MutableMap<String, String> = HashMap()
+            val isWebView: Boolean = channelObject.optBoolean("isWebView", false)
             channelObject.optJSONObject("ytdl-options")?.let {
                 val keys = it.keys()
                 while (keys.hasNext()) {
@@ -444,7 +448,7 @@ class MainActivity : AppCompatActivity() {
                     ytdlOptions[key] = value
                 }
             }
-            val ch = Channel(url, name, format, volume, header, ytdlOptions)
+            val ch = Channel(url, name, format, volume, header, ytdlOptions, isWebView)
             channel.add(ch)
         }
     }
@@ -480,6 +484,15 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(markerClass = [UnstableApi::class])
     fun play(num: Int) {
+        if (channel[num].isWebView) {
+            player.stop()
+            errorMessageView.text = ""
+            textInfo.text = ""
+            webViewHelper.loadUrl(channel[num].url)
+            return
+        }
+
+        webViewHelper.stop()
         textInfo.text = String.format(
             Locale.ROOT,
             "正在載入 %d %s",
@@ -671,9 +684,10 @@ class MainActivity : AppCompatActivity() {
         return super.dispatchKeyEvent(event)
     }
 
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (event.action != MotionEvent.ACTION_DOWN) {
-            return super.onTouchEvent(event)
+    override fun dispatchTouchEvent(event: MotionEvent): Boolean {
+        if (event.action != MotionEvent.ACTION_DOWN ||
+            supportFragmentManager.fragments.isNotEmpty()) {
+            return super.dispatchTouchEvent(event)
         }
         supportFragmentManager.popBackStack()
         if (!channelListLoaded) {
@@ -893,6 +907,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         isStarted = false
         player.stop()
+        webViewHelper.stop()
         saveSettings()
     }
 
