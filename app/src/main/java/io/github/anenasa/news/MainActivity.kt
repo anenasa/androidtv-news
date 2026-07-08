@@ -226,6 +226,9 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPlaybackStateChanged(state: Int) {
                 if (state == Player.STATE_READY) {
+                    if (!isStarted) {
+                        player.stop()
+                    }
                     errorMessageView.text = ""
                     textInfo.text = ""
                     errorCount = 0
