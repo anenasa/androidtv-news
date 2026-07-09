@@ -18,7 +18,7 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("SetJavaScriptEnabled")
-class WebViewHelper(val webView: WebView, lifecycleOwner: LifecycleOwner) {
+class WebViewHelper(webView: WebView, lifecycleOwner: LifecycleOwner) {
     var onPageFinishedExecuted = false
     private val scope = lifecycleOwner.lifecycle.coroutineScope
     private var webAutomationJob: Job? = null
@@ -49,7 +49,7 @@ class WebViewHelper(val webView: WebView, lifecycleOwner: LifecycleOwner) {
         }
     }
 
-    fun loadUrl(url: String, scripts: List<String>) {
+    fun loadUrl(webView: WebView, url: String, scripts: List<String>) {
         onPageFinishedExecuted = false
         webAutomationJob?.cancel()
         this.scripts = scripts
@@ -57,7 +57,7 @@ class WebViewHelper(val webView: WebView, lifecycleOwner: LifecycleOwner) {
         webView.visibility = View.VISIBLE
     }
 
-    fun stop() {
+    fun stop(webView: WebView) {
         webView.visibility = View.INVISIBLE
         webAutomationJob?.cancel()
         webView.loadUrl("about:blank")

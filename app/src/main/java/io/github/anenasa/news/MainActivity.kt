@@ -11,6 +11,7 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.SurfaceView
 import android.view.View
+import android.webkit.WebView
 import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
@@ -75,6 +76,7 @@ class MainActivity : AppCompatActivity() {
 
     var ytDlp: YtDlp? = null
     val player: ExoPlayer by lazy { ExoPlayer.Builder(this).build() }
+    val webView: WebView by lazy { findViewById(R.id.webView) }
     val webViewHelper: WebViewHelper by lazy { WebViewHelper(findViewById(R.id.webView), this) }
     val playerView: SurfaceView by lazy { findViewById(R.id.playerView) }
     val textView: TextView by lazy { findViewById(R.id.textView) }
@@ -484,11 +486,11 @@ class MainActivity : AppCompatActivity() {
             player.stop()
             errorMessageView.text = ""
             textInfo.text = ""
-            webViewHelper.loadUrl(channel[num].url, channel[num].script)
+            webViewHelper.loadUrl(webView, channel[num].url, channel[num].script)
             return
         }
 
-        webViewHelper.stop()
+        webViewHelper.stop(webView)
         textInfo.text = String.format(
             Locale.ROOT,
             "正在載入 %d %s",
@@ -904,7 +906,7 @@ class MainActivity : AppCompatActivity() {
         super.onStop()
         isStarted = false
         player.stop()
-        webViewHelper.stop()
+        webViewHelper.stop(webView)
         saveSettings()
     }
 
