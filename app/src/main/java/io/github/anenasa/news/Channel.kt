@@ -17,7 +17,8 @@ class Channel(
     val defaultVolume: Float,
     val defaultHeader: String,
     val ydlOptions: Map<String, String>,
-    val isWebView: Boolean
+    val isWebView: Boolean,
+    val script: List<String> = emptyList()
 ) {
     @Volatile
     var video: String = ""

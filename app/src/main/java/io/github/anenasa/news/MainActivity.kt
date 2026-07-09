@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     var ytDlp: YtDlp? = null
     val player: ExoPlayer by lazy { ExoPlayer.Builder(this).build() }
-    val webViewHelper: WebViewHelper by lazy { WebViewHelper(findViewById(R.id.webView)) }
+    val webViewHelper: WebViewHelper by lazy { WebViewHelper(findViewById(R.id.webView), this) }
     val playerView: SurfaceView by lazy { findViewById(R.id.playerView) }
     val textView: TextView by lazy { findViewById(R.id.textView) }
     val textInfo: TextView by lazy { findViewById(R.id.textInfo) }
@@ -441,9 +441,10 @@ class MainActivity : AppCompatActivity() {
             val format = ch.format ?: defaultFormat
             val volume = ch.volume ?: defaultVolume.toFloat()
             val header = ch.header
-            val isWebView = ch.isWebView
             val ytdlOptions = ch.ytdlOptions
-            val channelObject = Channel(url, name, format, volume, header, ytdlOptions, isWebView)
+            val isWebView = ch.isWebView
+            val script = ch.script
+            val channelObject = Channel(url, name, format, volume, header, ytdlOptions, isWebView, script)
             channel.add(channelObject)
         }
     }
@@ -483,7 +484,7 @@ class MainActivity : AppCompatActivity() {
             player.stop()
             errorMessageView.text = ""
             textInfo.text = ""
-            webViewHelper.loadUrl(channel[num].url)
+            webViewHelper.loadUrl(channel[num].url, channel[num].script)
             return
         }
 
