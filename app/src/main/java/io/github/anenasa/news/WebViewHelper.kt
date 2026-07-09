@@ -69,7 +69,6 @@ class WebViewHelper(webView: WebView, lifecycleOwner: LifecycleOwner) {
 }
 
 suspend fun WebView.runScript(scripts: List<String>) {
-    // FIXME: clear scripts when loading new page
     var index = 0
     while (index < scripts.size) {
         val parts = scripts[index++].split(',', limit=3)
