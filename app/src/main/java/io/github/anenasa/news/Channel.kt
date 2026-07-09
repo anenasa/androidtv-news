@@ -16,7 +16,7 @@ class Channel(
     val defaultFormat: String,
     val defaultVolume: Float,
     val defaultHeader: String,
-    val ydlOptions: MutableMap<String, String>,
+    val ydlOptions: Map<String, String>,
     val isWebView: Boolean
 ) {
     @Volatile

@@ -32,8 +32,6 @@ import androidx.media3.exoplayer.source.MergingMediaSource
 import io.github.anenasa.news.YtDlp.Companion.create
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.json.JSONArray
-import org.json.JSONObject
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -47,6 +45,15 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.yield
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.putJsonArray
+import kotlinx.serialization.json.putJsonObject
 
 class MainActivity : AppCompatActivity() {
 
@@ -76,7 +83,7 @@ class MainActivity : AppCompatActivity() {
     var backgroundExtractJob: Job? = null
     var readChannelListJob: Job? = null
     val okHttpClient: OkHttpClient = MyApplication.okHttpClient
-
+    val json = Json { ignoreUnknownKeys = true }
     val preferences: SharedPreferences by lazy { getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE) }
 
     @Volatile
@@ -322,53 +329,50 @@ class MainActivity : AppCompatActivity() {
             }
             channelLengthOfConfig = channel.size
 
-            var customChannelList: JSONObject? = null
-            var newChannelArray: JSONArray? = null
+            var customChannelList: JsonObject? = null
+            var newChannelArray: List<CustomChannel>? = null
             val customFile = File(getExternalFilesDir(null), "custom.txt")
             if (customFile.exists()) {
                 customFile.bufferedReader().use { reader ->
                     val customString = reader.readText()
-                    val customJsonObject = JSONObject(customString)
-                    customChannelList = customJsonObject.getJSONObject("customChannelList")
-                    newChannelArray = customJsonObject.getJSONArray("newChannelArray")
+                    val customJsonObject = json.parseToJsonElement(customString).jsonObject
+                    customChannelList = customJsonObject["customChannelList"]!!.jsonObject
+                    newChannelArray = json.decodeFromJsonElement<List<CustomChannel>>(customJsonObject["newChannelArray"]!!.jsonArray)
                 }
             }
 
             // Read custom settings for this channel
             for (ch in channel) {
-                if (customChannelList?.has(ch.name) == true) {
-                    val customChannelObject = customChannelList.getJSONObject(ch.name)
-                    ch.url = customChannelObject.getString("customUrl")
-                    ch.name = customChannelObject.getString("customName")
-                    ch.format = customChannelObject.getString("customFormat")
-                    ch.setVolume(customChannelObject.getString("customVolume"))
-                    ch.header = customChannelObject.getString("customHeader")
-                    ch.isHidden = customChannelObject.getBoolean("isHidden")
+                if (customChannelList?.containsKey(ch.name) == true) {
+                    val customChannelObject = json.decodeFromJsonElement<CustomChannel>(customChannelList[ch.name]!!.jsonObject)
+                    ch.url = customChannelObject.customUrl
+                    ch.name = customChannelObject.customName
+                    ch.format = customChannelObject.customFormat
+                    ch.setVolume(customChannelObject.customVolume)
+                    ch.header = customChannelObject.customHeader
+                    ch.isHidden = customChannelObject.isHidden
                 }
             }
 
             //Read custom channel set in app
-            if (newChannelArray != null) {
-                for (i in 0..<newChannelArray.length()) {
-                    val newChannelObject = newChannelArray.getJSONObject(i)
-                    val ch = Channel(
-                        "",
-                        "",
-                        defaultFormat,
-                        defaultVolume.toFloat(),
-                        "",
-                        HashMap(),
-                        false
-                    ).apply {
-                        url = newChannelObject.getString("customUrl")
-                        name = newChannelObject.getString("customName")
-                        format = newChannelObject.getString("customFormat")
-                        setVolume(newChannelObject.getString("customVolume"))
-                        header = newChannelObject.getString("customHeader")
-                        isHidden = newChannelObject.getBoolean("isHidden")
-                    }
-                    channel.add(ch)
+            newChannelArray?.forEach {
+                val ch = Channel(
+                    "",
+                    "",
+                    defaultFormat,
+                    defaultVolume.toFloat(),
+                    "",
+                    HashMap(),
+                    false
+                ).apply {
+                    url = it.customUrl
+                    name = it.customName
+                    format = it.customFormat
+                    setVolume(it.customVolume)
+                    header = it.customHeader
+                    isHidden = it.isHidden
                 }
+                channel.add(ch)
             }
 
             if (saveVideoUrl) {
@@ -419,14 +423,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun readChannelListFromString(content: String) {
-        val json = JSONObject(content)
-        val channelList = json.getJSONArray("channelList")
-
-        for (i in 0..<channelList.length()) {
-            val channelObject = channelList.getJSONObject(i)
-            if (channelObject.has("list")) {
+        for (ch in json.decodeFromString<ChannelConfig>(content).channelList) {
+            if (ch.list.isNotEmpty()) {
                 val request = Request.Builder()
-                    .url(channelObject.getString("list"))
+                    .url(ch.list)
                     .build()
                 okHttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
@@ -436,23 +436,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 continue
             }
-            val url = channelObject.getString("url")
-            val name = channelObject.getString("name")
-            val format: String = channelObject.optString("ytdl-format", defaultFormat)
-            val volume: Float = channelObject.optDouble("volume", defaultVolume.toDouble()).toFloat()
-            val header: String = channelObject.optString("header", "")
-            val ytdlOptions: MutableMap<String, String> = HashMap()
-            val isWebView: Boolean = channelObject.optBoolean("isWebView", false)
-            channelObject.optJSONObject("ytdl-options")?.let {
-                val keys = it.keys()
-                while (keys.hasNext()) {
-                    val key = keys.next()
-                    val value = it.getString(key)
-                    ytdlOptions[key] = value
-                }
-            }
-            val ch = Channel(url, name, format, volume, header, ytdlOptions, isWebView)
-            channel.add(ch)
+            val url = ch.url
+            val name = ch.name
+            val format = ch.format ?: defaultFormat
+            val volume = ch.volume ?: defaultVolume.toFloat()
+            val header = ch.header
+            val isWebView = ch.isWebView
+            val ytdlOptions = ch.ytdlOptions
+            val channelObject = Channel(url, name, format, volume, header, ytdlOptions, isWebView)
+            channel.add(channelObject)
         }
     }
 
@@ -854,29 +846,30 @@ class MainActivity : AppCompatActivity() {
 
         // Channel list not initialized, do not write empty list
         if (!channelListLoaded) return
+
+        val customChannels = channel.map { ch ->
+            CustomChannel(
+                customUrl = ch.customUrl,
+                customName = ch.customName,
+                customFormat = ch.customFormat,
+                customVolume = ch.customVolume,
+                customHeader = ch.customHeader,
+                isHidden = ch.isHidden
+            )
+        }
+        val jsonString = buildJsonObject {
+            putJsonObject("customChannelList") {
+                customChannels.take(channelLengthOfConfig).forEachIndexed { index, ch ->
+                    put(channel[index].defaultName, json.encodeToJsonElement(ch))
+                }
+            }
+            putJsonArray("newChannelArray") {
+                customChannels.drop(channelLengthOfConfig).forEach { ch ->
+                    add(json.encodeToJsonElement(ch))
+                }
+            }
+        }.toString()
         try {
-            val channelListObject = JSONObject()
-            val newChannelArray = JSONArray()
-            for (i in channel.indices) {
-                val channelObject = JSONObject().apply {
-                    put("customUrl", channel[i].customUrl)
-                    put("customName", channel[i].customName)
-                    put("customFormat", channel[i].customFormat)
-                    put("customVolume", channel[i].customVolume)
-                    put("customHeader", channel[i].customHeader)
-                    put("isHidden", channel[i].isHidden)
-                }
-                if (i < channelLengthOfConfig) {
-                    channelListObject.put(channel[i].defaultName, channelObject)
-                } else {
-                    newChannelArray.put(channelObject)
-                }
-            }
-            val jsonObject = JSONObject().apply {
-                put("customChannelList", channelListObject)
-                put("newChannelArray", newChannelArray)
-            }
-            val jsonString = jsonObject.toString()
             val file = File(getExternalFilesDir(null), "custom.txt")
             FileOutputStream(file).use { stream ->
                 stream.write(jsonString.toByteArray())

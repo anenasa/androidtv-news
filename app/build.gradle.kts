@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("com.chaquo.python")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 val useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
@@ -114,4 +115,5 @@ dependencies {
     implementation("com.github.mendhak:storage-chooser:2.0.4.4b")
     implementation("ch.acra:acra-core:5.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${lifecycleVersion}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
