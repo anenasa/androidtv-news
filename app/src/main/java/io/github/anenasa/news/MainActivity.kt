@@ -482,21 +482,21 @@ class MainActivity : AppCompatActivity() {
 
     @OptIn(markerClass = [UnstableApi::class])
     fun play(num: Int) {
-        if (channel[num].isWebView) {
-            player.stop()
-            errorMessageView.text = ""
-            textInfo.text = ""
-            webViewHelper.loadUrl(webView, channel[num].url, channel[num].script)
-            return
-        }
-
-        webViewHelper.stop(webView)
         textInfo.text = String.format(
             Locale.ROOT,
             "正在載入 %d %s",
             num,
             channel[num].name
         )
+
+        if (channel[num].isWebView) {
+            player.stop()
+            errorMessageView.text = ""
+            webViewHelper.loadUrl(webView, channel[num].url, channel[num].script)
+            return
+        }
+
+        webViewHelper.stop(webView)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 channel[num].extract(ytDlp!!, okHttpClient)

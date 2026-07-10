@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,9 +17,9 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("SetJavaScriptEnabled")
-class WebViewHelper(webView: WebView, lifecycleOwner: LifecycleOwner) {
+class WebViewHelper(webView: WebView, mainActivity: MainActivity) {
     var onPageFinishedExecuted = false
-    private val scope = lifecycleOwner.lifecycle.coroutineScope
+    private val scope = mainActivity.lifecycle.coroutineScope
     private var webAutomationJob: Job? = null
     var scripts: List<String> = emptyList()
 
@@ -44,6 +43,7 @@ class WebViewHelper(webView: WebView, lifecycleOwner: LifecycleOwner) {
                     } catch (e: Exception) {
                         Log.e(TAG, "runScript failed", e)
                     }
+                    mainActivity.textInfo.text = ""
                 }
             }
         }
