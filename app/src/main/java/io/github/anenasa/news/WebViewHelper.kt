@@ -39,11 +39,7 @@ class WebViewHelper {
                     onPageFinishedExecuted = true
                     webAutomationJob?.cancel()
                     webAutomationJob = scope.launch(Dispatchers.Main) {
-                        try {
-                            view?.runScript(scripts)
-                        } catch (e: Exception) {
-                            Log.e(TAG, "runScript failed", e)
-                        }
+                        view?.runScript(scripts)
                         mainActivity.textInfo.text = ""
                     }
                 }
@@ -73,13 +69,21 @@ class WebViewHelper {
 suspend fun WebView.runScript(scripts: List<String>) {
     var index = 0
     while (index < scripts.size) {
-        val parts = scripts[index++].split(',', limit=3)
-        delay(parts[1].toLong().milliseconds)
-        if (parts[0] == "tap") {
-            val (x, y) = parts[2].split(',', limit=2)
-            simulateTap(x.toInt(), y.toInt())
-        } else if (parts[0] == "js") {
-            val result = awaitEvaluateJavascript(parts[2])
+        val (type, time, content) = scripts[index++].split(',', limit=3)
+            .takeIf { it.size == 3 } ?: run {
+                Log.e(WebViewHelper.TAG, "runScript failed: size != 3")
+                break
+        }
+        delay((time.toLongOrNull() ?: 0L).milliseconds)
+        if (type == "tap") {
+            if (!content.contains(',')) {
+                Log.e(WebViewHelper.TAG, "runScript failed: no comma in coordinates")
+                break
+            }
+            val (x, y) = content.split(',', limit=2)
+            simulateTap(x.toIntOrNull() ?: 50, y.toIntOrNull() ?: 50)
+        } else if (type == "js") {
+            val result = awaitEvaluateJavascript(content)
             if (result == "\"retry\"") index--
         }
     }
