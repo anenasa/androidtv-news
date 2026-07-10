@@ -17,50 +17,52 @@ import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("SetJavaScriptEnabled")
-class WebViewHelper(webView: WebView, mainActivity: MainActivity) {
+class WebViewHelper {
     var onPageFinishedExecuted = false
-    private val scope = mainActivity.lifecycle.coroutineScope
     private var webAutomationJob: Job? = null
     var scripts: List<String> = emptyList()
 
-    init {
+    fun createWebView(mainActivity: MainActivity): WebView {
+        val scope = mainActivity.lifecycle.coroutineScope
         WebView.setWebContentsDebuggingEnabled(true)
-        webView.settings.javaScriptEnabled = true
-        webView.settings.domStorageEnabled = true
-        webView.settings.mediaPlaybackRequiresUserGesture = false
-        webView.settings.useWideViewPort = true
-        webView.settings.loadWithOverviewMode = true
-        webView.settings.textZoom = 100
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageFinished(view: WebView?, url: String?) {
-                super.onPageFinished(view, url)
-                if (onPageFinishedExecuted) return
-                onPageFinishedExecuted = true
-                webAutomationJob?.cancel()
-                webAutomationJob = scope.launch(Dispatchers.Main) {
-                    try {
-                        view?.runScript(scripts)
-                    } catch (e: Exception) {
-                        Log.e(TAG, "runScript failed", e)
+        return WebView(mainActivity).apply {
+            settings.javaScriptEnabled = true
+            settings.domStorageEnabled = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            settings.useWideViewPort = true
+            settings.loadWithOverviewMode = true
+            settings.textZoom = 100
+            webViewClient = object : WebViewClient() {
+                override fun onPageFinished(view: WebView?, url: String?) {
+                    super.onPageFinished(view, url)
+                    if (onPageFinishedExecuted) return
+                    onPageFinishedExecuted = true
+                    webAutomationJob?.cancel()
+                    webAutomationJob = scope.launch(Dispatchers.Main) {
+                        try {
+                            view?.runScript(scripts)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "runScript failed", e)
+                        }
+                        mainActivity.textInfo.text = ""
                     }
-                    mainActivity.textInfo.text = ""
                 }
             }
         }
     }
 
-    fun loadUrl(webView: WebView, url: String, scripts: List<String>) {
+    fun loadUrl(webView: WebView?, url: String, scripts: List<String>) {
         onPageFinishedExecuted = false
         webAutomationJob?.cancel()
         this.scripts = scripts
-        webView.loadUrl(url)
-        webView.visibility = View.VISIBLE
+        webView?.loadUrl(url)
+        webView?.visibility = View.VISIBLE
     }
 
-    fun stop(webView: WebView) {
-        webView.visibility = View.INVISIBLE
+    fun stop(webView: WebView?) {
+        webView?.visibility = View.INVISIBLE
         webAutomationJob?.cancel()
-        webView.loadUrl("about:blank")
+        webView?.loadUrl("about:blank")
     }
 
     companion object {

@@ -13,6 +13,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.webkit.WebView
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResult
@@ -76,8 +77,8 @@ class MainActivity : AppCompatActivity() {
 
     var ytDlp: YtDlp? = null
     val player: ExoPlayer by lazy { ExoPlayer.Builder(this).build() }
-    val webView: WebView by lazy { findViewById(R.id.webView) }
-    val webViewHelper: WebViewHelper by lazy { WebViewHelper(findViewById(R.id.webView), this) }
+    var webView: WebView? = null
+    var webViewHelper: WebViewHelper? = null
     val playerView: SurfaceView by lazy { findViewById(R.id.playerView) }
     val textView: TextView by lazy { findViewById(R.id.textView) }
     val textInfo: TextView by lazy { findViewById(R.id.textInfo) }
@@ -492,11 +493,16 @@ class MainActivity : AppCompatActivity() {
         if (channel[num].isWebView) {
             player.stop()
             errorMessageView.text = ""
-            webViewHelper.loadUrl(webView, channel[num].url, channel[num].script)
+            if (webViewHelper == null) {
+                webViewHelper = WebViewHelper()
+                webView = webViewHelper?.createWebView(this)
+                findViewById<FrameLayout>(R.id.webViewContainer).addView(webView)
+            }
+            webViewHelper?.loadUrl(webView, channel[num].url, channel[num].script)
             return
         }
 
-        webViewHelper.stop(webView)
+        webViewHelper?.stop(webView)
         lifecycleScope.launch(Dispatchers.IO) {
             try {
                 channel[num].extract(ytDlp!!, okHttpClient)
@@ -898,16 +904,20 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         player.release()
+        webView?.also {
+            findViewById<FrameLayout>(R.id.webViewContainer).removeView(it)
+            it.destroy()
+        }
+        super.onDestroy()
     }
 
     override fun onStop() {
-        super.onStop()
         isStarted = false
         player.stop()
-        webViewHelper.stop(webView)
+        webViewHelper?.stop(webView)
         saveSettings()
+        super.onStop()
     }
 
     companion object {
