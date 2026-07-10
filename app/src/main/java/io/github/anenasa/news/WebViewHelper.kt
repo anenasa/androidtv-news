@@ -40,7 +40,9 @@ class WebViewHelper {
                     webAutomationJob?.cancel()
                     webAutomationJob = scope.launch(Dispatchers.Main) {
                         view?.runScript(scripts)
-                        mainActivity.textInfo.text = ""
+                        if (view?.url == url && url != "about:blank") {
+                            mainActivity.textInfo.text = ""
+                        }
                     }
                 }
             }
