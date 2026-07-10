@@ -10,8 +10,8 @@ data class ChannelConfig(
 
 @Serializable
 data class ChannelData(
-    val url: String,
-    val name: String,
+    val url: String = "",
+    val name: String = "",
     @SerialName("ytdl-format") val format: String? = null,
     val volume: Float? = null,
     val header: String = "",
