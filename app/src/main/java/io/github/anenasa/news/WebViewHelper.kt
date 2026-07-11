@@ -48,14 +48,14 @@ class WebViewHelper {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
+                    if (view?.url == url && url != "about:blank") {
+                        mainActivity.textInfo.text = ""
+                    }
                     if (onPageFinishedExecuted) return
                     onPageFinishedExecuted = true
                     webAutomationJob?.cancel()
                     webAutomationJob = scope.launch(Dispatchers.Main) {
                         view?.runScript(scripts)
-                        if (view?.url == url && url != "about:blank") {
-                            mainActivity.textInfo.text = ""
-                        }
                     }
                 }
             }
