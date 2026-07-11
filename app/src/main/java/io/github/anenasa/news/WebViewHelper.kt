@@ -5,6 +5,7 @@ import android.os.SystemClock
 import android.util.Log
 import android.view.MotionEvent
 import android.view.View
+import android.webkit.CookieManager
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.coroutineScope
@@ -24,6 +25,14 @@ class WebViewHelper {
 
     fun createWebView(mainActivity: MainActivity): WebView {
         val scope = mainActivity.lifecycle.coroutineScope
+        val cookieManager: CookieManager = CookieManager.getInstance()
+        cookieManager.removeAllCookie()
+        MyApplication.cookieJar.cookies.forEach { cookie ->
+            val scheme = if (cookie.secure) "https://" else "http://"
+            val domain = cookie.domain.let { if (it.startsWith(".")) it.drop(1) else it }
+            cookieManager.setCookie("$scheme$domain${cookie.path}", cookie.toString())
+        }
+        cookieManager.flush()
         WebView.setWebContentsDebuggingEnabled(true)
         return WebView(mainActivity).apply {
             settings.javaScriptEnabled = true
