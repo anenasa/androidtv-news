@@ -100,6 +100,17 @@ suspend fun WebView.runScript(scripts: List<String>) {
         } else if (type == "js") {
             val result = awaitEvaluateJavascript(content)
             if (result == "\"retry\"") index--
+        } else if (type == "fullscreen") {
+            awaitEvaluateJavascript("""
+                $content.style.position = 'fixed';
+                $content.style.top = '0';
+                $content.style.left = '0';
+                $content.style.zIndex = '999999';
+                $content.style.width = '100%';
+                $content.style.height = '100%';
+                $content.style.objectFit = 'fill';
+                document.body.appendChild($content);
+            """)
         }
     }
 }
