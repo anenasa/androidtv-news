@@ -35,6 +35,10 @@ class WebViewHelper {
         cookieManager.flush()
         WebView.setWebContentsDebuggingEnabled(true)
         return WebView(mainActivity).apply {
+            val version = settings.userAgentString.takeIf { it.contains("Chrome/") }
+                ?.substringAfter("Chrome/")?.substringBefore(" ") ?: "150.0.0.0"
+            val userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$version Safari/537.36"
+            settings.userAgentString = userAgent
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
