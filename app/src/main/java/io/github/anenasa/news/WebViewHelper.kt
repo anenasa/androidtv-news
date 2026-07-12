@@ -2,27 +2,24 @@ package io.github.anenasa.news
 
 import android.annotation.SuppressLint
 import android.os.SystemClock
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.webkit.CookieManager
+import android.webkit.JsPromptResult
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.lifecycle.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
 import okhttp3.Headers
-import kotlin.coroutines.resume
-import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("SetJavaScriptEnabled")
 class WebViewHelper {
     var onPageFinishedExecuted = false
     private var webAutomationJob: Job? = null
-    var scripts: List<String> = emptyList()
+    var script: String = ""
 
     fun createWebView(mainActivity: MainActivity): WebView {
         val scope = mainActivity.lifecycle.coroutineScope
@@ -52,17 +49,49 @@ class WebViewHelper {
                     onPageFinishedExecuted = true
                     webAutomationJob?.cancel()
                     webAutomationJob = scope.launch(Dispatchers.Main) {
-                        view?.runScript(scripts)
+                        view?.evaluateJavascript(script, null)
                     }
+                }
+            }
+            webChromeClient = object : WebChromeClient() {
+                override fun onJsPrompt(
+                    view: WebView?,
+                    url: String?,
+                    message: String?,
+                    defaultValue: String?,
+                    result: JsPromptResult?
+                ): Boolean {
+                    if (message?.startsWith("tap:") == true && message.contains(',')) {
+                        result?.confirm()
+                        val (x, y) = message.removePrefix("tap:").split(',', limit=2)
+                        simulateTap(x.toIntOrNull() ?: 50, y.toIntOrNull() ?: 50)
+                        return true
+                    } else if (message?.startsWith("fullscreen:") == true) {
+                        message.removePrefix("fullscreen:").also { element ->
+                            this@apply.evaluateJavascript("""
+                                $element.style.position = 'fixed';
+                                $element.style.top = '0';
+                                $element.style.left = '0';
+                                $element.style.zIndex = '999999';
+                                $element.style.width = '100%';
+                                $element.style.height = '100%';
+                                $element.style.objectFit = 'fill';
+                                document.body.appendChild($element);
+                            """, null)
+                        }
+                        result?.confirm()
+                        return true
+                    }
+                    return super.onJsPrompt(view, url, message, defaultValue, result)
                 }
             }
         }
     }
 
-    fun loadUrl(webView: WebView?, url: String, scripts: List<String>, okHttpHeaders: Headers) {
+    fun loadUrl(webView: WebView?, url: String, script: String, okHttpHeaders: Headers) {
         onPageFinishedExecuted = false
         webAutomationJob?.cancel()
-        this.scripts = scripts
+        this.script = script
         webView?.settings?.userAgentString = okHttpHeaders["User-Agent"]
         webView?.loadUrl(url)
         webView?.visibility = View.VISIBLE
@@ -73,54 +102,7 @@ class WebViewHelper {
         webAutomationJob?.cancel()
         webView?.loadUrl("about:blank")
     }
-
-    companion object {
-        const val TAG = "WebViewHelper"
-    }
 }
-
-suspend fun WebView.runScript(scripts: List<String>) {
-    var index = 0
-    while (index < scripts.size) {
-        val (type, time, content) = scripts[index++].split(',', limit=3)
-            .takeIf { it.size == 3 } ?: run {
-                Log.e(WebViewHelper.TAG, "runScript failed: size != 3")
-                break
-        }
-        delay((time.toLongOrNull() ?: 0L).milliseconds)
-        if (type == "tap") {
-            if (!content.contains(',')) {
-                Log.e(WebViewHelper.TAG, "runScript failed: no comma in coordinates")
-                break
-            }
-            val (x, y) = content.split(',', limit=2)
-            simulateTap(x.toIntOrNull() ?: 50, y.toIntOrNull() ?: 50)
-        } else if (type == "js") {
-            val result = awaitEvaluateJavascript(content)
-            if (result == "\"retry\"") index--
-        } else if (type == "fullscreen") {
-            awaitEvaluateJavascript("""
-                $content.style.position = 'fixed';
-                $content.style.top = '0';
-                $content.style.left = '0';
-                $content.style.zIndex = '999999';
-                $content.style.width = '100%';
-                $content.style.height = '100%';
-                $content.style.objectFit = 'fill';
-                document.body.appendChild($content);
-            """)
-        }
-    }
-}
-
-suspend fun WebView.awaitEvaluateJavascript(script: String): String? =
-    suspendCancellableCoroutine { continuation ->
-        this.evaluateJavascript(script) { result ->
-            if (continuation.isActive) {
-                continuation.resume(result)
-            }
-        }
-    }
 
 fun WebView.simulateTap(percentX: Int, percentY: Int) {
     val time = SystemClock.uptimeMillis()
