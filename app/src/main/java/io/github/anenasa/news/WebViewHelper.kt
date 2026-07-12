@@ -14,6 +14,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
+import okhttp3.Headers
 import kotlin.coroutines.resume
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -35,10 +36,6 @@ class WebViewHelper {
         cookieManager.flush()
         WebView.setWebContentsDebuggingEnabled(true)
         return WebView(mainActivity).apply {
-            val version = settings.userAgentString.takeIf { it.contains("Chrome/") }
-                ?.substringAfter("Chrome/")?.substringBefore(" ") ?: "150.0.0.0"
-            val userAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/$version Safari/537.36"
-            settings.userAgentString = userAgent
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
             settings.mediaPlaybackRequiresUserGesture = false
@@ -62,10 +59,11 @@ class WebViewHelper {
         }
     }
 
-    fun loadUrl(webView: WebView?, url: String, scripts: List<String>) {
+    fun loadUrl(webView: WebView?, url: String, scripts: List<String>, okHttpHeaders: Headers) {
         onPageFinishedExecuted = false
         webAutomationJob?.cancel()
         this.scripts = scripts
+        webView?.settings?.userAgentString = okHttpHeaders["User-Agent"]
         webView?.loadUrl(url)
         webView?.visibility = View.VISIBLE
     }

@@ -498,7 +498,7 @@ class MainActivity : AppCompatActivity() {
                 webView = webViewHelper?.createWebView(this)
                 findViewById<FrameLayout>(R.id.webViewContainer).addView(webView)
             }
-            webViewHelper?.loadUrl(webView, channel[num].url, channel[num].script)
+            webViewHelper?.loadUrl(webView, channel[num].url, channel[num].script, channel[num].okHttpHeaders)
             return
         }
 
