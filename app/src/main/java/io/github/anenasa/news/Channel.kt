@@ -4,6 +4,7 @@ import android.util.Log
 import com.chaquo.python.Python
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import okhttp3.Headers
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -34,18 +35,24 @@ class Channel(
     var customHeader: String = ""
     @Volatile
     var isHidden: Boolean = false
-    val headerMap: MutableMap<String, String>
+    @Volatile
+    var okHttpHeaders: Headers
     @Volatile
     var time: Long = 0L
     private val mutex = Mutex()
 
     init {
-        headerMap = header.split("\\r\\n")
-            .filter { it.isNotEmpty() }
-            .associate {
-                it.substringBefore(":") to it.substringAfter(":").removePrefix(" ")
-            }
-            .toMutableMap()
+        okHttpHeaders = Headers.Builder().also { builder ->
+            header.split("\\r\\n")
+                .filter { it.isNotEmpty() }
+                .forEach {
+                    try {
+                        builder.add(it)
+                    } catch (e: Exception) {
+                        Log.e(TAG, "header error", e)
+                    }
+                }
+        }.build()
     }
 
     var url: String
@@ -87,13 +94,18 @@ class Channel(
         }
         set(header) {
             customHeader = header
-            headerMap.clear()
-            customHeader.ifEmpty { defaultHeader }
-                .split("\\r\\n")
-                .filter { it.isNotEmpty() }
-                .associateTo(headerMap) {
-                    it.substringBefore(":") to it.substringAfter(":").removePrefix(" ")
-                }
+            okHttpHeaders = Headers.Builder().also { builder ->
+                customHeader.ifEmpty { defaultHeader }
+                    .split("\\r\\n")
+                    .filter { it.isNotEmpty() }
+                    .forEach {
+                        try {
+                            builder.add(it)
+                        } catch (e: Exception) {
+                            Log.e(TAG, "header error", e)
+                        }
+                    }
+            }.build()
         }
 
     fun setVolume(volume: String) {
@@ -150,17 +162,19 @@ class Channel(
         var url = url
         if (url.startsWith("https://hamivideo.hinet.net/") && url.endsWith(".do")) {
             val id = url.substringAfterLast("/").substringBeforeLast(".")
-            val okHttpRequestBuilder = Request.Builder()
+            val okHttpRequest = Request.Builder()
                 .url("https://hamivideo.hinet.net/api/play.do?freeProduct=1&id=$id")
-            for (entry in headerMap.entries) {
-                okHttpRequestBuilder.addHeader(entry.key, entry.value)
-            }
-            val okHttpRequest = okHttpRequestBuilder.build()
+                .headers(okHttpHeaders)
+                .build()
             okHttpClient.newCall(okHttpRequest).execute().use { response ->
                 val jSONObject = JSONObject(response.body.string())
                 url = jSONObject.getString("url")
             }
-            headerMap.putIfAbsent("Referer", "https://hamivideo.hinet.net/")
+            if (okHttpHeaders["Referer"] == null) {
+                okHttpHeaders = okHttpHeaders.newBuilder()
+                    .add("Referer", "https://hamivideo.hinet.net/")
+                    .build()
+            }
         } else if (url.startsWith("https://embed.4gtv.tv/") || url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
             var id: String
             if (url.startsWith("https://www.ftvnews.com.tw/live/live-video/1/")) {
@@ -188,12 +202,10 @@ class Channel(
                 deviceId = response.body.string().removeSurrounding("\"")
             }
             val id = url.substringAfterLast("/")
-            val okHttpRequestBuilder = Request.Builder()
+            val okHttpRequest = Request.Builder()
                 .url("https://cdi.ofiii.com/ofiii_cdi/video/urls?device_type=pc&device_id=$deviceId&media_type=channel&asset_id=$id&project_num=OFWEB00")
-            for (entry in headerMap.entries) {
-                okHttpRequestBuilder.addHeader(entry.key, entry.value)
-            }
-            val okHttpRequest = okHttpRequestBuilder.build()
+                .headers(okHttpHeaders)
+                .build()
             okHttpClient.newCall(okHttpRequest).execute().use { response ->
                 val jSONObject = JSONObject(response.body.string())
                 url = jSONObject.getJSONArray("asset_urls").getString(0)
@@ -202,15 +214,15 @@ class Channel(
 
         val option = Python.getInstance().builtins.callAttr("dict")
         option.callAttr("__setitem__", "format", format)
-        if (!headerMap.isEmpty()) {
+        if (okHttpHeaders.size > 0) {
             val headerDict = Python.getInstance().builtins.callAttr("dict")
-            for (entry in headerMap.entries) {
-                headerDict.callAttr("__setitem__", entry.key, entry.value)
+            okHttpHeaders.forEach { (name, value) ->
+                headerDict.callAttr("__setitem__", name, value)
             }
             option.callAttr("__setitem__", "http_headers", headerDict)
         }
-        for (entry in ydlOptions.entries) {
-            option.callAttr("__setitem__", entry.key, entry.value)
+        ydlOptions.forEach { (key, value) ->
+            option.callAttr("__setitem__", key, value)
         }
         video = ytDlp.extract(url, option)
     }

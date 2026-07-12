@@ -514,7 +514,7 @@ class MainActivity : AppCompatActivity() {
             if (channelNum != num) return@launch
 
             val httpFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
-                .setDefaultRequestProperties(channel[num].headerMap)
+                .setDefaultRequestProperties(channel[num].okHttpHeaders.toMap())
             val factory = DefaultDataSource.Factory(this@MainActivity, httpFactory)
             val url = channel[num].video
             val split = url.indexOf('\n')
