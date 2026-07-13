@@ -18,7 +18,7 @@ data class ChannelData(
     @SerialName("ytdl-options") val ytdlOptions: Map<String, String> = emptyMap(),
     val list: String = "",
     val isWebView: Boolean = false,
-    val script: String = "",
+    val scriptOnFinish: String = "",
 )
 
 @Serializable

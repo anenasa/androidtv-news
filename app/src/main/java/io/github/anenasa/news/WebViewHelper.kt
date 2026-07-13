@@ -19,7 +19,7 @@ import okhttp3.Headers
 class WebViewHelper {
     var onPageFinishedExecuted = false
     private var webAutomationJob: Job? = null
-    var script: String = ""
+    var scriptOnFinish: String = ""
 
     fun createWebView(mainActivity: MainActivity): WebView {
         val scope = mainActivity.lifecycle.coroutineScope
@@ -48,7 +48,7 @@ class WebViewHelper {
                     onPageFinishedExecuted = true
                     webAutomationJob?.cancel()
                     webAutomationJob = scope.launch(Dispatchers.Main) {
-                        view?.evaluateJavascript(script, null)
+                        view?.evaluateJavascript(scriptOnFinish, null)
                     }
                 }
             }
@@ -87,10 +87,10 @@ class WebViewHelper {
         }
     }
 
-    fun loadUrl(webView: WebView?, url: String, script: String, okHttpHeaders: Headers) {
+    fun loadUrl(webView: WebView?, url: String, scriptOnFinish: String, okHttpHeaders: Headers) {
         onPageFinishedExecuted = false
         webAutomationJob?.cancel()
-        this.script = script
+        this.scriptOnFinish = scriptOnFinish
         webView?.settings?.userAgentString = okHttpHeaders["User-Agent"]
         webView?.loadUrl(url)
         webView?.visibility = View.VISIBLE

@@ -446,8 +446,8 @@ class MainActivity : AppCompatActivity() {
             val header = ch.header
             val ytdlOptions = ch.ytdlOptions
             val isWebView = ch.isWebView
-            val script = ch.script
-            val channelObject = Channel(url, name, format, volume, header, ytdlOptions, isWebView, script)
+            val scriptOnFinish = ch.scriptOnFinish
+            val channelObject = Channel(url, name, format, volume, header, ytdlOptions, isWebView, scriptOnFinish)
             channel.add(channelObject)
         }
     }
@@ -498,7 +498,7 @@ class MainActivity : AppCompatActivity() {
                 webView = webViewHelper?.createWebView(this)
                 findViewById<FrameLayout>(R.id.webViewContainer).addView(webView)
             }
-            webViewHelper?.loadUrl(webView, channel[num].url, channel[num].script, channel[num].okHttpHeaders)
+            webViewHelper?.loadUrl(webView, channel[num].url, channel[num].scriptOnFinish, channel[num].okHttpHeaders)
             return
         }
 
