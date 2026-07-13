@@ -42,9 +42,8 @@ class WebViewHelper {
             webViewClient = object : WebViewClient() {
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    if (view?.url == url && url != "about:blank") {
-                        mainActivity.textInfo.text = ""
-                    }
+                    if (view?.url != url || url == "about:blank") return
+                    mainActivity.textInfo.text = ""
                     if (onPageFinishedExecuted) return
                     onPageFinishedExecuted = true
                     webAutomationJob?.cancel()
