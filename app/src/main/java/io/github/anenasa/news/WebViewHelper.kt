@@ -92,7 +92,7 @@ class WebViewHelper {
         webAutomationJob?.cancel()
         this.scriptOnFinish = scriptOnFinish
         webView?.settings?.userAgentString = okHttpHeaders["User-Agent"]
-        webView?.loadUrl(url)
+        webView?.loadUrl(url, okHttpHeaders.toMap())
         webView?.visibility = View.VISIBLE
     }
 
