@@ -1,3 +1,7 @@
+version 6.0.0 2026.07.20
+-新增 WebView 模式
+-頻道表可用頻道上/下鍵快速翻頁
+
 version 5.0.1 2026.04.13
 -修復 ofiii Source error
 
