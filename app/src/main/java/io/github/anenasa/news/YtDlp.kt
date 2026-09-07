@@ -71,22 +71,12 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
      * @param option python dictionary of options for yt-dlp
      */
     private fun setEjs(option: PyObject) {
-        @Suppress("KotlinConstantConditions")
-        if (BuildConfig.USE_API_21) {
-            val ejsPath = "$nativeLibraryDir/libqjs.so"
-            val path = Python.getInstance().builtins.callAttr("dict")
-            path.callAttr("__setitem__", "path", ejsPath)
-            val jsRuntimes = Python.getInstance().builtins.callAttr("dict")
-            jsRuntimes.callAttr("__setitem__", "quickjs", path)
-            option.callAttr("__setitem__", "js_runtimes", jsRuntimes)
-        } else {
-            val ejsPath = "$nativeLibraryDir/libnode.so"
-            val path = Python.getInstance().builtins.callAttr("dict")
-            path.callAttr("__setitem__", "path", ejsPath)
-            val jsRuntimes = Python.getInstance().builtins.callAttr("dict")
-            jsRuntimes.callAttr("__setitem__", "node", path)
-            option.callAttr("__setitem__", "js_runtimes", jsRuntimes)
-        }
+        val ejsPath = "$nativeLibraryDir/libejs.so"
+        val path = Python.getInstance().builtins.callAttr("dict")
+        path.callAttr("__setitem__", "path", ejsPath)
+        val jsRuntimes = Python.getInstance().builtins.callAttr("dict")
+        jsRuntimes.callAttr("__setitem__", "quickjs", path)
+        option.callAttr("__setitem__", "js_runtimes", jsRuntimes)
     }
 
     companion object {
