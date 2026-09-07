@@ -34,8 +34,6 @@ android {
         versionCode = 60000
         versionName = "6.0.0"
 
-        buildConfigField("boolean", "USE_API_21", "$useApi21")
-
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
         }
@@ -55,12 +53,6 @@ android {
         debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
-        }
-    }
-
-    sourceSets {
-        getByName("main") {
-            jniLibs.setSrcDirs(listOf(if(useApi21) "src/main/jniLibs-api21" else "src/main/jniLibs-api24"))
         }
     }
 

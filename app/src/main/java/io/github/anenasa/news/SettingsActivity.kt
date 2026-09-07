@@ -325,8 +325,7 @@ class SettingsActivity : AppCompatActivity() {
                         .append("函式庫：\n")
                         .append("yt-dlp - The Unlicense\n")
                         .append("Chaquopy - MIT License\n")
-                        .append("Node.js - MIT License\n")
-                        .append("QuickJS - MIT License\n")
+                        .append("ytdlp-ejs - MIT License\n")
                         .append("ExoPlayer - Apache License 2.0\n")
                         .append("OkHttp - Apache License 2.0\n")
                         .append("Storage Chooser - Mozilla Public License Version 2.0\n\n")
@@ -342,10 +341,7 @@ class SettingsActivity : AppCompatActivity() {
                         resources.openRawResource(R.raw.chaquopy).bufferedReader().use { reader ->
                             stringBuilder.append(reader.readText()).append('\n')
                         }
-                        resources.openRawResource(R.raw.nodejs).bufferedReader().use { reader ->
-                            stringBuilder.append(reader.readText()).append('\n')
-                        }
-                        resources.openRawResource(R.raw.quickjs).bufferedReader().use { reader ->
+                        resources.openRawResource(R.raw.ytdlpejs).bufferedReader().use { reader ->
                             stringBuilder.append(reader.readText()).append('\n')
                         }
                         resources.openRawResource(R.raw.apache2).bufferedReader().use { reader ->
