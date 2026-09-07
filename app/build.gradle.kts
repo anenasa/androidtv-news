@@ -1,13 +1,15 @@
-import com.android.build.gradle.internal.api.BaseVariantOutputImpl
+import org.gradle.util.GradleVersion
 
 plugins {
     id("com.android.application")
     id("com.chaquo.python")
-    id("org.jetbrains.kotlin.android")
+    if (GradleVersion.current() < GradleVersion.version("9.0")) {
+        id("org.jetbrains.kotlin.android")
+    }
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-val useApi21 = providers.gradleProperty("useApi21").getOrElse("false") == "true"
+val useApi21 = GradleVersion.current() < GradleVersion.version("9.0")
 val apiVersion = if(useApi21) 21 else 24
 // Latest version requires AGP 9.1.0 or later
 val coreKtxVersion = if(useApi21) "1.17.0" else "1.18.0"
@@ -36,13 +38,6 @@ android {
 
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
-        }
-
-        applicationVariants.all {
-            outputs.all {
-                val output = this as BaseVariantOutputImpl
-                output.outputFileName = "androidtv-news-$api21Suffix$versionName.apk"
-            }
         }
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -75,12 +70,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
     buildFeatures {
         buildConfig = true
     }
@@ -89,6 +78,12 @@ android {
         jniLibs {
             useLegacyPackaging = true
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
