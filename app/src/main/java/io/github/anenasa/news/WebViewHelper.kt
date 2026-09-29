@@ -31,7 +31,9 @@ class WebViewHelper {
             cookieManager.setCookie("$scheme$domain${cookie.path}", cookie.toString())
         }
         cookieManager.flush()
-        WebView.setWebContentsDebuggingEnabled(true)
+        if (BuildConfig.DEBUG) {
+            WebView.setWebContentsDebuggingEnabled(true)
+        }
         return WebView(mainActivity).apply {
             settings.javaScriptEnabled = true
             settings.domStorageEnabled = true
@@ -62,7 +64,7 @@ class WebViewHelper {
                 ): Boolean {
                     if (message?.startsWith("tap:") == true && message.contains(',')) {
                         result?.confirm()
-                        val (x, y) = message.removePrefix("tap:").split(',', limit=2)
+                        val (x, y) = message.removePrefix("tap:").split(',', limit = 2)
                         simulateTap(x.toIntOrNull() ?: 50, y.toIntOrNull() ?: 50)
                         return true
                     } else if (message?.startsWith("fullscreen:") == true) {
