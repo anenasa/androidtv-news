@@ -31,11 +31,13 @@ import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import android.text.InputType
 import androidx.core.net.toUri
 
 class SettingsActivity : AppCompatActivity() {
     var defaultFormat: String = ""
     var defaultVolume: String = ""
+    var defaultBuffer: String = "20"
     var isShowErrorMessage: Boolean = false
     var enableBackgroundExtract: Boolean = false
     var saveVideoUrl: Boolean = false
@@ -57,6 +59,7 @@ class SettingsActivity : AppCompatActivity() {
         }
         defaultFormat = intentExtras.getString("defaultFormat") ?: "bv*+ba/b"
         defaultVolume = intentExtras.getString("defaultVolume") ?: "1.0"
+        defaultBuffer = intentExtras.getString("defaultBuffer") ?: "20"
         isShowErrorMessage = intentExtras.getBoolean("isShowErrorMessage")
         enableBackgroundExtract = intentExtras.getBoolean("enableBackgroundExtract")
         saveVideoUrl = intentExtras.getBoolean("saveVideoUrl")
@@ -74,6 +77,7 @@ class SettingsActivity : AppCompatActivity() {
                 val intent = Intent().apply {
                     putExtra("defaultFormat", defaultFormat)
                     putExtra("defaultVolume", defaultVolume)
+                    putExtra("defaultBuffer", defaultBuffer)
                     putExtra("isShowErrorMessage", isShowErrorMessage)
                     putExtra("enableBackgroundExtract", enableBackgroundExtract)
                     putExtra("saveVideoUrl", saveVideoUrl)
@@ -204,6 +208,27 @@ class SettingsActivity : AppCompatActivity() {
                     } else {
                         myActivity.defaultVolume = newValue.toString()
                         preference?.setSummary(newValue.toString())
+                    }
+                    true
+                }
+            }
+
+            findPreference<EditTextPreference>("buffer")?.apply {
+                val currentBuffer = if (myActivity.defaultBuffer.isEmpty()) "20" else myActivity.defaultBuffer
+                setSummary(currentBuffer)
+                setText(currentBuffer)
+                setOnBindEditTextListener { editText ->
+                    editText.inputType = InputType.TYPE_CLASS_NUMBER
+                }
+                setOnPreferenceChangeListener { preference: Preference?, newValue: Any? ->
+                    val value = newValue.toString().trim()
+                    val num = value.toIntOrNull()
+                    if (num == null || num <= 0) {
+                        myActivity.defaultBuffer = "20"
+                        preference?.setSummary("20")
+                    } else {
+                        myActivity.defaultBuffer = num.toString()
+                        preference?.setSummary(num.toString())
                     }
                     true
                 }
