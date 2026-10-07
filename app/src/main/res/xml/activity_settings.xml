@@ -24,8 +24,8 @@
         app:title="預設音量"/>
     <EditTextPreference
         app:layout="@layout/preference_layout"
-        app:key="buffer"
-        app:title="預設緩衝時間 (秒)"/>
+        app:key="liveDelay"
+        app:title="預設直播延遲 (秒)"/>
     <SwitchPreference
         app:layout="@layout/preference_layout"
         app:key="isShowErrorMessage"

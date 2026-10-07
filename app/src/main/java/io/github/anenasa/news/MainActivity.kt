@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity() {
     var input: String = ""
     var defaultFormat: String = ""
     var defaultVolume: String = ""
-    var defaultBuffer: String = "20"
+    var defaultLiveDelay: String = "20"
     var isShowErrorMessage: Boolean = false
     var enableBackgroundExtract: Boolean = false
     var saveVideoUrl: Boolean = false
@@ -87,7 +87,6 @@ class MainActivity : AppCompatActivity() {
                 5_000
             )
             .setPrioritizeTimeOverSizeThresholds(true)
-            .setBackBuffer(30_000, true)
             .build()
 
         ExoPlayer.Builder(this)
@@ -192,7 +191,7 @@ class MainActivity : AppCompatActivity() {
         if (result?.resultCode == RESULT_OK && data != null) {
             defaultFormat = data.getStringExtra("defaultFormat").orEmpty()
             defaultVolume = data.getStringExtra("defaultVolume").orEmpty()
-            defaultBuffer = data.getStringExtra("defaultBuffer").orEmpty().ifEmpty { "20" }
+            defaultLiveDelay = data.getStringExtra("defaultLiveDelay").orEmpty().ifEmpty { "20" }
             isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false)
             enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false)
             saveVideoUrl = data.getBooleanExtra("saveVideoUrl", false)
@@ -230,7 +229,7 @@ class MainActivity : AppCompatActivity() {
         channelNum = preferences.getInt("channelNum", 0)
         defaultFormat = preferences.getString("defaultFormat", "bv*+ba/b")!!
         defaultVolume = preferences.getString("defaultVolume", "1.0")!!
-        defaultBuffer = preferences.getString("defaultBuffer", "20")!!
+        defaultLiveDelay = preferences.getString("defaultLiveDelay", "20")!!
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false)
         enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false)
         saveVideoUrl = preferences.getBoolean("saveVideoUrl", false)
@@ -505,8 +504,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createMediaItem(uriString: String): MediaItem {
-        val bufferSec = defaultBuffer.toIntOrNull()?.coerceIn(5, 120) ?: 20
-        val targetOffsetMs = bufferSec * 1_000L
+        val liveDelaySec = defaultLiveDelay.toIntOrNull()?.coerceIn(5, 120) ?: 20
+        val targetOffsetMs = liveDelaySec * 1_000L
         val minOffsetMs = (targetOffsetMs / 2).coerceAtLeast(2_000L)
         val maxOffsetMs = (targetOffsetMs * 2).coerceAtLeast(10_000L)
 
@@ -847,7 +846,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SettingsActivity::class.java).apply {
             putExtra("defaultFormat", defaultFormat)
             putExtra("defaultVolume", defaultVolume)
-            putExtra("defaultBuffer", defaultBuffer)
+            putExtra("defaultLiveDelay", defaultLiveDelay)
             putExtra("isShowErrorMessage", isShowErrorMessage)
             putExtra("enableBackgroundExtract", enableBackgroundExtract)
             putExtra("saveVideoUrl", saveVideoUrl)
@@ -882,7 +881,7 @@ class MainActivity : AppCompatActivity() {
             putInt("channelNum", channelNum)
             putString("defaultFormat", defaultFormat)
             putString("defaultVolume", defaultVolume)
-            putString("defaultBuffer", defaultBuffer)
+            putString("defaultLiveDelay", defaultLiveDelay)
             putBoolean("isShowErrorMessage", isShowErrorMessage)
             putBoolean("enableBackgroundExtract", enableBackgroundExtract)
             putBoolean("saveVideoUrl", saveVideoUrl)
