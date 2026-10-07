@@ -27,6 +27,7 @@ import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.DefaultDataSource
 import androidx.media3.datasource.DefaultHttpDataSource
+import androidx.media3.exoplayer.DefaultLoadControl
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
@@ -66,6 +67,7 @@ class MainActivity : AppCompatActivity() {
     var input: String = ""
     var defaultFormat: String = ""
     var defaultVolume: String = ""
+    var defaultLiveDelay: String = "20"
     var isShowErrorMessage: Boolean = false
     var enableBackgroundExtract: Boolean = false
     var saveVideoUrl: Boolean = false
@@ -76,7 +78,21 @@ class MainActivity : AppCompatActivity() {
     var channelListLoaded: Boolean = false
 
     var ytDlp: YtDlp? = null
-    val player: ExoPlayer by lazy { ExoPlayer.Builder(this).build() }
+    val player: ExoPlayer by lazy {
+        val loadControl = DefaultLoadControl.Builder()
+            .setBufferDurationsMs(
+                120_000,
+                300_000,
+                2_500,
+                5_000
+            )
+            .setPrioritizeTimeOverSizeThresholds(true)
+            .build()
+
+        ExoPlayer.Builder(this)
+            .setLoadControl(loadControl)
+            .build()
+    }
     var webView: WebView? = null
     var webViewHelper: WebViewHelper? = null
     val playerView: SurfaceView by lazy { findViewById(R.id.playerView) }
@@ -175,6 +191,7 @@ class MainActivity : AppCompatActivity() {
         if (result?.resultCode == RESULT_OK && data != null) {
             defaultFormat = data.getStringExtra("defaultFormat").orEmpty()
             defaultVolume = data.getStringExtra("defaultVolume").orEmpty()
+            defaultLiveDelay = data.getStringExtra("defaultLiveDelay").orEmpty().ifEmpty { "20" }
             isShowErrorMessage = data.getBooleanExtra("isShowErrorMessage", false)
             enableBackgroundExtract = data.getBooleanExtra("enableBackgroundExtract", false)
             saveVideoUrl = data.getBooleanExtra("saveVideoUrl", false)
@@ -212,6 +229,7 @@ class MainActivity : AppCompatActivity() {
         channelNum = preferences.getInt("channelNum", 0)
         defaultFormat = preferences.getString("defaultFormat", "bv*+ba/b")!!
         defaultVolume = preferences.getString("defaultVolume", "1.0")!!
+        defaultLiveDelay = preferences.getString("defaultLiveDelay", "20")!!
         isShowErrorMessage = preferences.getBoolean("isShowErrorMessage", false)
         enableBackgroundExtract = preferences.getBoolean("enableBackgroundExtract", false)
         saveVideoUrl = preferences.getBoolean("saveVideoUrl", false)
@@ -242,6 +260,10 @@ class MainActivity : AppCompatActivity() {
                     errorMessageView.text = ""
                     textInfo.text = ""
                     errorCount = 0
+                } else if (state == Player.STATE_BUFFERING) {
+                    if (textInfo.text.isEmpty()) {
+                        textInfo.text = "緩衝中..."
+                    }
                 } else if (state == Player.STATE_ENDED) {
                     channel[channelNum].clearVideo()
                     play(channelNum)
@@ -481,6 +503,24 @@ class MainActivity : AppCompatActivity() {
         play(num)
     }
 
+    private fun createMediaItem(uriString: String): MediaItem {
+        val liveDelaySec = defaultLiveDelay.toIntOrNull()?.coerceIn(5, 120) ?: 20
+        val targetOffsetMs = liveDelaySec * 1_000L
+        val minOffsetMs = (targetOffsetMs / 2).coerceAtLeast(2_000L)
+        val maxOffsetMs = (targetOffsetMs * 2).coerceAtLeast(10_000L)
+
+        val liveConfiguration = MediaItem.LiveConfiguration.Builder()
+            .setTargetOffsetMs(targetOffsetMs)
+            .setMinOffsetMs(minOffsetMs)
+            .setMaxOffsetMs(maxOffsetMs)
+            .build()
+
+        return MediaItem.Builder()
+            .setUri(uriString)
+            .setLiveConfiguration(liveConfiguration)
+            .build()
+    }
+
     @OptIn(markerClass = [UnstableApi::class])
     fun play(num: Int) {
         textInfo.text = String.format(
@@ -515,20 +555,23 @@ class MainActivity : AppCompatActivity() {
 
             val httpFactory: DataSource.Factory = DefaultHttpDataSource.Factory()
                 .setDefaultRequestProperties(channel[num].okHttpHeaders.toMap())
+                .setConnectTimeoutMs(15_000)
+                .setReadTimeoutMs(15_000)
+                .setAllowCrossProtocolRedirects(true)
             val factory = DefaultDataSource.Factory(this@MainActivity, httpFactory)
             val url = channel[num].video
             val split = url.indexOf('\n')
             val mediaSource: MediaSource = if (split == -1) {
-                val mediaItem = MediaItem.fromUri(url)
+                val mediaItem = createMediaItem(url)
                 DefaultMediaSourceFactory(factory)
                     .createMediaSource(mediaItem)
             } else {
                 val firstUrl = url.substring(0, split)
-                val firstMediaItem = MediaItem.fromUri(firstUrl)
+                val firstMediaItem = createMediaItem(firstUrl)
                 val firstMediaSource = DefaultMediaSourceFactory(factory)
                     .createMediaSource(firstMediaItem)
                 val secondUrl = url.substring(split + 1)
-                val secondMediaItem = MediaItem.fromUri(secondUrl)
+                val secondMediaItem = createMediaItem(secondUrl)
                 val secondMediaSource = DefaultMediaSourceFactory(factory)
                     .createMediaSource(secondMediaItem)
                 MergingMediaSource(firstMediaSource, secondMediaSource)
@@ -803,6 +846,7 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this, SettingsActivity::class.java).apply {
             putExtra("defaultFormat", defaultFormat)
             putExtra("defaultVolume", defaultVolume)
+            putExtra("defaultLiveDelay", defaultLiveDelay)
             putExtra("isShowErrorMessage", isShowErrorMessage)
             putExtra("enableBackgroundExtract", enableBackgroundExtract)
             putExtra("saveVideoUrl", saveVideoUrl)
@@ -837,6 +881,7 @@ class MainActivity : AppCompatActivity() {
             putInt("channelNum", channelNum)
             putString("defaultFormat", defaultFormat)
             putString("defaultVolume", defaultVolume)
+            putString("defaultLiveDelay", defaultLiveDelay)
             putBoolean("isShowErrorMessage", isShowErrorMessage)
             putBoolean("enableBackgroundExtract", enableBackgroundExtract)
             putBoolean("saveVideoUrl", saveVideoUrl)
