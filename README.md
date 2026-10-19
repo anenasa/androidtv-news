@@ -1,12 +1,10 @@
 # 新聞直播
 
-在 Android 系統電視上透過網路觀看新聞直播
+在 Android 系統電視上透過網路觀看新聞直播。支援 Android 6 以上系統。
 
 ## 下載
 
 https://github.com/anenasa/androidtv-news/releases
-
-Android 7 以上系統可下載 androidtv-news-版本.apk，Android 5 和 6 可下載 androidtv-news-api21-版本.apk
 
 ## 特色
 
