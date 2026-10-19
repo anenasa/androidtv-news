@@ -12,8 +12,8 @@ plugins {
 val useApi21 = GradleVersion.current() < GradleVersion.version("9.0")
 val apiVersion = if(useApi21) 21 else 24
 // Latest version requires AGP 9.1.0 or later
-val coreKtxVersion = if(useApi21) "1.17.0" else "1.18.0"
-val media3Version = if(useApi21) "1.8.1" else "1.10.1"
+val coreKtxVersion = if(useApi21) "1.17.0" else "1.19.1"
+val media3Version = if(useApi21) "1.8.1" else "1.11.1"
 val lifecycleVersion = if(useApi21) "2.9.4" else "2.11.0"
 val api21Suffix = if(useApi21) "api21-" else ""
 
@@ -96,11 +96,11 @@ dependencies {
     }
     implementation("com.github.anenasa:LibRtmp-Client-for-Android:16647b19d5")
     implementation("androidx.preference:preference-ktx:1.2.1")
-    implementation("androidx.appcompat:appcompat:1.7.1")
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
-    implementation("org.jsoup:jsoup:1.22.2")
+    implementation("androidx.appcompat:appcompat:1.8.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.0")
+    implementation("org.jsoup:jsoup:1.23.2")
     implementation("com.github.mendhak:storage-chooser:2.0.4.4b")
-    implementation("ch.acra:acra-core:5.13.1")
+    implementation("ch.acra:acra-core:5.14.2")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:${lifecycleVersion}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 }
