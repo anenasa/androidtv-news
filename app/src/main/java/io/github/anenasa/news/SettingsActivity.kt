@@ -300,8 +300,7 @@ class SettingsActivity : AppCompatActivity() {
                             }
                             if (versionNew != BuildConfig.VERSION_NAME.substringBefore("-")) {
                                 withContext(Dispatchers.Main) { setSummary("有新版本") }
-                                val apiString = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) "" else "-api21"
-                                val link = "https://github.com/anenasa/androidtv-news/releases/download/v$versionNew/androidtv-news$apiString-$versionNew.apk"
+                                val link = "https://github.com/anenasa/androidtv-news/releases/download/v$versionNew/androidtv-news-$versionNew.apk"
                                 val intent = Intent(Intent.ACTION_VIEW, link.toUri())
                                 startActivity(intent)
                             } else {
