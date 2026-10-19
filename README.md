@@ -6,7 +6,7 @@
 
 https://github.com/anenasa/androidtv-news/releases
 
-Android 7 以上系統可下載 androidtv-news-版本.apk，Android 5 和 6 可下載 androidtv-news-api21-版本.apk
+新聞直播 6.2.0 版不再支援 Android 5.1 以下系統
 
 ## 特色
 
