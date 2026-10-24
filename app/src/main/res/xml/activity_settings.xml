@@ -58,10 +58,11 @@
         app:layout="@layout/preference_layout"
         app:key="update"
         app:title="更新"/>
-    <Preference
+    <EditTextPreference
         app:layout="@layout/preference_layout"
         app:key="update_ytdlp"
-        app:title="更新 yt-dlp"/>
+        app:title="更新 yt-dlp"
+        app:dialogMessage="留空代表下載最新版" />
     <Preference
         app:layout="@layout/preference_layout"
         app:key="about"

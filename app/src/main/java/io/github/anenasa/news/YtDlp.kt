@@ -107,13 +107,16 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
         /**
          * Download yt-dlp binary to external storage
          * @param externalFilesDir Context.getExternalFilesDir(null)
+         * @param version Version of yt-dlp nightly, latest version is downloaded if empty
          * @exception IOException Downloading yt-dlp failed
          */
-        fun download(externalFilesDir: File?) {
+        fun download(externalFilesDir: File?, version: String = "") {
             externalFilesDir ?: throw IOException("externalFilesDir is null")
+            val url = if (version.isEmpty()) "https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp"
+                else "https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/download/$version/yt-dlp"
             val file = File(externalFilesDir, "yt-dlp.part")
             val request = Request.Builder()
-                .url("https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp")
+                .url(url)
                 .build()
             MyApplication.okHttpClient.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) {

@@ -264,13 +264,13 @@ class SettingsActivity : AppCompatActivity() {
                 }
             }
 
-            findPreference<Preference>("update_ytdlp")?.apply {
+            findPreference<EditTextPreference>("update_ytdlp")?.apply {
                 setSummary(YtDlp.version)
-                setOnPreferenceClickListener { _: Preference? ->
+                setOnPreferenceChangeListener { _: Preference?, newValue: Any? ->
                     setSummary("正在更新")
                     lifecycleScope.launch(Dispatchers.IO) {
                         try {
-                            download(myActivity.getExternalFilesDir(null))
+                            download(myActivity.getExternalFilesDir(null), newValue.toString())
                             withContext(Dispatchers.Main) { setSummary("已更新，將重新啟動應用程式") }
                             myActivity.ytDlpUpdated = true
                         } catch (e: IOException) {
@@ -278,7 +278,7 @@ class SettingsActivity : AppCompatActivity() {
                             Log.e(TAG, "Preference update_ytdlp error", e)
                         }
                     }
-                    true
+                    false
                 }
             }
 
