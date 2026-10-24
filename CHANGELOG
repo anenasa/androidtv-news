@@ -1,3 +1,7 @@
+version 6.1.0 2026.10.24
+-外部 JS 引擎改用 ytdlp-ejs
+-可選擇 yt-dlp 版本
+
 version 6.0.0 2026.07.20
 -新增 WebView 模式
 -頻道表可用頻道上/下鍵快速翻頁

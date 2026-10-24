@@ -31,8 +31,8 @@ android {
         // Need to set this to 29 so file access works on Android TV 11 and above
         //noinspection ExpiredTargetSdkVersion
         targetSdk = 29
-        versionCode = 60000
-        versionName = "6.0.0"
+        versionCode = 60100
+        versionName = "6.1.0"
 
         ndk {
             abiFilters.addAll(listOf("armeabi-v7a", "arm64-v8a"))
