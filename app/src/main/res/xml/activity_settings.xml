@@ -22,6 +22,10 @@
         app:layout="@layout/preference_layout"
         app:key="volume"
         app:title="預設音量"/>
+    <EditTextPreference
+        app:layout="@layout/preference_layout"
+        app:key="liveDelay"
+        app:title="預設直播延遲 (秒)"/>
     <SwitchPreference
         app:layout="@layout/preference_layout"
         app:key="isShowErrorMessage"
