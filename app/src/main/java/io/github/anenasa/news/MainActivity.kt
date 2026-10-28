@@ -86,7 +86,10 @@ class MainActivity : AppCompatActivity() {
     var backgroundExtractJob: Job? = null
     var readChannelListJob: Job? = null
     val okHttpClient: OkHttpClient = MyApplication.okHttpClient
-    val json = Json { ignoreUnknownKeys = true }
+    val json = Json {
+        ignoreUnknownKeys = true
+        allowComments = true
+    }
     val preferences: SharedPreferences by lazy { getSharedPreferences("io.github.anenasa.news", MODE_PRIVATE) }
 
     @Volatile
