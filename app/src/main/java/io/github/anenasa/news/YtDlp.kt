@@ -1,6 +1,7 @@
 package io.github.anenasa.news
 
 import android.content.Context
+import android.system.Os
 import android.util.Log
 import com.chaquo.python.PyException
 import com.chaquo.python.PyObject
@@ -16,6 +17,7 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
     private val cookies: String
 
     init {
+        setOpensslConf(externalFilesDir)
         val py = Python.getInstance()
         val filename = File(externalFilesDir, "yt-dlp").toString()
         val path = py.getModule("sys")["path"] ?: throw PyException("sys.path is null")
@@ -23,6 +25,23 @@ class YtDlp private constructor(val externalFilesDir: File, val nativeLibraryDir
         ytDlp = py.getModule("yt_dlp")
         version = py.getModule("yt_dlp.version")["__version__"].toString()
         cookies = File(externalFilesDir, "cookies.txt").toString()
+    }
+
+    // Fix FTV
+    // https://github.com/anenasa/androidtv-news/issues/17
+    private fun setOpensslConf(externalFilesDir: File) {
+        val file = File(externalFilesDir, "openssl.cnf")
+        val content = """
+            openssl_conf = default_conf
+            [default_conf]
+            ssl_conf = ssl_sect
+            [ssl_sect]
+            system_default = ssl_default
+            [ssl_default]
+            Groups = ?X25519MLKEM768:DEFAULT
+        """.trimIndent()
+        if (!file.exists()) file.writeText(content)
+        Os.setenv("OPENSSL_CONF", file.absolutePath, true)
     }
 
     /**
