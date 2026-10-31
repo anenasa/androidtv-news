@@ -24,8 +24,18 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("keystore.jks")
+            storePassword = providers.environmentVariable("KEY_STORE_PASSWORD").orNull
+            keyAlias = providers.environmentVariable("ALIAS").orNull
+            keyPassword = providers.environmentVariable("KEY_PASSWORD").orNull
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
