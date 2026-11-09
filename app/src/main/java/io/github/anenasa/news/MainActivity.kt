@@ -260,7 +260,7 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.IO) { initializeYtDlp() }
         isStarted = true
         // Do not call play() more than once
-        // play() will be called in onActivityResult()
+        // play() will be called elsewhere
         if (doNotPlayOnStart) {
             doNotPlayOnStart = false
             return
