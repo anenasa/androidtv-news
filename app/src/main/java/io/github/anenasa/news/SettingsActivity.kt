@@ -7,6 +7,7 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -196,6 +197,9 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<EditTextPreference>("volume")?.apply {
                 setSummary(myActivity.defaultVolume)
                 setText(myActivity.defaultVolume)
+                setOnBindEditTextListener {
+                    it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
+                }
                 setOnPreferenceChangeListener { preference: Preference?, newValue: Any? ->
                     if (newValue.toString().isEmpty()) {
                         myActivity.defaultVolume = "1.0"

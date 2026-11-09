@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
+import android.text.InputType
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -161,6 +162,9 @@ class ChannelInfoActivity : AppCompatActivity() {
                 } else {
                     setSummary(myActivity.customVolume)
                     setText(myActivity.customVolume)
+                }
+                setOnBindEditTextListener {
+                    it.inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_DECIMAL
                 }
                 setOnPreferenceChangeListener { preference: Preference?, newValue: Any? ->
                     myActivity.customVolume = newValue.toString()
