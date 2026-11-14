@@ -185,13 +185,12 @@ class MainActivity : AppCompatActivity() {
             hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false)
             hideStatusBar = data.getBooleanExtra("hideStatusBar", false)
             useExternalJS = data.getBooleanExtra("useExternalJS", false)
+            saveSettings()
             if (data.getBooleanExtra("ytDlpUpdated", false)) {
                 // Kill process, so new version of yt-dlp can be loaded
                 exitProcess(0)
             }
             MyApplication.cookieJar.loadFile(File(getExternalFilesDir(null), "cookies.txt"))
-            saveSettings()
-
             ytDlp!!.useExternalJS = useExternalJS
 
             backgroundExtractJob?.cancel()
@@ -836,7 +835,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun saveSettings() {
-        preferences.edit {
+        preferences.edit(commit = true) {
             putInt("channelNum", channelNum)
             putString("defaultFormat", defaultFormat)
             putString("defaultVolume", defaultVolume)
