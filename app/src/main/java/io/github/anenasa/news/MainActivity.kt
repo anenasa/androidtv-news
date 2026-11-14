@@ -185,7 +185,8 @@ class MainActivity : AppCompatActivity() {
             hideNavigationBar = data.getBooleanExtra("hideNavigationBar", false)
             hideStatusBar = data.getBooleanExtra("hideStatusBar", false)
             useExternalJS = data.getBooleanExtra("useExternalJS", false)
-            saveSettings()
+            val noVideoCache = data.getBooleanExtra("remove_cache", false)
+            saveSettings(noVideoCache)
             if (data.getBooleanExtra("ytDlpUpdated", false)) {
                 // Kill process, so new version of yt-dlp can be loaded
                 exitProcess(0)
@@ -196,12 +197,9 @@ class MainActivity : AppCompatActivity() {
             backgroundExtractJob?.cancel()
             readChannelListJob = lifecycleScope.launch(Dispatchers.IO) {
                 while (true) {
-                    readChannelList()
+                    readChannelList(noVideoCache)
                     delay(5000)
                 }
-            }
-            if (data.getBooleanExtra("remove_cache", false)) {
-                for (ch in channel) ch.clearVideo()
             }
         } else {
             play(channelNum)
@@ -309,7 +307,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    suspend fun readChannelList() {
+    suspend fun readChannelList(noVideoCache: Boolean = false) {
         if (!isStarted) {
             return
         }
@@ -380,7 +378,7 @@ class MainActivity : AppCompatActivity() {
                 channel.add(ch)
             }
 
-            if (saveVideoUrl) {
+            if (saveVideoUrl && !noVideoCache) {
                 for (ch in channel) {
                     ch.video = preferences.getString("${ch.url} ${ch.format}", "")!!
                     ch.time = preferences.getLong("${ch.url} ${ch.format} time", 0)
@@ -834,7 +832,7 @@ class MainActivity : AppCompatActivity() {
         supportFragmentManager.popBackStack()
     }
 
-    fun saveSettings() {
+    fun saveSettings(noVideoCache: Boolean = false) {
         preferences.edit(commit = true) {
             putInt("channelNum", channelNum)
             putString("defaultFormat", defaultFormat)
@@ -847,7 +845,7 @@ class MainActivity : AppCompatActivity() {
             putBoolean("hideStatusBar", hideStatusBar)
             putBoolean("useExternalJS", useExternalJS)
 
-            if (saveVideoUrl) {
+            if (saveVideoUrl && !noVideoCache) {
                 for (ch in channel) {
                     putString("${ch.url} ${ch.format}", ch.video)
                     putLong("${ch.url} ${ch.format} time", ch.time)
